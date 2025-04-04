@@ -49,35 +49,59 @@ var order = [
 var scenes = {
 	\"menu\": {
 		\"is_scene\": false,
-		\"path\": \"\"
+		\"path\": \"\",
+		\"icon_animated\": false,
+		\"anim_x\": 4,
+		\"anim_y\": 13,
 	},
 	\"dashboard\": {
 		\"is_scene\": true,
-		\"path\": \"res://Scenes/Tabs/Dashboard.tscn\"
+		\"path\": \"res://Scenes/Tabs/Dashboard.tscn\",
+		\"icon_animated\": true,
+		\"anim_x\": 4,
+		\"anim_y\": 13,
 	},
 	\"empty\": {
 		\"is_scene\": false,
-		\"path\": \"\"
+		\"path\": \"\",
+		\"icon_animated\": false,
+		\"anim_x\": 4,
+		\"anim_y\": 13,
 	},
 	\"servers\": {
 		\"is_scene\": true,
-		\"path\": \"res://Scenes/Tabs/Network.tscn\"
+		\"path\": \"res://Scenes/Tabs/Network.tscn\",
+		\"icon_animated\": true,
+		\"anim_x\": 4,
+		\"anim_y\": 12,
 	},
 	\"folder\": {
 		\"is_scene\": true,
-		\"path\": \"res://Scenes/Tabs/FTP.tscn\"
+		\"path\": \"res://Scenes/Tabs/FTP.tscn\",
+		\"icon_animated\": false,
+		\"anim_x\": 4,
+		\"anim_y\": 13,
 	},
 	\"ticket\": {
 		\"is_scene\": true,
-		\"path\": \"res://Scenes/Tabs/Tickets.tscn\"
+		\"path\": \"res://Scenes/Tabs/Tickets.tscn\",
+		\"icon_animated\": false,
+		\"anim_x\": 4,
+		\"anim_y\": 13,
 	},
 	\"user\": {
 		\"is_scene\": true,
-		\"path\": \"res://Scenes/Tabs/Users.tscn\"
+		\"path\": \"res://Scenes/Tabs/Users.tscn\",
+		\"icon_animated\": false,
+		\"anim_x\": 4,
+		\"anim_y\": 13,
 	},
 	\"account\": {
 		\"is_scene\": true,
-		\"path\": \"res://Scenes/Tabs/Admin.tscn\"
+		\"path\": \"res://Scenes/Tabs/Admin.tscn\",
+		\"icon_animated\": false,
+		\"anim_x\": 4,
+		\"anim_y\": 13,
 	},
 }
 
@@ -85,6 +109,9 @@ func _ready():
 	for s in order:
 		var obj = load(\"res://Scenes/IObject/SidebarEntry.tscn\").instance()
 		obj.mode = s
+		obj.animated = scenes.get(s).icon_animated
+		obj.f_x = scenes.get(s).anim_x
+		obj.f_y = scenes.get(s).anim_y
 		obj.connect(\"clicked\", self, \"_on_sidebar_click\")
 		$Container.add_child(obj)
 		

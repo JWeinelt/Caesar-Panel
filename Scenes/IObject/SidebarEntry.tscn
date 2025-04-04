@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=4 format=2]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
@@ -6,10 +6,19 @@ script/source = "extends Control
 signal clicked(scope)
 
 var mode = \"empty\"
+var animated = false
+
+var f_x = 1
+var f_y = 1
 
 func _ready():
+	$AnimTex.hframes = f_x
+	$AnimTex.vframes = f_y
+	$AnimationPlayer.get_animation(\"hover\").track_set_key_value(0, 1, f_x * f_y - 1)
 	if mode != \"empty\":
-		$Tex.texture = load(\"res://Assets/sidebar/%s.png\" % mode)
+		if not animated:
+			$Tex.texture = load(\"res://Assets/sidebar/%s.png\" % mode)
+		else: $AnimTex.texture = load(\"res://Assets/sidebar/animated/%s.png\" % mode)
 
 
 
@@ -18,7 +27,41 @@ func _on_Tex_gui_input(event):
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == BUTTON_LEFT:
 			emit_signal(\"clicked\", mode)
+
+
+func _on_Tex_mouse_entered():
+	if animated: $AnimationPlayer.play(\"hover\")
 "
+
+[sub_resource type="Animation" id=2]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimTex:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ 0 ]
+}
+
+[sub_resource type="Animation" id=3]
+resource_name = "hover"
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimTex:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 0, 0 ]
+}
 
 [node name="SidebarEntry" type="Control"]
 anchor_right = 1.0
@@ -32,6 +75,12 @@ __meta__ = {
 "_edit_vertical_guides_": [ 52.0 ]
 }
 
+[node name="AnimTex" type="Sprite" parent="."]
+position = Vector2( 26, 26 )
+scale = Vector2( 0.072, 0.072 )
+hframes = 4
+vframes = 13
+
 [node name="Tex" type="TextureRect" parent="."]
 margin_left = 3.0
 margin_top = 3.0
@@ -40,4 +89,9 @@ margin_bottom = 515.0
 rect_scale = Vector2( 0.088, 0.088 )
 stretch_mode = 1
 
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 2 )
+anims/hover = SubResource( 3 )
+
 [connection signal="gui_input" from="Tex" to="." method="_on_Tex_gui_input"]
+[connection signal="mouse_entered" from="Tex" to="." method="_on_Tex_mouse_entered"]
