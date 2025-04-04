@@ -8,15 +8,35 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "ScrollContainer",
+"class": "SmoothScrollContainer",
+"language": "GDScript",
+"path": "res://addons/SmoothScroll/SmoothScrollContainer.gd"
+} ]
+_global_script_class_icons={
+"SmoothScrollContainer": ""
+}
+
 [application]
 
 config/name="CaesarPanelUniversal"
 config/icon="res://icon.png"
 
+[autoload]
+
+CNW="*res://Scenes/Global/CloudNETWorker.tscn"
+G="*res://Scripts/Global.gd"
+GlobalEngine="*res://Scenes/Global/GlobalEngine.tscn"
+
 [display]
 
 window/stretch/mode="2d"
 window/stretch/aspect="expand"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/SmoothScroll/plugin.cfg" )
 
 [gui]
 
