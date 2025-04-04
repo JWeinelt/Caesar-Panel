@@ -21,7 +21,12 @@ _global_script_class_icons={
 [application]
 
 config/name="CaesarPanelUniversal"
-config/icon="res://icon.png"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="Caesar"
+config/icon="res://Assets/logo.png"
+config/windows_native_icon="res://Assets/favicon.ico"
+config/auto_accept_quit=false
+config/quit_on_go_back=false
 
 [autoload]
 
