@@ -1,0 +1,401 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://assets/load.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=5]
+script/source = "extends Control
+
+var selected_tab_mon1 = 0
+
+const max_value_factor = 1.4
+
+const max_values = [20, 10, 100, 2048]
+const value_name = [\"avgTps\", \"players\", \"avgCPU\", \"avgMem\"]
+const titles = [\"Servermonitor TPS\", \"Spieleranzahl\", \"CPU-Verbrauch %\", \"RAM-Verbrauch\"]
+
+
+
+func getData():
+	$GetServerData.request(G.caesar()+\"stats/tps\", G.caesar_token())
+
+
+func separate_server_data(step: int):
+	var start = 0
+	var sep = $Y/LineSeperator
+	for i in range(0, sep.get_child_count()):
+		sep.get_child(sep.get_child_count()-1-i).get_child(0).text = str(start)
+		start += step
+
+
+
+func _on_GetServerData_request_completed(result, response_code, headers, body):
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	
+	$Header.text = titles[selected_tab_mon1]
+	$Loader.hide()
+	
+	var found = []
+	var obj = []
+	
+	
+	if not max_values[selected_tab_mon1] == 100:
+		separate_server_data((max_values[selected_tab_mon1]+max_values[selected_tab_mon1]*max_value_factor)/10)
+	elif max_values[selected_tab_mon1] == 20: separate_server_data(2)
+	else: separate_server_data(10)
+	for i in data:
+		for j in $X/Axe.get_children():
+			if j.servname == i.serviceName: 
+				obj.append(j)
+				found.append(i.serviceName)
+	
+	var idx = 0
+	
+	
+	for i in data:
+		var line
+		if found.find(i.serviceName) != -1:
+			line = obj[idx]
+			line.servname = i.serviceName
+			line.display_value(line.value, i.get(value_name[selected_tab_mon1]), (max_values[selected_tab_mon1]+max_values[selected_tab_mon1]*max_value_factor)/10)
+		else: 
+			line = load(\"res://scenes/pc/tab/Dashboard/Line.tscn\").instance()
+			line.servname = i.serviceName
+			$X/Axe.add_child(line)
+			line.display_value(0, i.get(value_name[selected_tab_mon1]), (max_values[selected_tab_mon1]+max_values[selected_tab_mon1]*max_value_factor)/10)
+		idx += 1
+
+
+func _on_MoveLeft_pressed():
+	selected_tab_mon1 -= 1
+	if selected_tab_mon1 < 0: selected_tab_mon1 = 3
+	$GetServerData.request(G.caesar()+\"stats/tps\", G.caesar_token())
+	$DataMonitor/Loader.show()
+
+
+func _on_MoveRight_pressed():
+	selected_tab_mon1 += 1
+	if selected_tab_mon1 > 3: selected_tab_mon1 = 0
+	$GetServerData.request(G.caesar()+\"stats/tps\", G.caesar_token())
+	$DataMonitor/Loader.show()
+"
+
+[sub_resource type="Animation" id=1]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 1, 1e-05 ) ]
+}
+
+[sub_resource type="Animation" id=2]
+resource_name = "do"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.6 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 1, 1e-05 ), Vector2( 1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=6]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ 0.0 ]
+}
+
+[sub_resource type="Animation" id=7]
+resource_name = "main"
+length = 0.5
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 0.0, 360.0 ]
+}
+
+[node name="DataMonitor" type="Control"]
+anchor_right = 0.5
+anchor_bottom = 0.472
+margin_bottom = -0.200012
+script = SubResource( 5 )
+
+[node name="Header" type="Label" parent="."]
+anchor_left = 0.428
+anchor_top = 0.068
+anchor_right = 0.428
+anchor_bottom = 0.068
+margin_left = -90.136
+margin_top = -20.244
+margin_right = 48.864
+margin_bottom = 10.756
+rect_scale = Vector2( 1.3, 1.3 )
+text = "Servermonitor (CPU)"
+
+[node name="Line" type="ColorRect" parent="."]
+anchor_bottom = 1.0
+margin_left = 70.0
+margin_top = 33.0
+margin_right = 70.604
+margin_bottom = -78.0
+
+[node name="Line2" type="ColorRect" parent="."]
+anchor_bottom = 1.0
+margin_left = 70.0
+margin_top = 204.0
+margin_right = 370.0
+margin_bottom = -77.396
+
+[node name="X" type="Control" parent="."]
+anchor_top = -0.159
+anchor_right = 0.078
+anchor_bottom = -0.018
+margin_top = -0.00299835
+margin_right = 0.0639992
+margin_bottom = 0.0940003
+
+[node name="Data" type="Control" parent="X"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="DE" type="ColorRect" parent="X/Data"]
+anchor_left = 2.812
+anchor_top = 6.2
+anchor_right = 2.812
+anchor_bottom = 6.2
+margin_left = -5.48
+margin_top = -20.0
+margin_right = 5.52
+margin_bottom = -1.52588e-05
+rect_scale = Vector2( 1, 1e-05 )
+rect_pivot_offset = Vector2( 5, 20 )
+color = Color( 1, 0.298039, 0.298039, 0.576471 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="X/Data/DE"]
+anims/RESET = SubResource( 1 )
+anims/do = SubResource( 2 )
+
+[node name="Axe" type="HBoxContainer" parent="X"]
+margin_left = 70.0
+margin_top = 248.0
+margin_right = 370.0
+margin_bottom = 288.0
+
+[node name="Y" type="Control" parent="."]
+margin_left = -1.0
+margin_top = -45.0
+margin_right = 39.0
+margin_bottom = -5.0
+
+[node name="LineSeperator" type="VBoxContainer" parent="Y"]
+margin_left = 61.0
+margin_top = 78.0
+margin_right = 71.0
+margin_bottom = 278.0
+custom_constants/separation = 19
+
+[node name="Line1" type="ColorRect" parent="Y/LineSeperator"]
+margin_right = 10.0
+margin_bottom = 0.604
+rect_min_size = Vector2( 10, 0.604 )
+
+[node name="Info" type="Label" parent="Y/LineSeperator/Line1"]
+margin_left = -49.063
+margin_top = -13.0
+margin_right = 2.117
+margin_bottom = 18.0
+rect_scale = Vector2( 0.9, 0.9 )
+align = 2
+
+[node name="Line2" type="ColorRect" parent="Y/LineSeperator"]
+margin_top = 19.0
+margin_right = 10.0
+margin_bottom = 19.604
+rect_min_size = Vector2( 10, 0.604 )
+
+[node name="Info" type="Label" parent="Y/LineSeperator/Line2"]
+margin_left = -49.063
+margin_top = -13.0
+margin_right = 2.117
+margin_bottom = 18.0
+rect_scale = Vector2( 0.9, 0.9 )
+align = 2
+
+[node name="Line3" type="ColorRect" parent="Y/LineSeperator"]
+margin_top = 38.0
+margin_right = 10.0
+margin_bottom = 38.604
+rect_min_size = Vector2( 10, 0.604 )
+
+[node name="Info" type="Label" parent="Y/LineSeperator/Line3"]
+margin_left = -49.063
+margin_top = -13.0
+margin_right = 2.117
+margin_bottom = 18.0
+rect_scale = Vector2( 0.9, 0.9 )
+align = 2
+
+[node name="Line4" type="ColorRect" parent="Y/LineSeperator"]
+margin_top = 57.0
+margin_right = 10.0
+margin_bottom = 57.604
+rect_min_size = Vector2( 10, 0.604 )
+
+[node name="Info" type="Label" parent="Y/LineSeperator/Line4"]
+margin_left = -49.063
+margin_top = -13.0
+margin_right = 2.117
+margin_bottom = 18.0
+rect_scale = Vector2( 0.9, 0.9 )
+align = 2
+
+[node name="Line5" type="ColorRect" parent="Y/LineSeperator"]
+margin_top = 76.0
+margin_right = 10.0
+margin_bottom = 76.604
+rect_min_size = Vector2( 10, 0.604 )
+
+[node name="Info" type="Label" parent="Y/LineSeperator/Line5"]
+margin_left = -49.063
+margin_top = -13.0
+margin_right = 2.117
+margin_bottom = 18.0
+rect_scale = Vector2( 0.9, 0.9 )
+align = 2
+
+[node name="Line6" type="ColorRect" parent="Y/LineSeperator"]
+margin_top = 95.0
+margin_right = 10.0
+margin_bottom = 95.604
+rect_min_size = Vector2( 10, 0.604 )
+
+[node name="Info" type="Label" parent="Y/LineSeperator/Line6"]
+margin_left = -49.063
+margin_top = -13.0
+margin_right = 2.117
+margin_bottom = 18.0
+rect_scale = Vector2( 0.9, 0.9 )
+align = 2
+
+[node name="Line7" type="ColorRect" parent="Y/LineSeperator"]
+margin_top = 114.0
+margin_right = 10.0
+margin_bottom = 114.604
+rect_min_size = Vector2( 10, 0.604 )
+
+[node name="Info" type="Label" parent="Y/LineSeperator/Line7"]
+margin_left = -49.063
+margin_top = -13.0
+margin_right = 2.117
+margin_bottom = 18.0
+rect_scale = Vector2( 0.9, 0.9 )
+align = 2
+
+[node name="Line8" type="ColorRect" parent="Y/LineSeperator"]
+margin_top = 133.0
+margin_right = 10.0
+margin_bottom = 133.604
+rect_min_size = Vector2( 10, 0.604 )
+
+[node name="Info" type="Label" parent="Y/LineSeperator/Line8"]
+margin_left = -49.063
+margin_top = -13.0
+margin_right = 2.117
+margin_bottom = 18.0
+rect_scale = Vector2( 0.9, 0.9 )
+align = 2
+
+[node name="Line9" type="ColorRect" parent="Y/LineSeperator"]
+margin_top = 152.0
+margin_right = 10.0
+margin_bottom = 152.604
+rect_min_size = Vector2( 10, 0.604 )
+
+[node name="Info" type="Label" parent="Y/LineSeperator/Line9"]
+margin_left = -49.063
+margin_top = -13.0
+margin_right = 2.117
+margin_bottom = 18.0
+rect_scale = Vector2( 0.9, 0.9 )
+align = 2
+
+[node name="Line10" type="ColorRect" parent="Y/LineSeperator"]
+margin_top = 171.0
+margin_right = 10.0
+margin_bottom = 171.604
+rect_min_size = Vector2( 10, 0.604 )
+
+[node name="Info" type="Label" parent="Y/LineSeperator/Line10"]
+margin_left = -49.063
+margin_top = -13.0
+margin_right = 2.117
+margin_bottom = 18.0
+rect_scale = Vector2( 0.9, 0.9 )
+align = 2
+
+[node name="MoveLeft" type="Button" parent="."]
+margin_left = 445.0
+margin_top = 251.0
+margin_right = 465.0
+margin_bottom = 271.0
+text = "<"
+
+[node name="Loader" type="TextureRect" parent="."]
+anchor_left = 0.444
+anchor_top = 0.461
+anchor_right = 0.444
+anchor_bottom = 0.461
+margin_left = -250.328
+margin_top = -250.463
+margin_right = 262.672
+margin_bottom = 262.537
+rect_scale = Vector2( 0.084, 0.084 )
+rect_pivot_offset = Vector2( 250, 250 )
+texture = ExtResource( 1 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Loader"]
+autoplay = "main"
+playback_speed = 0.51
+anims/RESET = SubResource( 6 )
+anims/main = SubResource( 7 )
+
+[node name="MoveRight" type="Button" parent="."]
+margin_left = 469.0
+margin_top = 251.0
+margin_right = 489.0
+margin_bottom = 271.0
+text = ">"
+
+[node name="GetServerData" type="HTTPRequest" parent="."]
+
+[connection signal="pressed" from="MoveLeft" to="." method="_on_MoveLeft_pressed"]
+[connection signal="pressed" from="MoveRight" to="." method="_on_MoveRight_pressed"]
+[connection signal="request_completed" from="GetServerData" to="." method="_on_GetServerData_request_completed"]

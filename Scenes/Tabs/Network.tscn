@@ -1,0 +1,257 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
+[ext_resource path="res://Assets/Customizabletheme/theme-1.tres" type="Theme" id=2]
+[ext_resource path="res://Assets/fonts/CascadiaCodePL.ttf" type="DynamicFontData" id=3]
+
+[sub_resource type="GDScript" id=3]
+script/source = "extends Control
+
+const type = \"servers\"
+
+func _ready():
+	CNW.connect(\"got_data_services\", self, \"_on_services_requested\")
+
+
+func _on_services_requested(json):
+	for i in json.services:
+		var s = load(\"res://Scenes/IObject/IService.tscn\").instance()
+		s.data = i
+		s.connect(\"manage_pressed\", self, \"_on_service_manage_pressed\")
+		$Tabs/Services/ServiceGrid.add_child(s)
+
+
+func _on_service_manage_pressed(json: Dictionary):
+	$Tabs/Services/ServiceInfo/InfoPlayer.play(\"main\")
+	$Tabs/Services/ServiceInfo/Name.text = json.configuration.serviceId.taskName + json.configuration.serviceId.nameSplitter + str(json.configuration.serviceId.taskServiceId)
+
+
+
+
+func setup(json: Dictionary):
+	var box = $Tabs/Services/ServiceInfo/Options/Information/Container
+	for i in json.keys():
+		match typeof(json.get(i)):
+			TYPE_INT:
+				var c = load(\"res://Scenes/DataDisplays/DispInt.tscn\").instance()
+				c.display(i, json.get(i))
+				box.add_child(c)
+			TYPE_STRING:
+				var c = load(\"res://Scenes/DataDisplays/DispString.tscn\").instance()
+				c.display(i, json.get(i))
+				box.add_child(c)
+			TYPE_BOOL:
+				var c = load(\"res://Scenes/DataDisplays/DispBool.tscn\").instance()
+				c.display(i, json.get(i))
+				box.add_child(c)
+			TYPE_DICTIONARY:
+				var c = load(\"res://Scenes/DataDisplays/Header.tscn\").instance()
+				c.setup(i)
+				box.add_child(c)
+				setup(json.get(i))
+
+
+func _on_InfoPlayer_animation_finished(anim_name):
+	GlobalEngine.update_cursor(CURSOR_ARROW)
+"
+
+[sub_resource type="StyleBoxEmpty" id=1]
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 0.247059 )
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0, 0, 0, 0.913725 )
+corner_radius_top_left = 10
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 10
+
+[sub_resource type="DynamicFont" id=5]
+size = 24
+font_data = ExtResource( 3 )
+
+[sub_resource type="Animation" id=6]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 715, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Options:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=7]
+resource_name = "main"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 715, 0 ), Vector2( 40, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Options:modulate")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[node name="Dashboard" type="Control"]
+anchor_right = 0.946
+anchor_bottom = 0.998
+margin_right = 0.295959
+margin_bottom = 0.200012
+theme = ExtResource( 1 )
+script = SubResource( 3 )
+__meta__ = {
+"_edit_vertical_guides_": [ 716.0 ]
+}
+
+[node name="Bg" type="Button" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+margin_right = 6.10352e-05
+custom_styles/focus = SubResource( 1 )
+custom_styles/disabled = SubResource( 2 )
+disabled = true
+
+[node name="Tabs" type="TabContainer" parent="."]
+margin_right = 969.0
+margin_bottom = 599.0
+theme = ExtResource( 2 )
+tab_align = 0
+
+[node name="Services" type="Tabs" parent="Tabs"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="ServiceGrid" type="GridContainer" parent="Tabs/Services"]
+anchor_right = 0.729
+anchor_bottom = 0.893
+margin_left = 6.0
+margin_top = 8.0
+margin_right = -0.401001
+margin_bottom = -0.117035
+columns = 5
+
+[node name="ServiceInfo" type="Button" parent="Tabs/Services"]
+anchor_left = 0.041
+anchor_right = 0.041
+margin_left = 715.0
+margin_right = 1644.0
+margin_bottom = 569.0
+custom_styles/disabled = SubResource( 4 )
+disabled = true
+
+[node name="Name" type="Label" parent="Tabs/Services/ServiceInfo"]
+margin_left = 36.0
+margin_top = 14.0
+margin_right = 194.0
+margin_bottom = 51.0
+custom_fonts/font = SubResource( 5 )
+text = "Servicename"
+
+[node name="InfoPlayer" type="AnimationPlayer" parent="Tabs/Services/ServiceInfo"]
+playback_speed = 1.69
+anims/RESET = SubResource( 6 )
+anims/main = SubResource( 7 )
+
+[node name="Options" type="TabContainer" parent="Tabs/Services/ServiceInfo"]
+modulate = Color( 1, 1, 1, 0 )
+margin_top = 56.0
+margin_right = 880.0
+margin_bottom = 569.0
+tab_align = 0
+
+[node name="Information" type="Tabs" parent="Tabs/Services/ServiceInfo/Options"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="Container" type="GridContainer" parent="Tabs/Services/ServiceInfo/Options/Information"]
+margin_right = 542.0
+margin_bottom = 481.0
+columns = 2
+
+[node name="Stats" type="Tabs" parent="Tabs/Services/ServiceInfo/Options"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="Task" type="Tabs" parent="Tabs/Services/ServiceInfo/Options"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="Settings" type="Tabs" parent="Tabs/Services/ServiceInfo/Options"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="Tasks" type="Tabs" parent="Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 38.0
+
+[node name="Overview" type="Tabs" parent="Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="Groups" type="Tabs" parent="Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 38.0
+
+[node name="Clusters" type="Tabs" parent="Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 38.0
+
+[node name="External" type="Tabs" parent="Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 38.0
+
+[connection signal="animation_finished" from="Tabs/Services/ServiceInfo/InfoPlayer" to="." method="_on_InfoPlayer_animation_finished"]

@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/Global/CloudNETWorker.gd" type="Script" id=1]
+
+[node name="CloudNETWorker" type="Node"]
+script = ExtResource( 1 )
+
+[node name="Req" type="Node" parent="."]
+
+[node name="Login" type="HTTPRequest" parent="Req"]
+
+[node name="SessionEnd" type="HTTPRequest" parent="Req"]
+
+[node name="GetServices" type="HTTPRequest" parent="Req"]
+
+[connection signal="request_completed" from="Req/Login" to="." method="_on_Login_request_completed"]
+[connection signal="request_completed" from="Req/SessionEnd" to="." method="_on_SessionEnd_request_completed"]
+[connection signal="request_completed" from="Req/GetServices" to="." method="_on_GetServices_request_completed"]

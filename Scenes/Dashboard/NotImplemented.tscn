@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+# Placeholder Method
+func getData():
+	pass
+"
+
+[node name="NotImpl" type="Control"]
+anchor_right = 0.5
+anchor_bottom = 0.472
+margin_bottom = -0.200012
+script = SubResource( 1 )
+__meta__ = {
+"_edit_horizontal_guides_": [ 283.0 ],
+"_edit_vertical_guides_": [ 512.0 ]
+}
+
+[node name="Label" type="Label" parent="."]
+margin_left = 1.0
+margin_top = 34.0
+margin_right = 511.0
+margin_bottom = 65.0
+text = "Diese Statistik wurde noch nicht verfügbar.
+Du musst dich also leider noch etwas gedulden!"
+align = 1

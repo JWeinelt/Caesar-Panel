@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+signal clicked(scope)
+
+var mode = \"empty\"
+
+func _ready():
+	if mode != \"empty\":
+		$Tex.texture = load(\"res://Assets/sidebar/%s.png\" % mode)
+
+
+
+
+func _on_Tex_gui_input(event):
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == BUTTON_LEFT:
+			emit_signal(\"clicked\", mode)
+"
+
+[node name="SidebarEntry" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -972.0
+margin_bottom = -548.0
+rect_min_size = Vector2( 52, 52 )
+script = SubResource( 1 )
+__meta__ = {
+"_edit_horizontal_guides_": [ 52.0 ],
+"_edit_vertical_guides_": [ 52.0 ]
+}
+
+[node name="Tex" type="TextureRect" parent="."]
+margin_left = 3.0
+margin_top = 3.0
+margin_right = 515.0
+margin_bottom = 515.0
+rect_scale = Vector2( 0.088, 0.088 )
+stretch_mode = 1
+
+[connection signal="gui_input" from="Tex" to="." method="_on_Tex_gui_input"]

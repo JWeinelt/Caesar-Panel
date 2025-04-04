@@ -1,0 +1,89 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://themes/Customizable/theme.tres" type="Theme" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+func getData():
+	$GetTickets.request(\"\")
+
+
+func _on_GetTickets_request_completed(result, response_code, headers, body):
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	
+	var open = 0
+	var review = 0
+	var closed = 0
+	var archive = 0
+	
+	for i in data:
+		if i.status == \"CLOSED\":
+			closed += 1
+		if i.status == \"OPEN\":
+			open += 1
+		if i.status == \"UNDER_REVIEW\":
+			review += 1
+		if i.status == \"ARCHIVED\":
+			archive += 1
+		
+	$Table/Opened.text += \"\\n\" + str(open)
+	$Table/Review.text += \"\\n\" + str(review)
+	$Table/Closed.text += \"\\n\" + str(closed)
+	$Table/Archive.text += \"\\n\" + str(archive)
+"
+
+[node name="TicketOverview" type="Control"]
+anchor_right = 0.5
+anchor_bottom = 0.472
+margin_bottom = -0.200012
+theme = ExtResource( 1 )
+script = SubResource( 1 )
+__meta__ = {
+"_edit_horizontal_guides_": [ 283.0 ],
+"_edit_vertical_guides_": [ 512.0 ]
+}
+
+[node name="Header" type="Label" parent="."]
+margin_right = 512.0
+margin_bottom = 14.0
+text = "Tickets"
+align = 1
+
+[node name="Table" type="ColorRect" parent="."]
+margin_left = 31.0
+margin_top = 44.0
+margin_right = 483.0
+margin_bottom = 274.0
+color = Color( 0, 0, 0, 0.0705882 )
+
+[node name="Opened" type="Label" parent="Table"]
+margin_right = 80.0
+margin_bottom = 31.0
+text = "Offen"
+align = 1
+
+[node name="Review" type="Label" parent="Table"]
+margin_left = 88.0
+margin_right = 193.0
+margin_bottom = 31.0
+text = "In Bearbeitung"
+align = 1
+
+[node name="Closed" type="Label" parent="Table"]
+margin_left = 203.0
+margin_right = 293.0
+margin_bottom = 31.0
+text = "Geschlossen"
+align = 1
+
+[node name="Archive" type="Label" parent="Table"]
+margin_left = 302.0
+margin_right = 382.0
+margin_bottom = 31.0
+text = "Archiviert"
+align = 1
+
+[node name="GetTickets" type="HTTPRequest" parent="."]
+
+[connection signal="request_completed" from="GetTickets" to="." method="_on_GetTickets_request_completed"]

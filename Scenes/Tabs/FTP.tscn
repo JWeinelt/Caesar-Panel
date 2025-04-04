@@ -1,0 +1,40 @@
+[gd_scene load_steps=4 format=2]
+
+[sub_resource type="GDScript" id=3]
+script/source = "extends Control
+
+
+const type = \"folder\"
+"
+
+[sub_resource type="StyleBoxEmpty" id=1]
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 0.247059 )
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+
+[node name="Dashboard" type="Control"]
+anchor_right = 0.946
+anchor_bottom = 0.998
+margin_right = 0.295959
+margin_bottom = 0.200012
+script = SubResource( 3 )
+
+[node name="Bg" type="Button" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/focus = SubResource( 1 )
+custom_styles/disabled = SubResource( 2 )
+disabled = true
+
+[node name="Grid" type="GridContainer" parent="."]
+anchor_left = 0.026
+anchor_top = 0.04
+anchor_right = 0.983
+anchor_bottom = 0.972
+margin_left = -0.194
+margin_top = 0.039999
+margin_right = 0.472961
+margin_bottom = -0.228027
+columns = 2

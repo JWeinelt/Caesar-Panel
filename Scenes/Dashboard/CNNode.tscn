@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
+[ext_resource path="res://assets/Misc/node_ready.png" type="Texture" id=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+func setup(label, status):
+	$Header.text = label
+	match status:
+		\"READY\":
+			$Status.texture = load(\"res://Assets/Misc/node_ready.png\")
+		\"SYNCING\":
+			$Status.texture = load(\"res://Assets/Misc/node_syncing.png\")
+		\"DISCONNECTED\":
+			$Status.texture = load(\"res://Assets/Misc/node_disconnected.png\")
+		\"UNAVAILABLE\":
+			$Status.texture = load(\"res://Assets/Misc/node_unavailabl.png\")
+"
+
+[node name="Node" type="Control"]
+anchor_right = 0.156
+anchor_bottom = 0.062
+margin_right = 0.255997
+margin_bottom = -0.200001
+rect_min_size = Vector2( 160, 37 )
+theme = ExtResource( 1 )
+script = SubResource( 1 )
+__meta__ = {
+"_edit_horizontal_guides_": [ 37.0 ],
+"_edit_vertical_guides_": [ 160.0 ]
+}
+
+[node name="Header" type="Label" parent="."]
+margin_left = 8.0
+margin_right = 63.0
+margin_bottom = 37.0
+text = "Node 1"
+valign = 1
+
+[node name="Status" type="TextureRect" parent="."]
+margin_left = 84.0
+margin_top = 6.0
+margin_right = 204.0
+margin_bottom = 126.0
+rect_scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 2 )

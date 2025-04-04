@@ -1,0 +1,112 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://themes/Customizable/fonts/segoeUI/Segoe UI Bold Italic.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://themes/Customizable/fonts/segoeUI/Segoe UI Italic.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=3]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+func _ready():
+	CNW.connect(\"login_success\", self, \"getData\")
+
+func getData():
+	$GetServiceData.request(CNW.cloudnet()+\"service\", CNW.headers())
+	$GetNodeData.request(CNW.cloudnet()+\"cluster\", CNW.headers())
+
+
+func _on_GetServiceData_request_completed(result, response_code, headers, body):
+	if response_code != 200:
+		$Error.text = \"Could not fetch data from CloudNET. Please check all connections.\\nCode: \" + str(response_code)
+		$Error.show()
+		return
+	
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	var crashed = 0
+	var running = 0
+	var prepared = 0
+	for i in data.services:
+		if i.lifeCycle == \"PREPARED\": prepared += 1
+		if i.lifeCycle == \"RUNNING\": running += 1
+	
+	$Services.bbcode_text = \"\"\"
+	[b]Services[/b]
+	[color=green]Online:[/color] %s
+	[color=yellow]Prepared:[/color] %s
+	[color=red]Crashed: [/color]%s
+	\"\"\" % [running, prepared, crashed]
+
+
+func _on_GetNodeData_request_completed(result, response_code, headers, body):
+	if response_code != 200:
+		$Error.text = \"Could not fetch data from CloudNET. Please check all connections.\\nCode: \" + str(response_code)
+		$Error.show()
+		return
+	
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	for i in data.nodes:
+		var node = load(\"res://Scenes/Dashboard/CNNode.tscn\").instance()
+		node.setup(i.node.uniqueId, i.state)
+		$List.add_child(node)
+"
+
+[sub_resource type="DynamicFont" id=2]
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=3]
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=4]
+font_data = ExtResource( 3 )
+
+[node name="CNNodes" type="Control"]
+anchor_right = 0.377
+anchor_bottom = 0.36
+margin_right = -0.0480042
+margin_bottom = -1.52588e-05
+rect_min_size = Vector2( 386, 216 )
+script = SubResource( 1 )
+__meta__ = {
+"_edit_vertical_guides_": [ 178.0 ]
+}
+
+[node name="GetServiceData" type="HTTPRequest" parent="."]
+
+[node name="GetNodeData" type="HTTPRequest" parent="."]
+
+[node name="Header" type="Label" parent="."]
+margin_left = 20.0
+margin_top = 8.0
+margin_right = 134.0
+margin_bottom = 22.0
+text = "CloudNET - Nodes and Clusters"
+
+[node name="List" type="VBoxContainer" parent="."]
+margin_left = 18.0
+margin_top = 33.0
+margin_right = 178.0
+margin_bottom = 255.0
+
+[node name="Services" type="RichTextLabel" parent="."]
+margin_left = 132.0
+margin_top = 21.0
+margin_right = 303.0
+margin_bottom = 120.0
+custom_fonts/bold_italics_font = SubResource( 2 )
+custom_fonts/italics_font = SubResource( 3 )
+custom_fonts/bold_font = SubResource( 4 )
+bbcode_enabled = true
+scroll_active = false
+
+[node name="Error" type="Label" parent="."]
+visible = false
+margin_left = 23.0
+margin_top = 91.0
+margin_right = 482.0
+margin_bottom = 148.0
+custom_colors/font_color = Color( 1, 0.321569, 0.321569, 1 )
+text = "Could not fetch data from CloudNET. Please check all connections.
+Code: "
+
+[connection signal="request_completed" from="GetServiceData" to="." method="_on_GetServiceData_request_completed"]
+[connection signal="request_completed" from="GetNodeData" to="." method="_on_GetNodeData_request_completed"]
