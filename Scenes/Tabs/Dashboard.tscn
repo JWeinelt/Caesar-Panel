@@ -1,14 +1,336 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://Scenes/Dashboard/CNNodes.tscn" type="PackedScene" id=1]
-[ext_resource path="res://Assets/Theme.tres" type="Theme" id=2]
+[ext_resource path="res://Assets/Customizabletheme/theme-1.tres" type="Theme" id=1]
 [ext_resource path="res://Scenes/Dashboard/Instructions.tscn" type="PackedScene" id=3]
 
 [sub_resource type="GDScript" id=3]
 script/source = "extends Control
 
+var frame0 = null
+var frame1 = null
+var frame2 = null
+var frame3 = null
+
+
+var save = {
+	\"panel1\": frame0,
+	\"panel2\": frame1,
+	\"panel3\": frame2,
+	\"panel4\": frame3
+}
+
+
+enum FRAME {
+	SERVER_STATS,
+	JOIN_MONITOR,
+	AVG_PLAYTIME,
+	PLAYERCOUNT,
+	DC_CHAT_FQ,
+	TICKETS,
+	WAITING_ROOM,
+	KMA_MONITOR,
+	KMA_OFFLINE_MONIT,
+	KMA_OVERVIEW,
+	KMA_MAINTENANCE,
+	CN_NODES
+}
+
 
 const type = \"dashboard\"
+
+func _ready():
+	setup_panel_selector()
+	frame0 = $Place1/Instructions
+	load_data()
+
+
+func save_data():
+	var file = File.new()
+	file.open_encrypted_with_pass(\"user://dashboard.cs\", File.WRITE, \"dashboard\")
+	file.store_var(save, true)
+	file.close()
+
+
+func load_data():
+	var file = File.new()
+	var err = file.open_encrypted_with_pass(\"user://dashboard.cs\", File.READ, \"dashboard\")
+	if err != OK:
+		save_data()
+		return
+	save = file.get_var(true)
+	
+	set_frame(0, save.panel1)
+	set_frame(1, save.panel2)
+	set_frame(2, save.panel3)
+	set_frame(3, save.panel4)
+
+
+func setup_panel_selector():
+	var idx = 0
+	for i in $Buttons.get_children():
+		if i is MenuButton:
+			var popup = i.get_popup()
+			
+			var sub_stats = PopupMenu.new()
+			sub_stats.set_name(\"stats\")
+			sub_stats.add_item(\"Server data\")
+			sub_stats.add_item(\"Join rates\")
+			sub_stats.add_item(\"Ø Play time\")
+			sub_stats.add_item(\"Playercount\")
+			sub_stats.add_item(\"DC chat frequency\")
+			sub_stats.connect(\"id_pressed\", self, \"_on_stats%s_selected\" % str(idx))
+			
+			var sub_support = PopupMenu.new()
+			sub_support.set_name(\"support\")
+			sub_support.add_item(\"Tickets\")
+			sub_support.add_item(\"Waiting room\")
+			sub_support.connect(\"id_pressed\", self, \"_on_support%s_selected\" % str(idx))
+			
+			var sub_kuma = PopupMenu.new()
+			sub_kuma.set_name(\"kuma\")
+			sub_kuma.add_item(\"Monitor\")
+			sub_kuma.add_item(\"Offline Monitors\")
+			sub_kuma.add_item(\"Overview\")
+			sub_kuma.add_item(\"Maintenance\")
+			sub_kuma.connect(\"id_pressed\", self, \"_on_kuma%s_selected\" % str(idx))
+			
+			for j in range(0, sub_kuma.get_item_count()):
+				sub_kuma.set_item_disabled(j, true)
+			
+			var sub_other = PopupMenu.new()
+			sub_other.set_name(\"others\")
+			sub_other.add_item(\"CloudNET - Nodes\")
+			sub_other.connect(\"id_pressed\", self, \"_on_other%s_selected\" % str(idx))
+			
+			popup.add_child(sub_stats)
+			popup.add_child(sub_support)
+			popup.add_child(sub_kuma)
+			popup.add_child(sub_other)
+			
+			popup.add_submenu_item(\"Statistics\", \"stats\")
+			popup.add_submenu_item(\"Support\", \"support\")
+			popup.add_submenu_item(\"Uptime\", \"kuma\")
+			popup.add_submenu_item(\"Others\", \"others\")
+			print(\"Connected \" + str(idx))
+			idx += 1
+	
+
+
+
+func set_frame(idx, frame_type):
+	match idx:
+		0:
+			if frame0 != null: frame0.queue_free()
+			frame0 = null
+		1:
+			if frame1 != null: frame1.queue_free()
+			frame1 = null
+		2:
+			if frame2 != null: frame2.queue_free()
+			frame2 = null
+		3:
+			if frame3 != null: frame3.queue_free()
+			frame3 = null
+		
+	var c = load(get_by_type(frame_type)).instance()
+	get_child(idx+1).add_child(c)
+	c.getData()
+	
+	match idx:
+		0:
+			frame0 = c
+		1:
+			frame1 = c
+		2:
+			frame2 = c
+		3:
+			frame3 = c
+
+
+func get_by_type(type) -> String:
+	match type:
+		FRAME.CN_NODES: return \"res://Scenes/Dashboard/CNNodes.tscn\"
+		
+	return \"res://Scenes/Dashboard/NotImplemented.tscn\"
+
+
+func _on_stats0_selected(id):
+	var s = 0
+	match id:
+		0:
+			set_frame(s, FRAME.SERVER_STATS)
+		1:
+			set_frame(s, FRAME.JOIN_MONITOR)
+		2:
+			set_frame(s, FRAME.AVG_PLAYTIME)
+		3:
+			set_frame(s, FRAME.PLAYERCOUNT)
+		4:
+			set_frame(s, FRAME.DC_CHAT_FQ)
+
+
+func _on_stats1_selected(id):
+	var s = 1
+	match id:
+		0:
+			set_frame(s, FRAME.SERVER_STATS)
+		1:
+			set_frame(s, FRAME.JOIN_MONITOR)
+		2:
+			set_frame(s, FRAME.AVG_PLAYTIME)
+		3:
+			set_frame(s, FRAME.PLAYERCOUNT)
+		4:
+			set_frame(s, FRAME.DC_CHAT_FQ)
+
+
+func _on_stats2_selected(id):
+	var s = 2
+	match id:
+		0:
+			set_frame(s, FRAME.SERVER_STATS)
+		1:
+			set_frame(s, FRAME.JOIN_MONITOR)
+		2:
+			set_frame(s, FRAME.AVG_PLAYTIME)
+		3:
+			set_frame(s, FRAME.PLAYERCOUNT)
+		4:
+			set_frame(s, FRAME.DC_CHAT_FQ)
+
+
+func _on_stats3_selected(id):
+	var s = 3
+	print(\"Setting screen 3\")
+	match id:
+		0:
+			set_frame(s, FRAME.SERVER_STATS)
+		1:
+			set_frame(s, FRAME.JOIN_MONITOR)
+		2:
+			set_frame(s, FRAME.AVG_PLAYTIME)
+		3:
+			set_frame(s, FRAME.PLAYERCOUNT)
+		4:
+			set_frame(s, FRAME.DC_CHAT_FQ)
+
+
+
+func _on_support0_selected(id):
+	var s = 0
+	match id:
+		0:
+			set_frame(s, FRAME.TICKETS)
+		1:
+			set_frame(s, FRAME.WAITING_ROOM)
+
+
+func _on_support1_selected(id):
+	var s = 1
+	match id:
+		0:
+			set_frame(s, FRAME.TICKETS)
+		1:
+			set_frame(s, FRAME.WAITING_ROOM)
+
+
+func _on_support2_selected(id):
+	var s = 2
+	match id:
+		0:
+			set_frame(s, FRAME.TICKETS)
+		1:
+			set_frame(s, FRAME.WAITING_ROOM)
+
+
+func _on_support3_selected(id):
+	var s = 3
+	match id:
+		0:
+			set_frame(s, FRAME.TICKETS)
+		1:
+			set_frame(s, FRAME.WAITING_ROOM)
+
+
+
+func _on_kuma0_selected(id):
+	var s = 0
+	match id:
+		0:
+			set_frame(s, FRAME.KMA_MONITOR)
+		1:
+			set_frame(s, FRAME.KMA_OFFLINE_MONIT)
+		2:
+			set_frame(s, FRAME.KMA_OVERVIEW)
+		3:
+			set_frame(s, FRAME.KMA_MAINTENANCE)
+
+
+func _on_kuma1_selected(id):
+	var s = 1
+	match id:
+		0:
+			set_frame(s, FRAME.KMA_MONITOR)
+		1:
+			set_frame(s, FRAME.KMA_OFFLINE_MONIT)
+		2:
+			set_frame(s, FRAME.KMA_OVERVIEW)
+		3:
+			set_frame(s, FRAME.KMA_MAINTENANCE)
+
+
+func _on_kuma2_selected(id):
+	var s = 2
+	match id:
+		0:
+			set_frame(s, FRAME.KMA_MONITOR)
+		1:
+			set_frame(s, FRAME.KMA_OFFLINE_MONIT)
+		2:
+			set_frame(s, FRAME.KMA_OVERVIEW)
+		3:
+			set_frame(s, FRAME.KMA_MAINTENANCE)
+
+
+func _on_kuma3_selected(id):
+	var s = 3
+	match id:
+		0:
+			set_frame(s, FRAME.KMA_MONITOR)
+		1:
+			set_frame(s, FRAME.KMA_OFFLINE_MONIT)
+		2:
+			set_frame(s, FRAME.KMA_OVERVIEW)
+		3:
+			set_frame(s, FRAME.KMA_MAINTENANCE)
+
+
+func _on_other0_selected(id):
+	var s = 0
+	match id:
+		0:
+			set_frame(s, FRAME.CN_NODES)
+
+
+func _on_other1_selected(id):
+	var s = 1
+	match id:
+		0:
+			set_frame(s, FRAME.CN_NODES)
+
+
+func _on_other2_selected(id):
+	var s = 2
+	match id:
+		0:
+			set_frame(s, FRAME.CN_NODES)
+
+
+func _on_other3_selected(id):
+	var s = 3
+	match id:
+		0:
+			set_frame(s, FRAME.CN_NODES)
 "
 
 [sub_resource type="StyleBoxEmpty" id=1]
@@ -30,7 +352,7 @@ anchor_right = 0.946
 anchor_bottom = 0.998
 margin_right = 0.295959
 margin_bottom = 0.200012
-theme = ExtResource( 2 )
+theme = ExtResource( 1 )
 script = SubResource( 3 )
 
 [node name="Bg" type="Button" parent="."]
@@ -52,11 +374,7 @@ margin_bottom = 0.256989
 custom_styles/disabled = SubResource( 4 )
 disabled = true
 
-[node name="CNNodes" parent="Place1" instance=ExtResource( 1 )]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_right = -240.526
-margin_bottom = -138.24
+[node name="Instructions" parent="Place1" instance=ExtResource( 3 )]
 
 [node name="Place2" type="Button" parent="."]
 anchor_left = 0.073
@@ -69,8 +387,6 @@ margin_right = 440.632
 margin_bottom = 0.256989
 custom_styles/disabled = SubResource( 4 )
 disabled = true
-
-[node name="Instructions" parent="Place2" instance=ExtResource( 3 )]
 
 [node name="Place3" type="Button" parent="."]
 anchor_left = 0.073
@@ -95,3 +411,54 @@ margin_right = 440.632
 margin_bottom = 268.257
 custom_styles/disabled = SubResource( 4 )
 disabled = true
+
+[node name="Buttons" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Button1" type="MenuButton" parent="Buttons"]
+anchor_left = 0.447
+anchor_top = 0.102
+anchor_right = 0.447
+anchor_bottom = 0.102
+margin_left = -0.143005
+margin_top = -0.0980034
+margin_right = 18.857
+margin_bottom = 32.902
+text = "..."
+
+[node name="Button2" type="MenuButton" parent="Buttons"]
+anchor_left = 0.9
+anchor_top = 0.102
+anchor_right = 0.9
+anchor_bottom = 0.102
+margin_left = -0.0999756
+margin_top = -0.0980034
+margin_right = 18.9
+margin_bottom = 32.902
+focus_mode = 2
+text = "..."
+
+[node name="Button3" type="MenuButton" parent="Buttons"]
+anchor_left = 0.446
+anchor_top = 0.549
+anchor_right = 0.446
+anchor_bottom = 0.549
+margin_left = -0.173981
+margin_top = 0.148987
+margin_right = 18.826
+margin_bottom = 33.149
+focus_mode = 2
+text = "..."
+
+[node name="Button4" type="MenuButton" parent="Buttons"]
+anchor_left = 0.901
+anchor_top = 0.551
+anchor_right = 0.901
+anchor_bottom = 0.551
+margin_left = -0.0689697
+margin_top = -0.0490112
+margin_right = 18.931
+margin_bottom = 32.951
+focus_mode = 2
+text = "..."

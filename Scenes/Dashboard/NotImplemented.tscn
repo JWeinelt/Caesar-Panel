@@ -9,20 +9,21 @@ func getData():
 "
 
 [node name="NotImpl" type="Control"]
-anchor_right = 0.5
-anchor_bottom = 0.472
-margin_bottom = -0.200012
+anchor_right = 0.377
+anchor_bottom = 0.36
+margin_right = -0.0480042
+margin_bottom = -1.52588e-05
+rect_min_size = Vector2( 386, 216 )
 script = SubResource( 1 )
 __meta__ = {
-"_edit_horizontal_guides_": [ 283.0 ],
-"_edit_vertical_guides_": [ 512.0 ]
+"_edit_horizontal_guides_": [ 215.0 ],
+"_edit_vertical_guides_": [ 387.0 ]
 }
 
 [node name="Label" type="Label" parent="."]
 margin_left = 1.0
 margin_top = 34.0
-margin_right = 511.0
+margin_right = 387.0
 margin_bottom = 65.0
-text = "Diese Statistik wurde noch nicht verfügbar.
-Du musst dich also leider noch etwas gedulden!"
+text = "This widget is not available at this time. Sorry!"
 align = 1
