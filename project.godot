@@ -9,12 +9,150 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "LinePlotter",
+"class": "AreaPlotter",
+"language": "GDScript",
+"path": "res://addons/easy_charts/control_charts/plotters/area_plotter.gd"
+}, {
+"base": "Reference",
+"class": "ArrayOperations",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/classes/structures/array_operations.gd"
+}, {
+"base": "Reference",
+"class": "Bar",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/classes/plotting/bar.gd"
+}, {
+"base": "FunctionPlotter",
+"class": "BarPlotter",
+"language": "GDScript",
+"path": "res://addons/easy_charts/control_charts/plotters/bar_plotter.gd"
+}, {
+"base": "Control",
+"class": "Canvas",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/containers/canvas/canvas.gd"
+}, {
+"base": "PanelContainer",
+"class": "Chart",
+"language": "GDScript",
+"path": "res://addons/easy_charts/control_charts/chart.gd"
+}, {
+"base": "Reference",
+"class": "ChartProperties",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/classes/plotting/chart_properties.gd"
+}, {
+"base": "Resource",
+"class": "DataFrame",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/classes/structures/data_frame.gd"
+}, {
+"base": "PanelContainer",
+"class": "DataTooltip",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/containers/data_tooltip/data_tooltip.gd"
+}, {
+"base": "Reference",
+"class": "ECUtilities",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/scripts/ec_utilities.gd"
+}, {
+"base": "Reference",
+"class": "Function",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/classes/plotting/function.gd"
+}, {
+"base": "HBoxContainer",
+"class": "FunctionLabel",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/containers/legend/function_label.gd"
+}, {
+"base": "VBoxContainer",
+"class": "FunctionLegend",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/containers/legend/function_legend.gd"
+}, {
+"base": "Control",
+"class": "FunctionPlotter",
+"language": "GDScript",
+"path": "res://addons/easy_charts/control_charts/plotters/function_plotter.gd"
+}, {
+"base": "Label",
+"class": "FunctionTypeLabel",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/containers/legend/function_type.gd"
+}, {
+"base": "Control",
+"class": "GridBox",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/containers/canvas/plot_box/grid_box.gd"
+}, {
+"base": "ScatterPlotter",
+"class": "LinePlotter",
+"language": "GDScript",
+"path": "res://addons/easy_charts/control_charts/plotters/line_plotter.gd"
+}, {
+"base": "Resource",
+"class": "Matrix",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/classes/structures/matrix.gd"
+}, {
+"base": "Reference",
+"class": "MatrixGenerator",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/classes/structures/matrix_generator.gd"
+}, {
+"base": "FunctionPlotter",
+"class": "PiePlotter",
+"language": "GDScript",
+"path": "res://addons/easy_charts/control_charts/plotters/pie_plotter.gd"
+}, {
+"base": "Control",
+"class": "PlotBox",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/containers/canvas/plot_box/plot_box.gd"
+}, {
+"base": "Reference",
+"class": "Point",
+"language": "GDScript",
+"path": "res://addons/easy_charts/utilities/classes/plotting/point.gd"
+}, {
+"base": "FunctionPlotter",
+"class": "ScatterPlotter",
+"language": "GDScript",
+"path": "res://addons/easy_charts/control_charts/plotters/scatter_plotter.gd"
+}, {
 "base": "ScrollContainer",
 "class": "SmoothScrollContainer",
 "language": "GDScript",
 "path": "res://addons/SmoothScroll/SmoothScrollContainer.gd"
 } ]
 _global_script_class_icons={
+"AreaPlotter": "",
+"ArrayOperations": "",
+"Bar": "",
+"BarPlotter": "",
+"Canvas": "",
+"Chart": "res://addons/easy_charts/utilities/icons/linechart.svg",
+"ChartProperties": "",
+"DataFrame": "",
+"DataTooltip": "",
+"ECUtilities": "",
+"Function": "",
+"FunctionLabel": "",
+"FunctionLegend": "",
+"FunctionPlotter": "",
+"FunctionTypeLabel": "",
+"GridBox": "",
+"LinePlotter": "",
+"Matrix": "",
+"MatrixGenerator": "",
+"PiePlotter": "",
+"PlotBox": "",
+"Point": "",
+"ScatterPlotter": "",
 "SmoothScrollContainer": ""
 }
 
@@ -23,6 +161,9 @@ _global_script_class_icons={
 config/name="CaesarPanelUniversal"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Caesar"
+run/low_processor_mode=true
+boot_splash/show_image=false
+boot_splash/bg_color=Color( 0.0509804, 0.0392157, 0.0392157, 0.0392157 )
 config/icon="res://Assets/logo.png"
 config/windows_native_icon="res://Assets/favicon.ico"
 config/auto_accept_quit=false
@@ -30,18 +171,21 @@ config/quit_on_go_back=false
 
 [autoload]
 
-CNW="*res://Scenes/Global/CloudNETWorker.tscn"
-G="*res://Scripts/Global.gd"
-GlobalEngine="*res://Scenes/Global/GlobalEngine.tscn"
+CN="*res://Scripts/CloudNET.gd"
+GE="*res://Scripts/GlobalEngine.tscn"
 
 [display]
 
+window/size/borderless=true
+window/per_pixel_transparency/allowed=true
+window/per_pixel_transparency/enabled=true
+window/energy_saving/keep_screen_on=false
 window/stretch/mode="2d"
 window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/SmoothScroll/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/SmoothScroll/plugin.cfg", "res://addons/easy_charts/plugin.cfg" )
 
 [gui]
 
@@ -56,4 +200,5 @@ common/enable_pause_aware_picking=true
 quality/driver/driver_name="GLES2"
 vram_compression/import_etc=true
 vram_compression/import_etc2=false
+environment/default_clear_color=Color( 0.301961, 0.301961, 0.301961, 0 )
 environment/default_environment="res://default_env.tres"

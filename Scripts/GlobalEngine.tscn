@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scripts/GlobalEngine.gd" type="Script" id=1]
+
+[node name="GlobalEngine" type="Node"]
+script = ExtResource( 1 )
+
+[node name="Auth" type="Node" parent="."]
+
+[node name="Auth" type="HTTPRequest" parent="Auth"]
+
+[node name="Weather" type="Node" parent="."]
+
+[node name="LocationService" type="HTTPRequest" parent="Weather"]
+
+[node name="WeatherGetter" type="HTTPRequest" parent="Weather"]
+
+[connection signal="request_completed" from="Auth/Auth" to="." method="_on_Auth_request_completed"]
+[connection signal="request_completed" from="Weather/LocationService" to="." method="_on_LocationService_request_completed"]
+[connection signal="request_completed" from="Weather/WeatherGetter" to="." method="_on_WeatherGetter_request_completed"]

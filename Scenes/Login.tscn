@@ -1,0 +1,132 @@
+[gd_scene load_steps=16 format=2]
+
+[ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
+[ext_resource path="res://Assets/Shaders/Rounded_Corners.tres" type="Shader" id=2]
+[ext_resource path="res://Assets/Theme-Icons/window_close_white.png" type="Texture" id=3]
+[ext_resource path="res://Assets/logo.png" type="Texture" id=4]
+[ext_resource path="res://Assets/Backgrounds/bg8.png" type="Texture" id=5]
+[ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=6]
+[ext_resource path="res://Scripts/Startup.gd" type="Script" id=7]
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = ExtResource( 2 )
+shader_param/corner_radius = 54.0
+
+[sub_resource type="StyleBoxTexture" id=1]
+texture = ExtResource( 5 )
+region_rect = Rect2( 0, 0, 1920, 1009 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0.74902, 0.74902, 0.74902, 0.211765 )
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+
+[sub_resource type="StyleBoxFlat" id=6]
+bg_color = Color( 0, 0, 0, 0.305882 )
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+
+[sub_resource type="StyleBoxEmpty" id=7]
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0, 0, 0, 0.196078 )
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+
+[sub_resource type="DynamicFont" id=9]
+size = 24
+font_data = ExtResource( 6 )
+
+[sub_resource type="StyleBoxTexture" id=8]
+texture = ExtResource( 4 )
+region_rect = Rect2( 0, 0, 1024, 1024 )
+
+[node name="Login" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 1 )
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_vertical_guides_": [ 512.0 ]
+}
+
+[node name="Bg" type="Panel" parent="."]
+material = SubResource( 2 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 1 )
+
+[node name="Exit" type="Button" parent="."]
+margin_left = 966.0
+margin_top = 8.0
+margin_right = 1011.0
+margin_bottom = 37.0
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 6 )
+custom_styles/focus = SubResource( 7 )
+custom_styles/normal = SubResource( 3 )
+icon = ExtResource( 3 )
+
+[node name="Username" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -141.0
+margin_top = -20.0
+margin_right = 142.0
+margin_bottom = 20.0
+custom_fonts/font = SubResource( 9 )
+text = "Username:"
+
+[node name="UEnter" type="LineEdit" parent="Username"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -3.0
+margin_bottom = 32.0
+
+[node name="Password" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -141.0
+margin_top = 62.0
+margin_right = 142.0
+margin_bottom = 102.0
+custom_fonts/font = SubResource( 9 )
+text = "Password:"
+
+[node name="PEnter" type="LineEdit" parent="Password"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -3.0
+margin_bottom = 32.0
+
+[node name="Logo" type="Panel" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -100.0
+margin_top = 12.0
+margin_right = 100.0
+margin_bottom = 212.0
+custom_styles/panel = SubResource( 8 )
+
+[node name="Login" type="Button" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -37.0
+margin_top = -141.0
+margin_right = 37.0
+margin_bottom = -108.0
+text = "Login"

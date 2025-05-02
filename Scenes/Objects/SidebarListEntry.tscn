@@ -1,0 +1,129 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Assets/sidebar/dashboard.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Control
+
+signal pressed(entry_name)
+
+export(String) var entry_name
+export(String) var icon_path
+
+func _ready():
+	$Name.text = entry_name
+	var style = StyleBoxTexture.new()
+	style.texture = load(\"res://Assets/sidebar/%s.png\" % icon_path)
+	$Icon.set(\"custom_styles/panel\", style)
+
+func _on_Overlay_mouse_entered():
+	$FX.play(\"fade_in\")
+
+
+func _on_Overlay_mouse_exited():
+	$FX.play(\"fade_out\")
+
+
+func _on_Overlay_gui_input(event):
+	pass # Replace with function body.
+"
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.12549, 0.172549, 0.227451, 1 )
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="Animation" id=3]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=4]
+resource_name = "fade_in"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_name = "fade_out"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+
+[sub_resource type="StyleBoxTexture" id=6]
+texture = ExtResource( 1 )
+region_rect = Rect2( 0, 0, 512, 512 )
+
+[node name="SidebarListEntry" type="Control"]
+anchor_right = 0.138
+anchor_bottom = 0.067
+margin_right = -0.312012
+margin_bottom = -0.200001
+rect_min_size = Vector2( 141, 50 )
+script = SubResource( 2 )
+
+[node name="Bg" type="Panel" parent="."]
+modulate = Color( 1, 1, 1, 0 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_bottom = -10.0
+custom_styles/panel = SubResource( 1 )
+
+[node name="FX" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 3 )
+anims/fade_in = SubResource( 4 )
+anims/fade_out = SubResource( 5 )
+
+[node name="Name" type="Label" parent="."]
+margin_left = 51.0
+margin_top = 13.0
+margin_right = 136.0
+margin_bottom = 27.0
+text = "Dtest"
+
+[node name="Icon" type="Panel" parent="."]
+margin_left = 7.0
+margin_top = -1.0
+margin_right = 47.0
+margin_bottom = 39.0
+custom_styles/panel = SubResource( 6 )
+
+[node name="Overlay" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[connection signal="gui_input" from="Overlay" to="." method="_on_Overlay_gui_input"]
+[connection signal="mouse_entered" from="Overlay" to="." method="_on_Overlay_mouse_entered"]
+[connection signal="mouse_exited" from="Overlay" to="." method="_on_Overlay_mouse_exited"]

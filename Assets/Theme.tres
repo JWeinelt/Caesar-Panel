@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=62 format=2]
+[gd_resource type="Theme" load_steps=67 format=2]
 
 [ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Assets/Theme-Icons/tree_arrow.png" type="Texture" id=2]
@@ -29,6 +29,9 @@
 [ext_resource path="res://Assets/Theme-Icons/increment_vertical.png" type="Texture" id=27]
 [ext_resource path="res://Assets/Theme-Icons/increment_horizontal.png" type="Texture" id=28]
 [ext_resource path="res://Assets/Theme-Icons/decrement_horizontal.png" type="Texture" id=29]
+[ext_resource path="res://Assets/Theme-Icons/slider_grabber.png" type="Texture" id=30]
+[ext_resource path="res://Assets/Theme-Icons/slider_grabber_disabled.png" type="Texture" id=31]
+[ext_resource path="res://Assets/Theme-Icons/slider_grabber_hover.png" type="Texture" id=32]
 
 [sub_resource type="DynamicFont" id=8]
 font_data = ExtResource( 1 )
@@ -106,6 +109,12 @@ bg_color = Color( 0.733333, 0.733333, 0.733333, 1 )
 
 [sub_resource type="StyleBoxFlat" id=35]
 bg_color = Color( 0.341176, 0.341176, 0.341176, 1 )
+
+[sub_resource type="StyleBoxFlat" id=40]
+bg_color = Color( 0, 0.372549, 0.533333, 1 )
+
+[sub_resource type="DynamicFont" id=41]
+font_data = ExtResource( 1 )
 
 [sub_resource type="DynamicFont" id=10]
 size = 18
@@ -280,6 +289,13 @@ HScrollBar/icons/increment_pressed = ExtResource( 28 )
 HScrollBar/styles/grabber = SubResource( 33 )
 HScrollBar/styles/grabber_highlight = SubResource( 34 )
 HScrollBar/styles/grabber_pressed = SubResource( 35 )
+HSlider/icons/grabber = ExtResource( 30 )
+HSlider/icons/grabber_disabled = ExtResource( 31 )
+HSlider/icons/grabber_highlight = ExtResource( 32 )
+HSlider/icons/tick = null
+HSlider/styles/grabber_area = SubResource( 40 )
+HSlider/styles/grabber_area_highlight = SubResource( 40 )
+Label/fonts/font = SubResource( 41 )
 LineEdit/fonts/font = SubResource( 10 )
 LineEdit/icons/clear = ExtResource( 4 )
 LineEdit/styles/focus = SubResource( 11 )
