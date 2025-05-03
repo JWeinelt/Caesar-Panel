@@ -13,10 +13,17 @@ script/source = "extends Control
 func _ready():
 	get_tree().get_root().set_transparent_background(true)
 	OS.window_borderless = true
+	
+	for i in $Sidebar/SidebarList.get_children():
+		i.connect(\"pressed\", self, \"_on_sidebar_click\")
 
 
 func _on_Exit_pressed():
 	get_tree().quit()
+
+
+func _on_sidebar_click(entry):
+	pass
 "
 
 [sub_resource type="StyleBoxFlat" id=9]
