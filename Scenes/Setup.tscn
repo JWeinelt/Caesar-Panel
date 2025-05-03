@@ -1,0 +1,846 @@
+[gd_scene load_steps=22 format=2]
+
+[ext_resource path="res://Assets/Backgrounds/bg31.png" type="Texture" id=1]
+[ext_resource path="res://Assets/Theme-Icons/window_close_white.png" type="Texture" id=2]
+[ext_resource path="res://Assets/Shaders/Rounded_Corners.tres" type="Shader" id=3]
+[ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://Assets/logo.png" type="Texture" id=5]
+[ext_resource path="res://Assets/Theme.tres" type="Theme" id=6]
+[ext_resource path="res://Scenes/Objects/Loader.tscn" type="PackedScene" id=7]
+
+[sub_resource type="GDScript" id=12]
+script/source = "extends Control
+
+func _ready():
+	get_tree().get_root().set_transparent_background(true)
+	OS.window_borderless = true
+	
+	$Screen2/Info.get_v_scroll().connect(\"value_changed\", self, \"_on_rich_val_change\")
+	
+	GE.connect(\"caesar_checked_connection\", self, \"_on_connection_check\")
+	GE.connect(\"code_validated\", self, \"_on_code_validation\")
+
+
+func _on_StartSetup_pressed():
+	$FX.play(\"page1\")
+
+func _on_rich_val_change(val: float):
+	if val == 498:
+		$Screen2/Page2Next.disabled = false
+
+
+func _on_Page2Next_pressed():
+	$FX.play(\"page2\")
+
+
+func _on_AddressName_text_entered(new_text):
+	var port := 49800
+	if $Screen3/UseCustomPort.pressed: port = $Screen3/UseCustomPort/PortNumber.value
+	GE.check_connection_caesar(new_text, $Screen3/UseSSL.pressed, port)
+	$Screen3/Loader.show_loading(30)
+
+
+func _on_connection_check(setup: bool):
+	$Screen3/Loader.end_loading()
+	GE.save_config()
+	if setup:
+		$FX.play(\"page3\")
+	else:
+		get_tree().change_scene(\"res://Scenes/Login.tscn\")
+
+
+func _on_VerifyDigits_text_entered(new_text):
+	GE.request_setup_code_validation(int(new_text))
+
+
+func _on_code_validation(valid: bool):
+	if valid: get_tree().change_scene(\"res://Scenes/Login.tscn\")
+	else: OS.alert(\"The provided code is not valid\", \"Code invalid\")
+	
+	
+"
+
+[sub_resource type="ShaderMaterial" id=8]
+shader = ExtResource( 3 )
+shader_param/corner_radius = 54.0
+
+[sub_resource type="StyleBoxTexture" id=1]
+texture = ExtResource( 1 )
+region_rect = Rect2( 0, 0, 1920, 1017 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0.74902, 0.74902, 0.74902, 0.211765 )
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+
+[sub_resource type="StyleBoxFlat" id=6]
+bg_color = Color( 0, 0, 0, 0.305882 )
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+
+[sub_resource type="StyleBoxEmpty" id=7]
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0, 0, 0, 0.196078 )
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+
+[sub_resource type="DynamicFont" id=9]
+size = 29
+font_data = ExtResource( 4 )
+
+[sub_resource type="StyleBoxTexture" id=10]
+texture = ExtResource( 5 )
+region_rect = Rect2( 0, 0, 1024, 1024 )
+
+[sub_resource type="DynamicFont" id=11]
+size = 21
+font_data = ExtResource( 4 )
+
+[sub_resource type="Animation" id=13]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Screen1:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Screen1:rect_position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 0, 0 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Screen2:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Screen2:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ false ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Screen1:visible")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ true ]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Screen2:rect_position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -1024, 0 ) ]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("Screen3:modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Screen3:rect_position")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -1024, 0 ) ]
+}
+tracks/8/type = "value"
+tracks/8/path = NodePath("Screen3:visible")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ false ]
+}
+tracks/9/type = "value"
+tracks/9/path = NodePath("Screen4:modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/10/type = "value"
+tracks/10/path = NodePath("Screen4:visible")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ false ]
+}
+tracks/11/type = "value"
+tracks/11/path = NodePath("Screen4:rect_position")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -1024, 0 ) ]
+}
+
+[sub_resource type="Animation" id=14]
+resource_name = "page1"
+tracks/0/type = "value"
+tracks/0/path = NodePath("Screen1:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Screen1:rect_position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 0, 0 ), Vector2( 1024, 0 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Screen2:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Screen2:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Screen1:visible")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ true, false ]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Screen2:rect_position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -1024, 0 ), Vector2( -1024, 0 ), Vector2( 0, 0 ) ]
+}
+
+[sub_resource type="Animation" id=15]
+resource_name = "page2"
+tracks/0/type = "value"
+tracks/0/path = NodePath("Screen1:rect_position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 1024, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Screen1:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ false ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Screen1:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Screen2:rect_position")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 0, 0 ), Vector2( 1024, 0 ) ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Screen2:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Screen2:visible")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ true, false ]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("Screen3:modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Screen3:rect_position")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -1024, 0 ), Vector2( -1024, 0 ), Vector2( 0, 0 ) ]
+}
+tracks/8/type = "value"
+tracks/8/path = NodePath("Screen3:visible")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ false, true, true ]
+}
+
+[sub_resource type="Animation" id=16]
+resource_name = "page3"
+tracks/0/type = "value"
+tracks/0/path = NodePath("Screen3:rect_position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 0, 0 ), Vector2( 1024, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Screen3:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Screen3:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ true, false ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Screen4:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Screen4:visible")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Screen4:rect_position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -1024, 0 ), Vector2( -1024, 0 ), Vector2( 0, 0 ) ]
+}
+
+[node name="Setup" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 6 )
+script = SubResource( 12 )
+__meta__ = {
+"_edit_vertical_guides_": [ 513.0 ]
+}
+
+[node name="Bg" type="Panel" parent="."]
+material = SubResource( 8 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 1 )
+
+[node name="Exit" type="Button" parent="."]
+margin_left = 966.0
+margin_top = 8.0
+margin_right = 1011.0
+margin_bottom = 37.0
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 6 )
+custom_styles/focus = SubResource( 7 )
+custom_styles/normal = SubResource( 3 )
+icon = ExtResource( 2 )
+
+[node name="Screen1" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = 1024.0
+margin_bottom = 600.0
+
+[node name="Header" type="Label" parent="Screen1"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -647.0
+margin_top = 175.0
+margin_right = -374.0
+margin_bottom = 215.0
+custom_fonts/font = SubResource( 9 )
+text = "Welcome to Caesar!"
+
+[node name="Logo" type="Panel" parent="Screen1"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -572.0
+margin_right = -452.0
+margin_bottom = 120.0
+custom_styles/panel = SubResource( 10 )
+
+[node name="Info1" type="Label" parent="Screen1"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -264.5
+margin_top = -71.5
+margin_right = 264.5
+margin_bottom = -42.5
+custom_fonts/font = SubResource( 11 )
+text = "We have to ask some questions to make you ready to
+start."
+align = 1
+
+[node name="StartSetup" type="Button" parent="Screen1"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -42.5
+margin_top = 1.5
+margin_right = 42.5
+margin_bottom = 34.5
+text = "Start setup"
+
+[node name="Screen2" type="Control" parent="."]
+visible = false
+modulate = Color( 1, 1, 1, 0 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -1024.0
+margin_bottom = 600.0
+
+[node name="Header" type="Label" parent="Screen2"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -173.0
+margin_top = 175.0
+margin_right = 177.0
+margin_bottom = 215.0
+custom_fonts/font = SubResource( 9 )
+text = "We value your privacy."
+align = 1
+
+[node name="Logo" type="Panel" parent="Screen2"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -60.0
+margin_right = 60.0
+margin_bottom = 120.0
+custom_styles/panel = SubResource( 10 )
+
+[node name="Info" type="RichTextLabel" parent="Screen2"]
+margin_left = 184.0
+margin_top = 223.0
+margin_right = 843.0
+margin_bottom = 469.0
+bbcode_enabled = true
+bbcode_text = "[b]Privacy Notice[/b]
+Caesar is a modular, open-source management software for Minecraft servers, licensed under the GNU General Public License v3.0 (GPLv3). As such, it is provided without any warranty – use it at your own risk.
+
+[b]Data Usage[/b]
+Upon first start, Caesar will send a single HTTP request to [color=blue][u]https://ipinfo.io[/u][color=white] to determine your approximate location (based on IP address). This data is used only locally to enhance your user experience by displaying:
+
+• Current weather
+• Local time
+• Time zone
+
+on the [b]Dashboard.[/b]
+[b]No data is stored or transmitted[/b] beyond this inital request. Your location is [b]never[/b] sent to our servers, nor is it used for analytics or shared with third parties.
+
+This feature can be disabled at any time in the settings under [code]Dashboard → Local Enhancements[/code].
+
+[b]Legal Note[/b]
+Caesar is released under the GPL v3 license, meaning:
+
+• You are free to use, modify, and distribute it.
+• The software comes as-is, without any warranty, expressed or implied.
+• The developers of Caesar cannot be held liable for any damage, data loss, or other issues resulting from its use.
+
+
+We believe in openness, transparency, and user control. You can always inspect the full source code at [color=blue]https://github.com/JWeinelt/Caesar[color=white]."
+text = "Privacy Notice
+Caesar is a modular, open-source management software for Minecraft servers, licensed under the GNU General Public License v3.0 (GPLv3). As such, it is provided without any warranty – use it at your own risk.
+
+Data Usage
+Upon first start, Caesar will send a single HTTP request to https://ipinfo.io to determine your approximate location (based on IP address). This data is used only locally to enhance your user experience by displaying:
+
+• Current weather
+• Local time
+• Time zone
+
+on the Dashboard.
+No data is stored or transmitted beyond this inital request. Your location is never sent to our servers, nor is it used for analytics or shared with third parties.
+
+This feature can be disabled at any time in the settings under Dashboard → Local Enhancements.
+
+Legal Note
+Caesar is released under the GPL v3 license, meaning:
+
+• You are free to use, modify, and distribute it.
+• The software comes as-is, without any warranty, expressed or implied.
+• The developers of Caesar cannot be held liable for any damage, data loss, or other issues resulting from its use.
+
+
+We believe in openness, transparency, and user control. You can always inspect the full source code at https://github.com/JWeinelt/Caesar."
+
+[node name="Page2Next" type="Button" parent="Screen2"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -42.5
+margin_top = -107.0
+margin_right = 42.5
+margin_bottom = -74.0
+disabled = true
+text = "Next"
+
+[node name="Screen3" type="Control" parent="."]
+visible = false
+modulate = Color( 1, 1, 1, 0 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -1024.0
+margin_bottom = 600.0
+
+[node name="Header" type="Label" parent="Screen3"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -173.0
+margin_top = 175.0
+margin_right = 177.0
+margin_bottom = 215.0
+custom_fonts/font = SubResource( 9 )
+text = "Let's get started."
+align = 1
+
+[node name="Logo" type="Panel" parent="Screen3"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -60.0
+margin_right = 60.0
+margin_bottom = 120.0
+custom_styles/panel = SubResource( 10 )
+
+[node name="Info1" type="Label" parent="Screen3"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -264.5
+margin_top = -71.5
+margin_right = 264.5
+margin_bottom = -10.5
+custom_fonts/font = SubResource( 11 )
+text = "Please enter the address of your instance."
+align = 1
+
+[node name="AddressName" type="LineEdit" parent="Screen3"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -197.0
+margin_top = -17.0
+margin_right = 198.0
+margin_bottom = 18.0
+hint_tooltip = "Head to the Discord server if you want to get an \"instance.caesarnet.cloud\" link."
+placeholder_text = "instance.caesarnet.cloud/your_instance"
+
+[node name="UseSSL" type="CheckButton" parent="Screen3"]
+margin_left = 318.0
+margin_top = 332.0
+margin_right = 551.0
+margin_bottom = 365.0
+text = "Use encrypted connection"
+
+[node name="UseCustomPort" type="CheckButton" parent="Screen3"]
+margin_left = 318.0
+margin_top = 382.0
+margin_right = 455.0
+margin_bottom = 415.0
+pressed = true
+text = "Default port"
+
+[node name="PortNumber" type="SpinBox" parent="Screen3/UseCustomPort"]
+margin_left = 163.0
+margin_right = 249.0
+margin_bottom = 35.0
+min_value = 1023.0
+max_value = 65535.0
+value = 49800.0
+
+[node name="Loader" parent="Screen3" instance=ExtResource( 7 )]
+margin_left = 733.0
+margin_top = 276.0
+margin_right = -251.0
+margin_bottom = -284.0
+
+[node name="Page3Next" type="Button" parent="Screen3"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -42.5
+margin_top = -107.0
+margin_right = 42.5
+margin_bottom = -74.0
+disabled = true
+text = "Next"
+
+[node name="Screen4" type="Control" parent="."]
+visible = false
+modulate = Color( 1, 1, 1, 0 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -1024.0
+margin_bottom = 600.0
+
+[node name="Header" type="Label" parent="Screen4"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -173.0
+margin_top = 175.0
+margin_right = 177.0
+margin_bottom = 215.0
+custom_fonts/font = SubResource( 9 )
+text = "The server displays a 4-digit
+verification code."
+align = 1
+
+[node name="Logo" type="Panel" parent="Screen4"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -60.0
+margin_right = 60.0
+margin_bottom = 120.0
+custom_styles/panel = SubResource( 10 )
+
+[node name="Info1" type="Label" parent="Screen4"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -264.5
+margin_top = -31.5
+margin_right = 264.5
+margin_bottom = 29.5
+custom_fonts/font = SubResource( 11 )
+text = "Please enter it below to verify that's you."
+align = 1
+
+[node name="VerifyDigits" type="LineEdit" parent="Screen4"]
+margin_left = 422.0
+margin_top = 328.0
+margin_right = 604.0
+margin_bottom = 363.0
+max_length = 4
+placeholder_text = "1234"
+
+[node name="Page4Next" type="Button" parent="Screen4"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -42.5
+margin_top = -107.0
+margin_right = 42.5
+margin_bottom = -74.0
+disabled = true
+text = "Next"
+
+[node name="FX" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 13 )
+anims/page1 = SubResource( 14 )
+anims/page2 = SubResource( 15 )
+anims/page3 = SubResource( 16 )
+
+[connection signal="pressed" from="Screen1/StartSetup" to="." method="_on_StartSetup_pressed"]
+[connection signal="pressed" from="Screen2/Page2Next" to="." method="_on_Page2Next_pressed"]
+[connection signal="text_entered" from="Screen3/AddressName" to="." method="_on_AddressName_text_entered"]
+[connection signal="text_entered" from="Screen4/VerifyDigits" to="." method="_on_VerifyDigits_text_entered"]

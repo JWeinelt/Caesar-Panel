@@ -9,12 +9,44 @@ script = ExtResource( 1 )
 
 [node name="Auth" type="HTTPRequest" parent="Auth"]
 
+[node name="AuthCN" type="HTTPRequest" parent="Auth"]
+
 [node name="Weather" type="Node" parent="."]
 
 [node name="LocationService" type="HTTPRequest" parent="Weather"]
 
 [node name="WeatherGetter" type="HTTPRequest" parent="Weather"]
 
+[node name="CloudNET" type="Node" parent="."]
+
+[node name="Services" type="HTTPRequest" parent="CloudNET"]
+
+[node name="Tasks" type="HTTPRequest" parent="CloudNET"]
+
+[node name="Groups" type="HTTPRequest" parent="CloudNET"]
+
+[node name="Clusters" type="HTTPRequest" parent="CloudNET"]
+
+[node name="Action" type="HTTPRequest" parent="CloudNET"]
+
+[node name="Setup" type="Node" parent="."]
+
+[node name="CheckConnection" type="HTTPRequest" parent="Setup"]
+
+[node name="ValidateCode" type="HTTPRequest" parent="Setup"]
+
+[node name="Management" type="Node" parent="."]
+
+[node name="UserAction" type="HTTPRequest" parent="Management"]
+
 [connection signal="request_completed" from="Auth/Auth" to="." method="_on_Auth_request_completed"]
+[connection signal="request_completed" from="Auth/AuthCN" to="." method="_on_AuthCN_request_completed"]
 [connection signal="request_completed" from="Weather/LocationService" to="." method="_on_LocationService_request_completed"]
 [connection signal="request_completed" from="Weather/WeatherGetter" to="." method="_on_WeatherGetter_request_completed"]
+[connection signal="request_completed" from="CloudNET/Services" to="." method="_on_Services_request_completed"]
+[connection signal="request_completed" from="CloudNET/Tasks" to="." method="_on_Tasks_request_completed"]
+[connection signal="request_completed" from="CloudNET/Groups" to="." method="_on_Groups_request_completed"]
+[connection signal="request_completed" from="CloudNET/Clusters" to="." method="_on_Clusters_request_completed"]
+[connection signal="request_completed" from="CloudNET/Action" to="." method="_on_Action_request_completed"]
+[connection signal="request_completed" from="Setup/CheckConnection" to="." method="_on_CheckConnection_request_completed"]
+[connection signal="request_completed" from="Setup/ValidateCode" to="." method="_on_ValidateCode_request_completed"]

@@ -10,7 +10,20 @@ script/source = "extends Control
 
 
 func _ready():
-	pass
+	GE.connect(\"services_got\", self, \"_on_services_received\")
+	GE.connect(\"tasks_got\", self, \"_on_tasks_received\")
+	GE.get_services()
+	GE.get_tasks()
+
+
+func _on_services_received(data):
+	var amount = data.services.size()
+	$Overview/Servers/Amount.text = str(amount)
+
+
+func _on_tasks_received(data):
+	var amount = data.tasks.size()
+	$Overview/Tasks/Amount.text = str(amount)
 "
 
 [sub_resource type="DynamicFont" id=2]

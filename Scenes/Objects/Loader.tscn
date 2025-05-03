@@ -1,0 +1,88 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Assets/Misc/load.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Control
+
+
+func _ready():
+	$Img.hide()
+
+
+func show_loading(time: int):
+	$Img.show()
+	$EndTimer.wait_time = time
+	$EndTimer.start()
+
+
+func end_loading():
+	$Img.hide()
+
+
+func _on_EndTimer_timeout():
+	$Img.hide()
+"
+
+[sub_resource type="StyleBoxTexture" id=1]
+texture = ExtResource( 1 )
+region_rect = Rect2( 0, 0, 513, 513 )
+
+[sub_resource type="Animation" id=3]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Img:rect_rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ 0.0 ]
+}
+
+[sub_resource type="Animation" id=4]
+resource_name = "main"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Img:rect_rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 0.0, 360.0 ]
+}
+
+[node name="Loader" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -20.0
+margin_top = -20.0
+margin_right = -1004.0
+margin_bottom = -580.0
+rect_min_size = Vector2( 40, 40 )
+rect_pivot_offset = Vector2( 20, 20 )
+script = SubResource( 2 )
+
+[node name="Img" type="Panel" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+rect_pivot_offset = Vector2( 20, 20 )
+custom_styles/panel = SubResource( 1 )
+
+[node name="FX" type="AnimationPlayer" parent="."]
+autoplay = "main"
+playback_speed = 0.58
+anims/RESET = SubResource( 3 )
+anims/main = SubResource( 4 )
+
+[node name="EndTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="timeout" from="EndTimer" to="." method="_on_EndTimer_timeout"]

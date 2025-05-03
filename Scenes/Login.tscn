@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/Shaders/Rounded_Corners.tres" type="Shader" id=2]
@@ -41,6 +41,10 @@ corner_radius_bottom_left = 25
 
 [sub_resource type="DynamicFont" id=9]
 size = 24
+font_data = ExtResource( 6 )
+
+[sub_resource type="DynamicFont" id=10]
+size = 17
 font_data = ExtResource( 6 )
 
 [sub_resource type="StyleBoxTexture" id=8]
@@ -111,6 +115,21 @@ anchor_bottom = 1.0
 margin_top = -3.0
 margin_bottom = 32.0
 
+[node name="Error" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -220.0
+margin_top = 219.0
+margin_right = 224.0
+margin_bottom = 243.0
+custom_colors/font_color = Color( 1, 0.313726, 0.313726, 1 )
+custom_fonts/font = SubResource( 10 )
+text = "Username or password is not valid"
+align = 1
+valign = 1
+
 [node name="Logo" type="Panel" parent="."]
 anchor_left = 0.5
 anchor_right = 0.5
@@ -130,3 +149,8 @@ margin_top = -141.0
 margin_right = 37.0
 margin_bottom = -108.0
 text = "Login"
+
+[connection signal="pressed" from="Exit" to="." method="_on_Exit_pressed"]
+[connection signal="text_entered" from="Username/UEnter" to="." method="_on_UEnter_text_entered"]
+[connection signal="text_entered" from="Password/PEnter" to="." method="_on_PEnter_text_entered"]
+[connection signal="pressed" from="Login" to="." method="_on_Login_pressed"]

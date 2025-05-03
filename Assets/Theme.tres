@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=67 format=2]
+[gd_resource type="Theme" load_steps=74 format=2]
 
 [ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Assets/Theme-Icons/tree_arrow.png" type="Texture" id=2]
@@ -32,6 +32,9 @@
 [ext_resource path="res://Assets/Theme-Icons/slider_grabber.png" type="Texture" id=30]
 [ext_resource path="res://Assets/Theme-Icons/slider_grabber_disabled.png" type="Texture" id=31]
 [ext_resource path="res://Assets/Theme-Icons/slider_grabber_hover.png" type="Texture" id=32]
+[ext_resource path="res://Assets/fonts/Segoe UI Bold Italic.ttf" type="DynamicFontData" id=33]
+[ext_resource path="res://Assets/fonts/Segoe UI Italic.ttf" type="DynamicFontData" id=34]
+[ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=35]
 
 [sub_resource type="DynamicFont" id=8]
 font_data = ExtResource( 1 )
@@ -175,6 +178,18 @@ bg_color = Color( 0, 0.517647, 0.203922, 1 )
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 
+[sub_resource type="DynamicFont" id=42]
+font_data = ExtResource( 35 )
+
+[sub_resource type="DynamicFont" id=43]
+font_data = ExtResource( 33 )
+
+[sub_resource type="DynamicFont" id=44]
+font_data = ExtResource( 34 )
+
+[sub_resource type="DynamicFont" id=45]
+font_data = ExtResource( 1 )
+
 [sub_resource type="StyleBoxEmpty" id=39]
 
 [sub_resource type="StyleBoxFlat" id=15]
@@ -312,6 +327,10 @@ PopupMenu/styles/separator = SubResource( 31 )
 ProgressBar/fonts/font = SubResource( 22 )
 ProgressBar/styles/bg = SubResource( 23 )
 ProgressBar/styles/fg = SubResource( 24 )
+RichTextLabel/fonts/bold_font = SubResource( 42 )
+RichTextLabel/fonts/bold_italics_font = SubResource( 43 )
+RichTextLabel/fonts/italics_font = SubResource( 44 )
+RichTextLabel/fonts/normal_font = SubResource( 45 )
 TabContainer/constants/hseparation = 26
 TabContainer/constants/label_valign_bg = 2
 TabContainer/constants/label_valign_fg = 7
