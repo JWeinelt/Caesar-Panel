@@ -546,9 +546,9 @@ margin_bottom = 600.0
 [node name="Header" type="Label" parent="Screen1"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_left = -647.0
+margin_left = -646.0
 margin_top = 175.0
-margin_right = -374.0
+margin_right = -373.0
 margin_bottom = 215.0
 custom_fonts/font = SubResource( 9 )
 text = "Welcome to Caesar!"
@@ -566,10 +566,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -264.5
-margin_top = -71.5
-margin_right = 264.5
-margin_bottom = -42.5
+margin_left = -775.0
+margin_top = -372.0
+margin_right = -246.0
+margin_bottom = -311.0
 custom_fonts/font = SubResource( 11 )
 text = "We have to ask some questions to make you ready to
 start."
@@ -580,10 +580,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -42.5
-margin_top = 1.5
-margin_right = 42.5
-margin_bottom = 34.5
+margin_left = -555.0
+margin_top = -251.0
+margin_right = -470.0
+margin_bottom = -218.0
 text = "Start setup"
 
 [node name="Screen2" type="Control" parent="."]
@@ -592,14 +592,15 @@ modulate = Color( 1, 1, 1, 0 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = -1024.0
+margin_right = -0.000488281
 margin_bottom = 600.0
 
 [node name="Header" type="Label" parent="Screen2"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_left = -173.0
+margin_left = -685.0
 margin_top = 175.0
-margin_right = 177.0
+margin_right = -335.0
 margin_bottom = 215.0
 custom_fonts/font = SubResource( 9 )
 text = "We value your privacy."
@@ -608,8 +609,8 @@ align = 1
 [node name="Logo" type="Panel" parent="Screen2"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_left = -60.0
-margin_right = 60.0
+margin_left = -572.0
+margin_right = -452.0
 margin_bottom = 120.0
 custom_styles/panel = SubResource( 10 )
 
@@ -673,10 +674,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-margin_left = -42.5
-margin_top = -107.0
-margin_right = 42.5
-margin_bottom = -74.0
+margin_left = -553.0
+margin_top = -672.0
+margin_right = -468.0
+margin_bottom = -639.0
 disabled = true
 text = "Next"
 
@@ -686,14 +687,15 @@ modulate = Color( 1, 1, 1, 0 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = -1024.0
+margin_right = -0.000488281
 margin_bottom = 600.0
 
 [node name="Header" type="Label" parent="Screen3"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_left = -173.0
+margin_left = -685.0
 margin_top = 175.0
-margin_right = 177.0
+margin_right = -335.0
 margin_bottom = 215.0
 custom_fonts/font = SubResource( 9 )
 text = "Let's get started."
@@ -702,8 +704,8 @@ align = 1
 [node name="Logo" type="Panel" parent="Screen3"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_left = -60.0
-margin_right = 60.0
+margin_left = -572.0
+margin_right = -452.0
 margin_bottom = 120.0
 custom_styles/panel = SubResource( 10 )
 
@@ -712,10 +714,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -264.5
-margin_top = -71.5
-margin_right = 264.5
-margin_bottom = -10.5
+margin_left = -772.0
+margin_top = -379.0
+margin_right = -243.0
+margin_bottom = -318.0
 custom_fonts/font = SubResource( 11 )
 text = "Please enter the address of your instance."
 align = 1
@@ -725,10 +727,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -197.0
-margin_top = -17.0
-margin_right = 198.0
-margin_bottom = 18.0
+margin_left = -707.0
+margin_top = -331.0
+margin_right = -312.0
+margin_bottom = -296.0
 hint_tooltip = "Head to the Discord server if you want to get an \"instance.caesarnet.cloud\" link."
 placeholder_text = "instance.caesarnet.cloud/your_instance"
 
@@ -758,8 +760,8 @@ value = 49800.0
 [node name="Loader" parent="Screen3" instance=ExtResource( 7 )]
 margin_left = 733.0
 margin_top = 276.0
-margin_right = -251.0
-margin_bottom = -284.0
+margin_right = -1275.0
+margin_bottom = -884.0
 
 [node name="Page3Next" type="Button" parent="Screen3"]
 anchor_left = 0.5
@@ -784,10 +786,10 @@ margin_bottom = 600.0
 [node name="Header" type="Label" parent="Screen4"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_left = -173.0
+margin_left = -685.0
 margin_top = 175.0
-margin_right = 177.0
-margin_bottom = 215.0
+margin_right = -300.0
+margin_bottom = 258.0
 custom_fonts/font = SubResource( 9 )
 text = "The server displays a 4-digit
 verification code."
@@ -796,8 +798,8 @@ align = 1
 [node name="Logo" type="Panel" parent="Screen4"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_left = -60.0
-margin_right = 60.0
+margin_left = -572.0
+margin_right = -452.0
 margin_bottom = 120.0
 custom_styles/panel = SubResource( 10 )
 
@@ -806,10 +808,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -264.5
-margin_top = -31.5
-margin_right = 264.5
-margin_bottom = 29.5
+margin_left = -773.0
+margin_top = -324.0
+margin_right = -244.0
+margin_bottom = -293.0
 custom_fonts/font = SubResource( 11 )
 text = "Please enter it below to verify that's you."
 align = 1
