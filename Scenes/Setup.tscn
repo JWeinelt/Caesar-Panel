@@ -34,7 +34,7 @@ func _on_Page2Next_pressed():
 
 
 func _on_AddressName_text_entered(new_text):
-	var port := 49800
+	var port := 49850
 	if $Screen3/UseCustomPort.pressed: port = $Screen3/UseCustomPort/PortNumber.value
 	GE.check_connection_caesar(new_text, $Screen3/UseSSL.pressed, port)
 	$Screen3/Loader.show_loading(30)
