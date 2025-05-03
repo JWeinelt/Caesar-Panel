@@ -540,8 +540,8 @@ icon = ExtResource( 2 )
 [node name="Screen1" type="Control" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_right = 1024.0
-margin_bottom = 600.0
+margin_right = 2048.0
+margin_bottom = 1200.0
 
 [node name="Header" type="Label" parent="Screen1"]
 anchor_left = 0.5
@@ -592,8 +592,8 @@ modulate = Color( 1, 1, 1, 0 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = -1024.0
-margin_right = -0.000488281
-margin_bottom = 600.0
+margin_right = 1024.0
+margin_bottom = 1200.0
 
 [node name="Header" type="Label" parent="Screen2"]
 anchor_left = 0.5
@@ -687,8 +687,8 @@ modulate = Color( 1, 1, 1, 0 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = -1024.0
-margin_right = -0.000488281
-margin_bottom = 600.0
+margin_right = 1024.0
+margin_bottom = 1200.0
 
 [node name="Header" type="Label" parent="Screen3"]
 anchor_left = 0.5
@@ -781,7 +781,8 @@ modulate = Color( 1, 1, 1, 0 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = -1024.0
-margin_bottom = 600.0
+margin_right = 1024.0
+margin_bottom = 1200.0
 
 [node name="Header" type="Label" parent="Screen4"]
 anchor_left = 0.5
