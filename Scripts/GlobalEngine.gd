@@ -1,7 +1,7 @@
 extends Node
 
 signal caesar_authenticated
-signal caesar_auth_failed
+signal caesar_auth_failed(reason)
 signal cloudnet_authenticated
 
 signal services_got(data)
@@ -50,7 +50,12 @@ func cloudnet_tk():
 
 
 func caesar():
-	return cs_settings.defaults.caesar_host
+	var url = cs_settings.defaults.caesar_host
+	if url.find(":") == -1: url = url + ":49850"
+	if not url.begins_with("http://"): url = "http://" + url
+	if not url.ends_with("/"): url = url + "/"
+	print(url)
+	return url
 
 
 func cloudnet():
@@ -94,6 +99,12 @@ func get_greeting():
 	])
 
 
+func login(username, password):
+	var p = username + ":" + password
+	var encoded = Marshalls.utf8_to_base64(p)
+	$Auth/Auth.request(caesar() + "auth", ["Authorization: Basic " + encoded], false, HTTPClient.METHOD_POST)
+
+
 func get_greeting_from_time(iso_time: String) -> String:
 	# Beispiel-Input: "2025-05-02T17:30"
 	var split_time = iso_time.split("T")
@@ -131,13 +142,19 @@ func _on_Auth_request_completed(_result, response_code, _headers, body):
 	var data = JSON.parse(body.get_string_from_utf8()).result
 	
 	if response_code == 200:
+		emit_signal("caesar_authenticated")
+		print("Auth to Caesar endpoint successful")
 		if data.useCloudNET:
 			var header = ["Authorization: Basic " + data.cloudnet.credentials]
 			$Auth/AuthCN.request("http://" + data.cloudnet.host + "/auth", header, false, HTTPClient.METHOD_POST)
 			cloud_address = "http://" + data.cloudnet.host + "/"
-			emit_signal("caesar_authenticated")
+		else:
+			get_tree().change_scene("res://Scenes/Main.tscn")
 	else:
-		emit_signal("caesar_auth_failed")
+		printerr("Unable to authenticate to Caesar endpoint")
+		printerr("Code: %s" % str(response_code))
+		printerr("Reason: %s" % str(data.reason))
+		emit_signal("caesar_auth_failed", data.reason)
 
 
 func _on_LocationService_request_completed(_result, _response_code, _headers, body):
