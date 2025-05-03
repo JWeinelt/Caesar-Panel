@@ -25,7 +25,9 @@ func _on_Overlay_mouse_exited():
 
 
 func _on_Overlay_gui_input(event):
-	pass # Replace with function body.
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == BUTTON_LEFT:
+			emit_signal(\"pressed\", entry_name)
 "
 
 [sub_resource type="StyleBoxFlat" id=1]
