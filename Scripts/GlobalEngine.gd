@@ -21,6 +21,7 @@ var cloud_address = ""
 
 var location = Vector2.ZERO
 
+var server_setup_mode = false
 
 var cs_settings = {
 	"defaults": {
@@ -100,6 +101,8 @@ func get_greeting():
 
 
 func login(username, password):
+	cs_settings.defaults.username = username
+	save_config()
 	var p = username + ":" + password
 	var encoded = Marshalls.utf8_to_base64(p)
 	$Auth/Auth.request(caesar() + "auth", ["Authorization: Basic " + encoded], false, HTTPClient.METHOD_POST)
@@ -144,6 +147,7 @@ func _on_Auth_request_completed(_result, response_code, _headers, body):
 	if response_code == 200:
 		emit_signal("caesar_authenticated")
 		print("Auth to Caesar endpoint successful")
+		server_setup_mode = data.setupMode
 		if data.useCloudNET:
 			var header = ["Authorization: Basic " + data.cloudnet.credentials]
 			$Auth/AuthCN.request("http://" + data.cloudnet.host + "/auth", header, false, HTTPClient.METHOD_POST)
