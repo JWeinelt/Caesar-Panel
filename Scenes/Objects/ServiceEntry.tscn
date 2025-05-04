@@ -1,0 +1,235 @@
+[gd_scene load_steps=19 format=2]
+
+[ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://Assets/icons/online.png" type="Texture" id=2]
+[ext_resource path="res://Assets/sidebar/user.png" type="Texture" id=3]
+[ext_resource path="res://Assets/icons/memory.png" type="Texture" id=4]
+[ext_resource path="res://Assets/icons/cpu.png" type="Texture" id=5]
+
+[sub_resource type="GDScript" id=10]
+script/source = "extends Control
+
+signal clicked(service)
+
+var data
+
+func setup(json):
+	data = json
+	var cpu = json.processSnapshot.cpuUsage * 100
+	var maxMem = json.processSnapshot.maxHeapMemory / 1024 / 1024 / 1024
+	var mem = json.processSnapshot.heapUsageMemory / 1024 / 1024 / 1024
+	
+	var task = json.configuration.serviceId.taskName
+	var service = task + json.configuration.serviceId.nameSplitter
+	service += str(json.configuration.serviceId.taskServiceId)
+	
+	var status = json.lifeCycle
+	
+	$Name.text = service
+	$Base.text = \"based on \" + task
+	$Memory/MemoryUsage.text = str(mem) + \"GB/\" + str(maxMem) + \"GB\"
+	$CPU/CPUUsage.text = str(cpu) + \"%\"
+
+
+func _on_Overlay_mouse_entered():
+	$FX.play(\"hover_on\")
+
+
+func _on_Overlay_mouse_exited():
+	$FX.play(\"hover_off\")
+
+
+func _on_Overlay_gui_input(event):
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == BUTTON_LEFT:
+			emit_signal(\"clicked\", data)
+"
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.0313726, 0.0313726, 0.133333, 1 )
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="DynamicFont" id=2]
+size = 20
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 11
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=4]
+font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxTexture" id=5]
+texture = ExtResource( 2 )
+region_rect = Rect2( 0, 0, 200, 200 )
+
+[sub_resource type="StyleBoxTexture" id=6]
+texture = ExtResource( 3 )
+region_rect = Rect2( 0, 0, 512, 512 )
+
+[sub_resource type="DynamicFont" id=7]
+font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxTexture" id=8]
+texture = ExtResource( 4 )
+region_rect = Rect2( 0, 0, 512, 512 )
+
+[sub_resource type="StyleBoxTexture" id=9]
+texture = ExtResource( 5 )
+region_rect = Rect2( 0, 0, 512, 512 )
+
+[sub_resource type="Animation" id=12]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:custom_styles/panel:bg_color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.0313726, 0.0313726, 0.133333, 1 ) ]
+}
+
+[sub_resource type="Animation" id=13]
+resource_name = "hover_off"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:custom_styles/panel:bg_color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0.101961, 0.101961, 0.203922, 1 ), Color( 0.0313726, 0.0313726, 0.133333, 1 ) ]
+}
+
+[sub_resource type="Animation" id=11]
+resource_name = "hover_on"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:custom_styles/panel:bg_color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0.0313726, 0.0313726, 0.133333, 1 ), Color( 0.101961, 0.101961, 0.203922, 1 ) ]
+}
+
+[node name="ServiceEntry" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -716.0
+margin_bottom = -512.0
+script = SubResource( 10 )
+
+[node name="Bg" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 1 )
+
+[node name="Name" type="Label" parent="."]
+margin_left = 5.0
+margin_top = 3.0
+margin_right = 63.0
+margin_bottom = 26.0
+custom_fonts/font = SubResource( 2 )
+text = "Lobby-1"
+
+[node name="Base" type="Label" parent="."]
+margin_left = 84.0
+margin_top = 13.0
+margin_right = 159.0
+margin_bottom = 28.0
+custom_colors/font_color = Color( 0.537255, 0.537255, 0.537255, 1 )
+custom_fonts/font = SubResource( 3 )
+text = "based on Lobby"
+
+[node name="Status" type="Label" parent="."]
+margin_left = 257.0
+margin_top = 5.0
+margin_right = 303.0
+margin_bottom = 28.0
+custom_colors/font_color = Color( 0.12549, 0.682353, 0, 1 )
+custom_fonts/font = SubResource( 4 )
+text = "Online"
+
+[node name="Icon" type="Panel" parent="Status"]
+margin_left = -17.0
+margin_top = 4.0
+margin_right = -2.0
+margin_bottom = 19.0
+custom_styles/panel = SubResource( 5 )
+
+[node name="Players" type="Panel" parent="."]
+margin_left = 7.0
+margin_top = 40.0
+margin_right = 27.0
+margin_bottom = 60.0
+custom_styles/panel = SubResource( 6 )
+
+[node name="PlayerAmount" type="Label" parent="Players"]
+margin_left = 23.0
+margin_top = -1.0
+margin_right = 63.0
+margin_bottom = 22.0
+custom_fonts/font = SubResource( 7 )
+text = "1/32"
+
+[node name="Memory" type="Panel" parent="."]
+margin_left = 72.0
+margin_top = 40.0
+margin_right = 92.0
+margin_bottom = 60.0
+custom_styles/panel = SubResource( 8 )
+
+[node name="MemoryUsage" type="Label" parent="Memory"]
+margin_left = 23.0
+margin_top = -1.0
+margin_right = 63.0
+margin_bottom = 22.0
+custom_colors/font_color = Color( 0.439216, 0.439216, 0.439216, 1 )
+custom_fonts/font = SubResource( 7 )
+text = "1.5GB/2GB"
+
+[node name="CPU" type="Panel" parent="."]
+margin_left = 178.0
+margin_top = 40.0
+margin_right = 198.0
+margin_bottom = 60.0
+custom_styles/panel = SubResource( 9 )
+
+[node name="CPUUsage" type="Label" parent="CPU"]
+margin_left = 23.0
+margin_top = -1.0
+margin_right = 63.0
+margin_bottom = 22.0
+custom_colors/font_color = Color( 0.439216, 0.439216, 0.439216, 1 )
+custom_fonts/font = SubResource( 7 )
+text = "49%"
+
+[node name="Overlay" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="FX" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 12 )
+anims/hover_off = SubResource( 13 )
+anims/hover_on = SubResource( 11 )
+
+[connection signal="gui_input" from="Overlay" to="." method="_on_Overlay_gui_input"]
+[connection signal="mouse_entered" from="Overlay" to="." method="_on_Overlay_mouse_entered"]
+[connection signal="mouse_exited" from="Overlay" to="." method="_on_Overlay_mouse_exited"]
