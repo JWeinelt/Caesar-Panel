@@ -8,7 +8,7 @@ script/source = "extends Control
 
 
 func _ready():
-	pass
+	$Header.text = \"Welcome back, \" + GE.cs_settings.defaults.username
 "
 
 [sub_resource type="DynamicFont" id=2]

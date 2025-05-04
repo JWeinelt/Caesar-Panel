@@ -1,9 +1,11 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=3]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold Italic.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://Assets/Customizabletheme/theme.tres" type="Theme" id=5]
+[ext_resource path="res://addons/SmoothScroll/SmoothScrollContainer.gd" type="Script" id=6]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
@@ -19,11 +21,21 @@ func _ready():
 func _on_services_received(data):
 	var amount = data.services.size()
 	$Overview/Servers/Amount.text = str(amount)
+	
+	for i in data.services:
+		var entry = load(\"res://Scenes/Objects/ServiceEntry.tscn\").instance()
+		$Details/Tabs/Services/ServiceList/Services.add_child(entry)
+		entry.connect(\"clicked\", self, \"_on_service_clicked\")
+		entry.setup(i)
 
 
 func _on_tasks_received(data):
 	var amount = data.tasks.size()
 	$Overview/Tasks/Amount.text = str(amount)
+
+
+func _on_service_clicked(service):
+	pass
 "
 
 [sub_resource type="DynamicFont" id=2]
@@ -76,6 +88,7 @@ custom_fonts/font = SubResource( 2 )
 text = "CloudNET Management"
 
 [node name="Bg1" type="Panel" parent="."]
+visible = false
 margin_left = 47.0
 margin_top = 74.0
 margin_right = 839.0
@@ -83,13 +96,22 @@ margin_bottom = 292.0
 custom_styles/panel = SubResource( 3 )
 
 [node name="Bg2" type="Panel" parent="."]
+visible = false
 margin_left = 369.0
 margin_top = 254.0
 margin_right = 839.0
 margin_bottom = 572.0
 custom_styles/panel = SubResource( 3 )
 
+[node name="Bg3" type="Panel" parent="."]
+margin_left = 47.0
+margin_top = 74.0
+margin_right = 839.0
+margin_bottom = 572.0
+custom_styles/panel = SubResource( 3 )
+
 [node name="Overview" type="Control" parent="."]
+visible = false
 margin_left = 67.0
 margin_top = 92.0
 margin_right = 368.0
@@ -152,3 +174,77 @@ margin_right = 116.0
 margin_bottom = 38.0
 custom_fonts/font = SubResource( 7 )
 text = "Overview"
+
+[node name="Details" type="Control" parent="."]
+anchor_left = 0.052
+anchor_top = 0.123
+anchor_right = 0.951
+anchor_bottom = 0.953
+margin_left = 0.0840034
+margin_top = 0.199997
+margin_right = 0.267029
+margin_bottom = 0.199951
+
+[node name="Tabs" type="TabContainer" parent="Details"]
+anchor_left = 0.015
+anchor_top = 0.014
+anchor_right = 0.981
+anchor_bottom = 0.974
+margin_left = 0.0899992
+margin_top = 0.0279999
+margin_right = 0.0859375
+margin_bottom = -0.0520325
+theme = ExtResource( 5 )
+tab_align = 0
+
+[node name="Services" type="Tabs" parent="Details/Tabs"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="ServiceList" type="ScrollContainer" parent="Details/Tabs/Services"]
+margin_right = 308.0
+margin_bottom = 443.0
+script = ExtResource( 6 )
+
+[node name="Services" type="VBoxContainer" parent="Details/Tabs/Services/ServiceList"]
+
+[node name="ServiceDetails" type="Control" parent="Details/Tabs/Services"]
+margin_left = 309.0
+margin_top = 4.0
+margin_right = 758.0
+margin_bottom = 447.0
+
+[node name="Header" type="Label" parent="Details/Tabs/Services/ServiceDetails"]
+margin_left = 5.0
+margin_top = 18.0
+margin_right = 52.0
+margin_bottom = 49.0
+text = "Lobby"
+
+[node name="Info" type="RichTextLabel" parent="Details/Tabs/Services/ServiceDetails"]
+margin_left = 8.0
+margin_top = 49.0
+margin_right = 229.0
+margin_bottom = 298.0
+bbcode_enabled = true
+bbcode_text = "Task"
+text = "Task"
+
+[node name="Tasks" type="Tabs" parent="Details/Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 38.0
+
+[node name="Groups" type="Tabs" parent="Details/Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 38.0
+
+[node name="Cluster" type="Tabs" parent="Details/Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 38.0

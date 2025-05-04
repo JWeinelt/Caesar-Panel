@@ -10,6 +10,8 @@ signal pressed(entry_name)
 export(String) var entry_name
 export(String) var icon_path
 
+export(PackedScene) var to_load
+
 func _ready():
 	$Name.text = entry_name
 	var style = StyleBoxTexture.new()

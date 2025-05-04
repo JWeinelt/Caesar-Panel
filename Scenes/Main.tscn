@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=28 format=2]
 
 [ext_resource path="res://Assets/Theme-Icons/window_close_white.png" type="Texture" id=1]
 [ext_resource path="res://Assets/Backgrounds/bg8.png" type="Texture" id=2]
@@ -6,9 +6,19 @@
 [ext_resource path="res://Scenes/Objects/SidebarListEntry.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Scenes/Tabs/CloudNET.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Scenes/Tabs/Dashboard.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Assets/fonts/CascadiaCode.ttf" type="DynamicFontData" id=7]
+[ext_resource path="res://Assets/Misc/settings.png" type="Texture" id=8]
+[ext_resource path="res://Scenes/Tabs/Mail.tscn" type="PackedScene" id=9]
+[ext_resource path="res://Scenes/Tabs/Account.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Scenes/Tabs/Support.tscn" type="PackedScene" id=12]
+[ext_resource path="res://Scenes/Tabs/Chat.tscn" type="PackedScene" id=13]
+[ext_resource path="res://Scenes/Tabs/Users.tscn" type="PackedScene" id=14]
+[ext_resource path="res://Scenes/Tabs/Files.tscn" type="PackedScene" id=15]
 
 [sub_resource type="GDScript" id=4]
 script/source = "extends Control
+
+var scenes = []
 
 func _ready():
 	get_tree().get_root().set_transparent_background(true)
@@ -16,6 +26,18 @@ func _ready():
 	
 	for i in $Sidebar/SidebarList.get_children():
 		i.connect(\"pressed\", self, \"_on_sidebar_click\")
+	
+	provide_pages()
+	_on_sidebar_click(\"Dashboard\")
+
+
+func provide_pages():
+	for i in $Sidebar/SidebarList.get_children():
+		var scene: PackedScene = i.to_load
+		var n = scene.instance()
+		$Main.add_child(n)
+		n.hide()
+		scenes.append(scene)
 
 
 func _on_Exit_pressed():
@@ -23,7 +45,19 @@ func _on_Exit_pressed():
 
 
 func _on_sidebar_click(entry):
-	pass
+	for i in $Main.get_children():
+		i.hide()
+	
+	var idx = 0
+	for j in $Sidebar/SidebarList.get_children():
+		if j.entry_name == entry:
+			print(\"found\")
+			print(scenes[idx].resource_path)
+			$Main.get_child(idx).show()
+			return
+		idx += 1
+	
+	print(\"No scene found\")
 "
 
 [sub_resource type="StyleBoxFlat" id=9]
@@ -64,10 +98,30 @@ corner_radius_top_right = 25
 corner_radius_bottom_right = 25
 corner_radius_bottom_left = 25
 
+[sub_resource type="StyleBoxFlat" id=14]
+bg_color = Color( 0.384314, 0.384314, 0.384314, 0.705882 )
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="StyleBoxEmpty" id=15]
+
+[sub_resource type="StyleBoxFlat" id=13]
+bg_color = Color( 0, 0, 0, 0 )
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
 [sub_resource type="StyleBoxFlat" id=8]
 bg_color = Color( 0.0627451, 0.0901961, 0.117647, 1 )
-corner_radius_top_left = 30
+corner_radius_top_right = 20
 corner_radius_bottom_left = 30
+
+[sub_resource type="DynamicFont" id=12]
+size = 29
+font_data = ExtResource( 7 )
 
 [node name="Main" type="Control"]
 anchor_right = 1.0
@@ -97,7 +151,19 @@ custom_styles/focus = SubResource( 7 )
 custom_styles/normal = SubResource( 3 )
 icon = ExtResource( 1 )
 
+[node name="Settings" type="Button" parent="."]
+margin_left = 16.0
+margin_top = 7.0
+margin_right = 53.0
+margin_bottom = 35.0
+custom_styles/hover = SubResource( 14 )
+custom_styles/focus = SubResource( 15 )
+custom_styles/normal = SubResource( 13 )
+icon = ExtResource( 8 )
+icon_align = 1
+
 [node name="Sidebar" type="Control" parent="."]
+margin_top = 52.0
 margin_right = 141.0
 margin_bottom = 600.0
 
@@ -120,6 +186,7 @@ margin_right = 141.0
 margin_bottom = 50.0
 entry_name = "Dashboard"
 icon_path = "dashboard"
+to_load = ExtResource( 6 )
 
 [node name="Servers" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
@@ -127,8 +194,9 @@ anchor_bottom = 0.0
 margin_top = 54.0
 margin_right = 141.0
 margin_bottom = 104.0
-entry_name = "Servers"
+entry_name = "CloudNET"
 icon_path = "servers"
+to_load = ExtResource( 5 )
 
 [node name="Files" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
@@ -138,6 +206,7 @@ margin_right = 141.0
 margin_bottom = 158.0
 entry_name = "Files"
 icon_path = "folder"
+to_load = ExtResource( 15 )
 
 [node name="Support" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
@@ -147,6 +216,7 @@ margin_right = 141.0
 margin_bottom = 212.0
 entry_name = "Support"
 icon_path = "headset"
+to_load = ExtResource( 12 )
 
 [node name="Chat" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
@@ -156,6 +226,7 @@ margin_right = 141.0
 margin_bottom = 266.0
 entry_name = "Chat"
 icon_path = "chat"
+to_load = ExtResource( 13 )
 
 [node name="Users" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
@@ -165,6 +236,7 @@ margin_right = 141.0
 margin_bottom = 320.0
 entry_name = "Users"
 icon_path = "users"
+to_load = ExtResource( 14 )
 
 [node name="Account" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
@@ -174,6 +246,7 @@ margin_right = 141.0
 margin_bottom = 374.0
 entry_name = "Account"
 icon_path = "account"
+to_load = ExtResource( 10 )
 
 [node name="Mail" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
@@ -183,15 +256,33 @@ margin_right = 141.0
 margin_bottom = 428.0
 entry_name = "Mails"
 icon_path = "mail"
+to_load = ExtResource( 9 )
 
 [node name="Main" type="Control" parent="."]
 margin_left = 141.0
 margin_right = 1025.0
 margin_bottom = 603.0
 
-[node name="Dashboard" parent="Main" instance=ExtResource( 6 )]
-
-[node name="CloudNET" parent="Main" instance=ExtResource( 5 )]
+[node name="Tour" type="Control" parent="."]
 visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 164.0
+margin_top = 69.0
+margin_right = -71.0
+margin_bottom = -47.0
+
+[node name="Bg1" type="ColorRect" parent="Tour"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 0.419608 )
+
+[node name="Header" type="Label" parent="Tour"]
+margin_left = 25.0
+margin_top = 21.0
+margin_right = 331.0
+margin_bottom = 55.0
+custom_fonts/font = SubResource( 12 )
+text = "Welcome to Caesar!"
 
 [connection signal="pressed" from="Exit" to="." method="_on_Exit_pressed"]
