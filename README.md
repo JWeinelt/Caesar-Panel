@@ -4,7 +4,7 @@
 This repo contains the frontend panel of **Caesar.**
 
 > [!WARNING]
-> This software won't work alone. You need a full software pack for the **Caesar Client.** Head to [Jenkins](https://jenkins.caesarnet.cloud) to download it.
+> This software won't work alone. You need a full software pack for the **Caesar Client.** Download it from [Releases](https://github.com/JWeinelt/Caesar-Panel/releases).
 
 ## 📥 Download
 As this software won't work standalone, please download a full pack from [Jenkins](https://jenkins.caesarnet.cloud).
