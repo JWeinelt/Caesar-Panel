@@ -37,7 +37,8 @@ var cs_settings = {
 		"useSSL": false,
 		"used_background": "1",
 		"blur_background": true,
-		"blue_rate": 3.0
+		"blur_rate": 3.0,
+		"own_background_file": ""
 	},
 	"client_version": "0.0.1",
 	"clientSettings": {
