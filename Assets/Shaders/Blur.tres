@@ -1,0 +1,25 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type canvas_item;
+render_mode unshaded;
+
+uniform float blur_size : hint_range(0.0, 20.0) = 4.0;
+
+void fragment() {
+    vec4 col = vec4(0.0);
+    vec2 tex_offset = vec2(SCREEN_PIXEL_SIZE.x * blur_size, 0.0);
+
+    col += texture(TEXTURE, UV + tex_offset * -4.0) * 0.05;
+    col += texture(TEXTURE, UV + tex_offset * -3.0) * 0.09;
+    col += texture(TEXTURE, UV + tex_offset * -2.0) * 0.12;
+    col += texture(TEXTURE, UV + tex_offset * -1.0) * 0.15;
+    col += texture(TEXTURE, UV)                    * 0.16;
+    col += texture(TEXTURE, UV + tex_offset *  1.0) * 0.15;
+    col += texture(TEXTURE, UV + tex_offset *  2.0) * 0.12;
+    col += texture(TEXTURE, UV + tex_offset *  3.0) * 0.09;
+    col += texture(TEXTURE, UV + tex_offset *  4.0) * 0.05;
+
+    COLOR = col;
+}
+"
