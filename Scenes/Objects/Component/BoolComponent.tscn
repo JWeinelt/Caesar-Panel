@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
+[ext_resource path="res://Scenes/Objects/Component/BoolComponent.gd" type="Script" id=2]
+
+[node name="BoolComponent" type="Label"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 11.0
+margin_right = -970.0
+margin_bottom = -544.0
+rect_min_size = Vector2( 0, 45 )
+theme = ExtResource( 1 )
+text = "dawda"
+script = ExtResource( 2 )
+
+[node name="Check" type="CheckButton" parent="."]
+margin_left = 60.0
+margin_top = -5.0
+margin_right = 146.0
+margin_bottom = 28.0
+
+[connection signal="toggled" from="Check" to="." method="_on_Check_toggled"]
