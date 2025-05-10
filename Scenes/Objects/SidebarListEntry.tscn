@@ -92,17 +92,16 @@ region_rect = Rect2( 0, 0, 512, 512 )
 
 [node name="SidebarListEntry" type="Control"]
 anchor_right = 0.138
-anchor_bottom = 0.067
+anchor_bottom = 0.083
 margin_right = -0.312012
-margin_bottom = -0.200001
+margin_bottom = -9.8
 rect_min_size = Vector2( 141, 50 )
 script = SubResource( 2 )
 
 [node name="Bg" type="Panel" parent="."]
 modulate = Color( 1, 1, 1, 0 )
 anchor_right = 1.0
-anchor_bottom = 1.0
-margin_bottom = -10.0
+anchor_bottom = 0.8
 custom_styles/panel = SubResource( 1 )
 
 [node name="FX" type="AnimationPlayer" parent="."]
@@ -111,17 +110,22 @@ anims/fade_in = SubResource( 4 )
 anims/fade_out = SubResource( 5 )
 
 [node name="Name" type="Label" parent="."]
-margin_left = 51.0
-margin_top = 13.0
-margin_right = 136.0
-margin_bottom = 27.0
+anchor_left = 0.362
+anchor_top = 0.26
+anchor_right = 0.362
+anchor_bottom = 0.26
+margin_left = -0.0420036
+margin_right = 84.958
+margin_bottom = 14.0
 text = "Dtest"
 
 [node name="Icon" type="Panel" parent="."]
-margin_left = 7.0
+anchor_left = 0.05
+anchor_right = 0.05
+anchor_bottom = 0.78
+margin_left = -0.0500002
 margin_top = -1.0
-margin_right = 47.0
-margin_bottom = 39.0
+margin_right = 39.95
 custom_styles/panel = SubResource( 6 )
 
 [node name="Overlay" type="Control" parent="."]

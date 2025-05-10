@@ -1,6 +1,7 @@
-[gd_resource type="Theme" load_steps=71 format=2]
+[gd_resource type="Theme" load_steps=73 format=2]
 
 [ext_resource path="res://themes/windows_10_dark/assets/fonts/segoeUI/Segoe UI.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=2]
 
 [sub_resource type="StyleBoxFlat" id=75]
 bg_color = Color( 0.192157, 0.192157, 0.192157, 0.462745 )
@@ -59,6 +60,9 @@ bg_color = Color( 0, 0, 0, 0.713726 )
 [sub_resource type="StyleBoxEmpty" id=16]
 
 [sub_resource type="StyleBoxEmpty" id=17]
+
+[sub_resource type="DynamicFont" id=76]
+font_data = ExtResource( 2 )
 
 [sub_resource type="StyleBoxFlat" id=20]
 content_margin_top = 10.0
@@ -688,7 +692,7 @@ FileDialog/icons/parent_folder = null
 FileDialog/icons/reload = null
 FileDialog/icons/toggle_hidden = null
 Fonts/fonts/large = null
-Fonts/fonts/normal = null
+Fonts/fonts/normal = SubResource( 76 )
 GraphEdit/colors/activity = Color( 0, 0, 0, 1 )
 GraphEdit/colors/grid_major = Color( 0, 0, 0, 1 )
 GraphEdit/colors/grid_minor = Color( 0, 0, 0, 1 )

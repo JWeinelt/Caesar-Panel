@@ -165,6 +165,7 @@ _global_script_class_icons={
 [application]
 
 config/name="CaesarPanelUniversal"
+run/main_scene="res://Scenes/Login.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Caesar"
 run/low_processor_mode=true
@@ -172,13 +173,13 @@ boot_splash/show_image=false
 boot_splash/bg_color=Color( 0.0509804, 0.0392157, 0.0392157, 0.0392157 )
 config/icon="res://Assets/logo.png"
 config/windows_native_icon="res://Assets/favicon.ico"
-config/auto_accept_quit=false
 config/quit_on_go_back=false
 
 [autoload]
 
 CN="*res://Scripts/CloudNET.gd"
 GE="*res://Scripts/GlobalEngine.tscn"
+JsonDataParser="*res://Scripts/JsonDataParser.gd"
 
 [display]
 
@@ -186,8 +187,6 @@ window/size/borderless=true
 window/per_pixel_transparency/allowed=true
 window/per_pixel_transparency/enabled=true
 window/energy_saving/keep_screen_on=false
-window/stretch/mode="2d"
-window/stretch/aspect="expand"
 
 [editor]
 

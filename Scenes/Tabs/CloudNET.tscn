@@ -12,10 +12,13 @@ script/source = "extends Control
 
 
 func _ready():
-	GE.connect(\"services_got\", self, \"_on_services_received\")
-	GE.connect(\"tasks_got\", self, \"_on_tasks_received\")
-	GE.get_services()
-	GE.get_tasks()
+	if GE.enable_cloud:
+		GE.connect(\"services_got\", self, \"_on_services_received\")
+		GE.connect(\"tasks_got\", self, \"_on_tasks_received\")
+		GE.get_services()
+		GE.get_tasks()
+	else:
+		print(\"CloudNET not enabled, skipping data fetching.\")
 
 
 func _on_services_received(data):
@@ -104,10 +107,14 @@ margin_bottom = 572.0
 custom_styles/panel = SubResource( 3 )
 
 [node name="Bg3" type="Panel" parent="."]
-margin_left = 47.0
-margin_top = 74.0
-margin_right = 839.0
-margin_bottom = 572.0
+anchor_left = 0.053
+anchor_top = 0.123
+anchor_right = 0.95
+anchor_bottom = 0.953
+margin_left = 0.201
+margin_top = 0.199997
+margin_right = 0.150024
+margin_bottom = 0.199951
 custom_styles/panel = SubResource( 3 )
 
 [node name="Overview" type="Control" parent="."]
@@ -203,30 +210,53 @@ anchor_bottom = 1.0
 margin_top = 30.0
 
 [node name="ServiceList" type="ScrollContainer" parent="Details/Tabs/Services"]
-margin_right = 308.0
-margin_bottom = 443.0
+anchor_right = 0.402
+anchor_bottom = 0.989
+margin_right = -0.333954
+margin_bottom = -0.0719299
 script = ExtResource( 6 )
 
 [node name="Services" type="VBoxContainer" parent="Details/Tabs/Services/ServiceList"]
 
+[node name="ServiceList2" type="ScrollContainer" parent="Details/Tabs/Services"]
+anchor_right = 0.402
+anchor_bottom = 0.989
+margin_right = -0.333954
+margin_bottom = -0.0719299
+script = ExtResource( 6 )
+
+[node name="Services" type="VBoxContainer" parent="Details/Tabs/Services/ServiceList2"]
+
 [node name="ServiceDetails" type="Control" parent="Details/Tabs/Services"]
-margin_left = 309.0
-margin_top = 4.0
-margin_right = 758.0
-margin_bottom = 447.0
+anchor_left = 0.403
+anchor_top = 0.009
+anchor_right = 0.988
+anchor_bottom = 0.998
+margin_left = -0.100983
+margin_top = -0.0319996
+margin_right = 0.204102
+margin_bottom = -0.103912
 
 [node name="Header" type="Label" parent="Details/Tabs/Services/ServiceDetails"]
-margin_left = 5.0
-margin_top = 18.0
-margin_right = 52.0
-margin_bottom = 49.0
+anchor_left = 0.011
+anchor_top = 0.041
+anchor_right = 0.011
+anchor_bottom = 0.041
+margin_left = 0.0609994
+margin_top = -0.163
+margin_right = 47.061
+margin_bottom = 30.837
 text = "Lobby"
 
 [node name="Info" type="RichTextLabel" parent="Details/Tabs/Services/ServiceDetails"]
-margin_left = 8.0
-margin_top = 49.0
-margin_right = 229.0
-margin_bottom = 298.0
+anchor_left = 0.018
+anchor_top = 0.111
+anchor_right = 0.51
+anchor_bottom = 0.673
+margin_left = -0.0820007
+margin_top = -0.173004
+margin_right = 0.00997925
+margin_bottom = -0.139008
 bbcode_enabled = true
 bbcode_text = "Task"
 text = "Task"

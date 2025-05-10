@@ -12,16 +12,23 @@ signal groups_got(data)
 signal caesar_checked_connection(is_setup)
 signal code_validated(valid)
 
+signal server_config_loaded(data)
+signal server_config_load_fail
+signal config_server_change_ok
+
 signal loaded_weather
 
 var caesar_auth = ""
 var cloudnet_auth = ""
 
 var cloud_address = ""
+var enable_cloud = false
 
 var location = Vector2.ZERO
 
 var server_setup_mode = false
+
+var config_changed_keys = []
 
 var cs_settings = {
 	"defaults": {
@@ -30,8 +37,13 @@ var cs_settings = {
 		"useSSL": false,
 		"used_background": "1",
 		"blur_background": true,
+		"blue_rate": 3.0
 	},
 	"client_version": "0.0.1",
+	"clientSettings": {
+		"useBorderlessWindow": false,
+		"useVSync": true,
+	}
 }
 
 func _ready():
@@ -60,6 +72,8 @@ func caesar():
 
 
 func cloudnet():
+	if not cloud_address.begins_with("http://") and not cloud_address.begins_with("https://"):
+		cloud_address = "http://" + cloud_address
 	return cloud_address
 
 
@@ -148,11 +162,14 @@ func _on_Auth_request_completed(_result, response_code, _headers, body):
 		emit_signal("caesar_authenticated")
 		print("Auth to Caesar endpoint successful")
 		server_setup_mode = data.setupMode
+		caesar_auth = data.token
 		if data.useCloudNET:
 			var header = ["Authorization: Basic " + data.cloudnet.credentials]
 			$Auth/AuthCN.request("http://" + data.cloudnet.host + "/auth", header, false, HTTPClient.METHOD_POST)
 			cloud_address = "http://" + data.cloudnet.host + "/"
+			enable_cloud = true
 		else:
+			enable_cloud = false
 			get_tree().change_scene("res://Scenes/Main.tscn")
 	else:
 		printerr("Unable to authenticate to Caesar endpoint")
@@ -169,6 +186,43 @@ func _on_LocationService_request_completed(_result, _response_code, _headers, bo
 		long, lat
 	])
 	location = Vector2(long, lat)
+
+
+func get_server_config():
+	$Management/GetConfig.request(caesar() + "config", caesar_tk())
+
+
+func send_config_change(data):
+	for i in config_changed_keys:
+		var val = data.get(i)
+		var body = {
+			"key": i,
+			"value": val,
+			"type": get_value_type(val)
+		}
+		var sender = HTTPRequest.new()
+		$Management.add_child(sender)
+		sender.connect("request_completed", self, "_on_SendConfigChange_request_completed")
+		sender.request(caesar() + "config", caesar_tk(), false, HTTPClient.METHOD_PUT, JSON.print(body))
+
+
+func send_config_change_indiv(key, val):
+		var body = {
+			"key": key,
+			"value": val,
+			"type": get_value_type(val)
+		}
+		var sender = HTTPRequest.new()
+		$Management.add_child(sender)
+		sender.connect("request_completed", self, "_on_SendConfigChange_request_completed")
+		sender.request(caesar() + "config", caesar_tk(), false, HTTPClient.METHOD_PUT, JSON.print(body))
+
+
+func get_value_type(val):
+	if val is int: return "INT"
+	if val is String: return "STRING"
+	if val is bool: return "BOOLEAN"
+	else: return "UNKNOWN"
 
 
 func _on_WeatherGetter_request_completed(_result, _response_code, _headers, body):
@@ -227,3 +281,18 @@ func _on_ValidateCode_request_completed(_result, response_code, _headers, body):
 	var data = JSON.parse(body.get_string_from_utf8()).result
 	if response_code != 200: return
 	emit_signal("code_validated", data.success)
+
+
+func _on_GetConfig_request_completed(_result, response_code, _headers, body):
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	if response_code == 200:
+		emit_signal("server_config_loaded", body.get_string_from_utf8())
+	else: 
+		emit_signal("server_config_load_fail")
+		printerr("Server configuration could not be loaded: " + str(response_code))
+
+
+func _on_SendConfigChange_request_completed(_result, response_code, _headers, _body):
+	if response_code == 200: 
+		print("changes saved")
+		emit_signal("config_server_change_ok")
