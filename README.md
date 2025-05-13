@@ -3,9 +3,6 @@
 
 This repo contains the frontend panel of **Caesar.**
 
-> [!WARNING]
-> This software won't work alone. You need a full software pack for the **Caesar Client.** Download it from [Releases](https://github.com/JWeinelt/Caesar-Panel/releases).
-
 ## 📥 Getting started
 
 ## Download
