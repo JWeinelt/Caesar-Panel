@@ -6,7 +6,7 @@ This repo contains the frontend panel of **Caesar.**
 ## 📥 Getting started
 
 ## Download
-As this software won't work standalone, please download a full pack from [Jenkins](https://jenkins.caesarnet.cloud).
+As this software won't work standalone, please download a full pack from [the main repository](https://github.com/JWeinelt/Caesar/releases).
 
 ## Requirements
 - Java 17 or newer
