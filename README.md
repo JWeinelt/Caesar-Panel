@@ -21,3 +21,11 @@ The Caesar panel always comes with the so-called **Caesar Worker.** The worker c
 
 ## In Germany we say: Support ist kein Mord (Support is no murder)!
 You are welcome to support this project by contributing or donating.
+
+
+## ❤️ These amazing people make Caesar big!
+
+<a href="https://github.com/FireAnimationStudios "><img src="https://github.com/FireAnimationStudios.png" width="50" height="50" alt="@FireAnimationStudios "/></a>
+<a href="https://github.com/PhastixTV"><img src="https://github.com/PhastixTV.png" width="50" height="50" alt="@PhastixTV"/></a>
+<a href="https://github.com/LeMichiii"><img src="https://github.com/LeMichiii.png" width="50" height="50" alt="@LeMichiii"/></a>
+<a href="https://github.com/ProJakob"><img src="https://github.com/ProJakob.png" width="50" height="50" alt="@ProJakob"/></a>
