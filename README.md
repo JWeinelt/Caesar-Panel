@@ -4,7 +4,7 @@
 This repo contains the frontend panel of **Caesar.**
 
 ## 📥 Download
-As this software won't work standalone, please download a full pack from [the main repository](https://github.com/JWeinelt/Caesar/releases).
+You will find a full download [at the Releases](https://github.com/JWeinelt/Caesar-Panel/releases).
 
 ## ⚙️ Requirements
 - Java 17 or newer
