@@ -2,7 +2,7 @@
 ##
 ## Applies velocity based momentum and "overdrag"
 ## functionality to a ScrollContainer
-tool
+#tool
 extends ScrollContainer
 class_name SmoothScrollContainer
 

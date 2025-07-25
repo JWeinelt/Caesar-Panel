@@ -180,6 +180,7 @@ config/quit_on_go_back=false
 CN="*res://Scripts/CloudNET.gd"
 GE="*res://Scripts/GlobalEngine.tscn"
 JsonDataParser="*res://Scripts/JsonDataParser.gd"
+DataLoader="*res://Scripts/DataLoader.tscn"
 
 [display]
 
