@@ -1,0 +1,46 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node
+
+var ws: WebSocketClient = null
+
+func _ready():
+	ws = WebSocketClient.new()
+	ws.connect(\"connection_established\", self, \"_on_conn_ok\")
+	ws.connect(\"data_received\", self, \"_on_data_received\")
+	ws.connect_to_url(\"http://localhost:48003\")
+
+
+func _process(delta):
+	if ws != null: ws.poll()
+
+
+func _on_conn_ok(protocol):
+	var auth = {
+		\"type\": \"AUTHENTICATE\",
+		\"myID\": GE.user_id,
+		\"myVersion\": GE.client_version
+	}
+	send_message(JSON.print(auth))
+
+
+func _on_data_received():
+	var message := ws.get_peer(1).get_packet().get_string_from_utf8()
+	var vm = JSON.parse(message).result
+	if vm.has(\"type\"):
+		var type = vm.get(\"type\")
+		match type:
+			\"HANDSHAKE\":
+				var updateAvailable = vm.get(\"updateAvailable\")
+				if updateAvailable: print(\"Update available\")
+
+
+func send_message(message):
+	var err = ws.get_peer(1).put_packet(message.to_utf8())
+	if err != OK:
+		printerr(\"Problem while sending message via WebSocket (Console): \" + str(err))
+"
+
+[node name="ClientLinkSocket" type="Node"]
+script = SubResource( 1 )

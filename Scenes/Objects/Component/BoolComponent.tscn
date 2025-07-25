@@ -19,5 +19,6 @@ margin_left = 60.0
 margin_top = -5.0
 margin_right = 146.0
 margin_bottom = 28.0
+flat = true
 
 [connection signal="toggled" from="Check" to="." method="_on_Check_toggled"]

@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Scripts/ScriptPartsUI/Background.gd" type="Script" id=1]
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Control
+
+"
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.11002, 0.120717, 0.147461, 1 )
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
+
+[node name="DashboardCard" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -679.0
+margin_bottom = -390.0
+rect_min_size = Vector2( 345, 210 )
+script = SubResource( 2 )
+
+[node name="Bg" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 1 )

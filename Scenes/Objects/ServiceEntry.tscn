@@ -13,11 +13,24 @@ signal clicked(service)
 
 var data
 
+
+func _ready():
+	var original_stylebox = $Bg.get_stylebox(\"panel\") as StyleBoxFlat
+	var unique_stylebox = original_stylebox.duplicate()
+	$Bg.add_stylebox_override(\"panel\", unique_stylebox)
+	$Overlay.show()
+
+
 func setup(json):
 	data = json
 	var cpu = json.processSnapshot.cpuUsage * 100
 	var maxMem = json.processSnapshot.maxHeapMemory / 1024 / 1024 / 1024
 	var mem = json.processSnapshot.heapUsageMemory / 1024 / 1024 / 1024
+	
+	maxMem = round(maxMem * 100) / 100
+	mem = round(mem * 100) / 100
+	
+	cpu = round(cpu / 100)
 	
 	var task = json.configuration.serviceId.taskName
 	var service = task + json.configuration.serviceId.nameSplitter
@@ -28,7 +41,29 @@ func setup(json):
 	$Name.text = service
 	$Base.text = \"based on \" + task
 	$Memory/MemoryUsage.text = str(mem) + \"GB/\" + str(maxMem) + \"GB\"
-	$CPU/CPUUsage.text = str(cpu) + \"%\"
+	$CPU/CPUUsage.text = str(str(cpu).split(\".\")[0]) + \"%\"
+	if cpu == -100: $CPU.hide()
+	if $Memory/MemoryUsage.text == \"-0GB/-0GB\": $Memory.hide()
+	
+	$Players/PlayerAmount.text = str(json.properties.get(\"Online-Count\")) + \"/\" + str(json.properties.get(\"Max-Players\"))
+	
+	var fontStatus = $Status.get_font(\"font\")
+	var text_size = fontStatus.get_string_size(status)
+	$Status.rect_position.x = rect_size.x - text_size.x - 20
+	
+	var baseFont = $Name.get_font(\"font\")
+	var baseSize = baseFont.get_string_size(service)
+	$Base.rect_position.x = baseSize.x + 20
+	
+	$Status.text = status
+	
+	match status:
+		\"PREPARED\":
+			$Status.set(\"custom_colors/font_color\", Color(0.945313, 0.789386, 0.077545))
+			$Status/Icon.get(\"custom_styles/panel\").texture = load(\"res://Assets/icons/prepared.png\")
+		\"RUNNING\":
+			$Status.set(\"custom_colors/font_color\", Color(0.12549, 0.682353, 0))
+			$Status/Icon.get(\"custom_styles/panel\").texture = load(\"res://Assets/icons/online.png\")
 
 
 func _on_Overlay_mouse_entered():
@@ -130,10 +165,10 @@ tracks/0/keys = {
 }
 
 [node name="ServiceEntry" type="Control"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_right = -716.0
-margin_bottom = -512.0
+anchor_right = 0.301
+margin_right = -0.22403
+margin_bottom = 88.0
+rect_min_size = Vector2( 308, 88 )
 script = SubResource( 10 )
 
 [node name="Bg" type="Panel" parent="."]
@@ -159,19 +194,19 @@ custom_fonts/font = SubResource( 3 )
 text = "based on Lobby"
 
 [node name="Status" type="Label" parent="."]
-margin_left = 257.0
-margin_top = 5.0
-margin_right = 303.0
-margin_bottom = 28.0
+margin_left = 226.0
+margin_top = 60.0
+margin_right = 272.0
+margin_bottom = 83.0
 custom_colors/font_color = Color( 0.12549, 0.682353, 0, 1 )
 custom_fonts/font = SubResource( 4 )
 text = "Online"
 
 [node name="Icon" type="Panel" parent="Status"]
 margin_left = -17.0
-margin_top = 4.0
+margin_top = 9.0
 margin_right = -2.0
-margin_bottom = 19.0
+margin_bottom = 24.0
 custom_styles/panel = SubResource( 5 )
 
 [node name="Players" type="Panel" parent="."]
@@ -206,9 +241,9 @@ custom_fonts/font = SubResource( 7 )
 text = "1.5GB/2GB"
 
 [node name="CPU" type="Panel" parent="."]
-margin_left = 178.0
+margin_left = 220.0
 margin_top = 40.0
-margin_right = 198.0
+margin_right = 240.0
 margin_bottom = 60.0
 custom_styles/panel = SubResource( 9 )
 

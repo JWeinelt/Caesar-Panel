@@ -1,0 +1,6 @@
+[gd_scene format=2]
+
+[node name="Control" type="Control"]
+anchor_right = 0.115
+anchor_bottom = 0.08
+margin_right = 0.239998

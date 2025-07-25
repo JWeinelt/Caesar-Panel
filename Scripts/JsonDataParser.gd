@@ -5,30 +5,30 @@ signal component_value_change(value, data_name)
 var active_data = {}
 
 
-func parse(json: String, data_name: String, node_to_attach_components):
-	var dir: Dictionary = JSON.parse(json).result
-	for key in dir.keys():
-		if dir.get(key) is int:
-			var comp = create_int_component(key, dir.get(key))
+func parse(json: Dictionary, data_name: String, node_to_attach_components):
+	for key in json.keys():
+		if key.begins_with("_"): continue
+		if json.get(key) is int:
+			var comp = create_int_component(key, json.get(key))
 			comp.data_name = data_name
 			comp.connect("value_changed", self, "_on_component_value_change")
 			attach_component(node_to_attach_components, comp)
-		if dir.get(key) is String:
-			var comp = create_string_component(key, dir.get(key))
+		if json.get(key) is String:
+			var comp = create_string_component(key, json.get(key))
 			comp.data_name = data_name
 			comp.connect("value_changed", self, "_on_component_value_change")
 			attach_component(node_to_attach_components, comp)
-		if dir.get(key) is bool:
-			var comp = create_bool_component(key, dir.get(key))
+		if json.get(key) is bool:
+			var comp = create_bool_component(key, json.get(key))
 			comp.data_name = data_name
 			comp.connect("value_changed", self, "_on_component_value_change")
 			attach_component(node_to_attach_components, comp)
 		
-		if dir.get(key) is Dictionary:
+		if json.get(key) is Dictionary:
 			var header = create_component_header(key)
 			header.header_name = key
 			attach_component(node_to_attach_components, header)
-			parse(JSON.print(dir.get(key)), data_name, header)
+			parse(json.get(key), data_name, header)
 			header.adjust_y()
 
 

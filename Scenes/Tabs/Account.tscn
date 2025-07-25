@@ -1,7 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://Scripts/ScriptPartsUI/Background_CR.gd" type="Script" id=3]
+[ext_resource path="res://Assets/fonts/Segoe UI Italic.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=5]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
@@ -15,6 +18,19 @@ func _ready():
 size = 33
 font_data = ExtResource( 2 )
 
+[sub_resource type="DynamicFont" id=3]
+size = 21
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=4]
+font_data = ExtResource( 4 )
+
+[sub_resource type="DynamicFont" id=5]
+font_data = ExtResource( 5 )
+
+[sub_resource type="DynamicFont" id=6]
+font_data = ExtResource( 4 )
+
 [node name="Account" type="Control"]
 anchor_right = 0.862
 anchor_bottom = 1.0
@@ -22,37 +38,145 @@ margin_right = 0.311951
 theme = ExtResource( 1 )
 script = SubResource( 1 )
 __meta__ = {
-"_edit_horizontal_guides_": [ 60.0, 270.0, 510.0, 300.0 ],
-"_edit_vertical_guides_": [ 883.0, 56.0, 401.0, 481.0, 826.0 ]
+"_edit_horizontal_guides_": [ 60.0, 510.0 ],
+"_edit_vertical_guides_": [ 443.0, 885.0 ]
 }
 
 [node name="Header" type="Label" parent="."]
 margin_right = 881.0
 margin_bottom = 45.0
 custom_fonts/font = SubResource( 2 )
-text = "Welcome back"
+text = "Your account"
 align = 1
 
-[node name="Dash1" type="Control" parent="."]
-margin_left = 56.0
-margin_top = 60.0
-margin_right = 401.0
-margin_bottom = 270.0
+[node name="Security" type="Control" parent="."]
+margin_top = 61.0
+margin_right = 444.0
+margin_bottom = 293.0
 
-[node name="Dash2" type="Control" parent="."]
-margin_left = 481.0
-margin_top = 60.0
-margin_right = 826.0
-margin_bottom = 270.0
+[node name="Bg" type="ColorRect" parent="Security"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.120117, 0.139369, 0.1875, 1 )
+script = ExtResource( 3 )
 
-[node name="Dash3" type="Control" parent="."]
-margin_left = 481.0
-margin_top = 300.0
-margin_right = 826.0
+[node name="Header" type="Label" parent="Security"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -220.0
+margin_right = 220.0
+margin_bottom = 29.0
+custom_fonts/font = SubResource( 3 )
+text = "Security"
+align = 1
+
+[node name="ChangePW" type="Label" parent="Security"]
+margin_left = 15.0
+margin_top = 43.0
+margin_right = 139.0
+margin_bottom = 66.0
+custom_fonts/font = SubResource( 4 )
+text = "Change password"
+
+[node name="OldPW" type="LineEdit" parent="Security/ChangePW"]
+margin_left = 146.0
+margin_top = -5.0
+margin_right = 385.0
+margin_bottom = 30.0
+placeholder_text = "Enter your current password"
+caret_blink = true
+
+[node name="NewPW1" type="LineEdit" parent="Security/ChangePW"]
+margin_left = 146.0
+margin_top = 40.0
+margin_right = 385.0
+margin_bottom = 75.0
+placeholder_text = "New password"
+caret_blink = true
+
+[node name="NewPW2" type="LineEdit" parent="Security/ChangePW"]
+margin_left = 146.0
+margin_top = 84.0
+margin_right = 385.0
+margin_bottom = 119.0
+placeholder_text = "Repeat password"
+caret_blink = true
+
+[node name="ChangePassword" type="Button" parent="Security/ChangePW"]
+margin_left = 147.0
+margin_top = 138.0
+margin_right = 281.0
+margin_bottom = 171.0
+text = "Change password"
+
+[node name="ErrorLabel" type="Label" parent="Security/ChangePW"]
+margin_top = 33.0
+margin_right = 40.0
+margin_bottom = 56.0
+custom_colors/font_color = Color( 1, 0, 0, 1 )
+custom_fonts/font = SubResource( 5 )
+
+[node name="Notifications" type="Control" parent="."]
+margin_top = 296.0
+margin_right = 444.0
 margin_bottom = 510.0
 
-[node name="Dash4" type="Control" parent="."]
-margin_left = 56.0
-margin_top = 300.0
-margin_right = 401.0
-margin_bottom = 510.0
+[node name="Bg" type="ColorRect" parent="Notifications"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.120117, 0.139369, 0.1875, 1 )
+script = ExtResource( 3 )
+
+[node name="Header" type="Label" parent="Notifications"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -220.0
+margin_right = 220.0
+margin_bottom = 29.0
+custom_fonts/font = SubResource( 3 )
+text = "Notifications"
+align = 1
+
+[node name="InfoNotify" type="Label" parent="Notifications"]
+margin_left = 8.0
+margin_top = 34.0
+margin_right = 131.0
+margin_bottom = 57.0
+custom_fonts/font = SubResource( 6 )
+text = "Notify me, when..."
+
+[node name="NewTicketNotify" type="CheckButton" parent="Notifications"]
+margin_left = 6.0
+margin_top = 65.0
+margin_right = 244.0
+margin_bottom = 98.0
+text = "a new ticket is created"
+flat = true
+
+[node name="NTNType" type="OptionButton" parent="Notifications/NewTicketNotify" groups=["type_selector"]]
+margin_left = 253.0
+margin_top = 4.0
+margin_right = 430.0
+margin_bottom = 37.0
+rect_scale = Vector2( 0.7, 0.7 )
+text = "Select..."
+items = [ "Select...", null, true, 0, null, "E-Mail", null, false, 1, null, "Caesar", null, false, 2, null, "Discord", null, false, 3, null ]
+selected = 0
+
+[node name="AssignTicketNotify" type="CheckButton" parent="Notifications"]
+margin_left = 6.0
+margin_top = 103.0
+margin_right = 245.0
+margin_bottom = 136.0
+text = "a ticket got assigned to me"
+flat = true
+
+[node name="ATType" type="OptionButton" parent="Notifications/AssignTicketNotify" groups=["type_selector"]]
+margin_left = 253.0
+margin_top = 6.0
+margin_right = 430.0
+margin_bottom = 39.0
+rect_scale = Vector2( 0.7, 0.7 )
+text = "Select..."
+items = [ "Select...", null, true, 0, null, "E-Mail", null, false, 1, null, "Caesar", null, false, 2, null, "Discord", null, false, 3, null ]
+selected = 0

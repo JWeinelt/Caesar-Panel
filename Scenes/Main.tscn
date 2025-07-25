@@ -1,10 +1,9 @@
-[gd_scene load_steps=40 format=2]
+[gd_scene load_steps=42 format=2]
 
 [ext_resource path="res://Assets/Theme-Icons/window_close_white.png" type="Texture" id=1]
-[ext_resource path="res://Assets/Backgrounds/bg8.png" type="Texture" id=2]
-[ext_resource path="res://Assets/Shaders/Rounded_Corners.tres" type="Shader" id=3]
+[ext_resource path="res://Assets/Backgrounds/non_blur/bg1.png" type="Texture" id=2]
 [ext_resource path="res://Scenes/Objects/SidebarListEntry.tscn" type="PackedScene" id=4]
-[ext_resource path="res://Scenes/Tabs/CloudNET.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Scenes/Tabs/Servers.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Scenes/Tabs/Dashboard.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Assets/fonts/CascadiaCode.ttf" type="DynamicFontData" id=7]
 [ext_resource path="res://Assets/Misc/settings.png" type="Texture" id=8]
@@ -21,6 +20,7 @@
 [ext_resource path="res://Assets/Customizabletheme/theme.tres" type="Theme" id=19]
 [ext_resource path="res://Assets/Backgrounds/non_blur/bg2.png" type="Texture" id=20]
 [ext_resource path="res://Assets/Shaders/Blur.tres" type="Shader" id=21]
+[ext_resource path="res://Scripts/SceneAppend/SettingsScreen.gd" type="Script" id=22]
 
 [sub_resource type="GDScript" id=4]
 script/source = "extends Control
@@ -28,8 +28,9 @@ script/source = "extends Control
 var scenes = []
 
 func _ready():
-	get_tree().get_root().set_transparent_background(true)
-	OS.window_borderless = false
+	if GE.cs_settings.clientSettings.blur_background:
+		update_bg_blur(GE.cs_settings.clientSettings.blur_rate)
+	else: update_bg_blur(0)
 	
 	for i in $Sidebar/SidebarList.get_children():
 		i.connect(\"pressed\", self, \"_on_sidebar_click\")
@@ -38,9 +39,13 @@ func _ready():
 	
 	provide_pages()
 	_on_sidebar_click(\"Dashboard\")
+# warning-ignore:return_value_discarded
 	GE.connect(\"server_config_loaded\", self, \"_on_server_config_loaded\")
+# warning-ignore:return_value_discarded
 	GE.connect(\"config_server_change_ok\", self, \"_on_server_config_changed\")
+# warning-ignore:return_value_discarded
 	GE.connect(\"server_config_load_fail\", self, \"_on_server_config_load_fail\")
+# warning-ignore:return_value_discarded
 	JsonDataParser.connect(\"component_value_change\", self, \"_on_config_value_change\")
 	
 	
@@ -70,8 +75,9 @@ func provide_pages():
 
 func show_settings():
 	$SettingsScreen.show()
-	$SettingsScreen/Loader.show_loading(30)
-	GE.get_server_config()
+	$Main.hide()
+	$SettingsScreen/ServerSettings/Loader.show_loading(30)
+	#GE.get_server_config()
 
 
 
@@ -97,33 +103,36 @@ func _on_sidebar_click(entry):
 
 func _on_server_config_loaded(data):
 	JsonDataParser.parse(data, \"config\", $SettingsScreen/ServerSettings/List/List)
-	$SettingsScreen/Loader.end_loading()
+	$SettingsScreen/ServerSettings/Loader.end_loading()
 
 
 func _on_server_config_load_fail():
-	$SettingsScreen/Loader.end_loading()
+	$SettingsScreen/ServerSettings/Loader.end_loading()
 	$SettingsScreen/ServerSettings/Error.show()
 
 
 func _on_Settings_pressed():
 	if $SettingsScreen.visible:
 		$SettingsScreen.hide()
+		$Main.show()
 		return
 	show_settings()
+	GE.get_server_config()
 
 
 func _on_SaveSettings_pressed():
 	for i in $SettingsScreen/ServerSettings/List/List.get_children():
 		if not i.has_method(\"value\"): continue
 		GE.send_config_change_indiv(i.key, i.value())
-		$SettingsScreen/ChangeLoader.show_loading(30)
+		$SettingsScreen/ServerSettings/ChangeLoader.show_loading(30)
 
 
 func _on_server_config_changed():
 	$SettingsScreen/ServerSettings/SaveSettings.disabled = true
-	$SettingsScreen/ChangeLoader.end_loading()
+	$SettingsScreen/ServerSettings/ChangeLoader.end_loading()
 
 
+# warning-ignore:unused_argument
 func _on_config_value_change(value, data_name):
 	if data_name != \"config\": return
 	$SettingsScreen/ServerSettings/SaveSettings.disabled = false
@@ -134,11 +143,20 @@ func _on_BlurRate_value_changed(value):
 	mat.set(\"shader_param/blur_size\", value)
 
 
-func _on_BgSelector_item_selected(index):
-	var f = $SettingsScreen/ClientSettings/Design/BgSelector.get_item_text(index)
-	$SettingsScreen/ClientSettings/Design/Preview.get(\"custom_styles/panel\").texture = load(
-		\"res://Assets/Backgrounds/non_blur/%s.png\" % f
-	)
+
+func update_background_mode(use_image: bool):
+	if use_image: $BgFX.play(\"change\")
+	else: $BgFX.play_backwards(\"change\")
+
+
+func change_bg_image(id: int):
+	var path = \"res://Assets/Backgrounds/non_blur/bg%s.png\" % id
+	$BgImage.get(\"custom_styles/panel\").texture = load(path)
+
+
+func update_bg_blur(blur: float):
+	var shader_material := $BgImage.material as ShaderMaterial
+	shader_material.set_shader_param(\"blur_size\", blur)
 "
 
 [sub_resource type="StyleBoxFlat" id=9]
@@ -149,12 +167,139 @@ corner_radius_bottom_right = 30
 corner_radius_bottom_left = 30
 
 [sub_resource type="ShaderMaterial" id=11]
-shader = ExtResource( 3 )
-shader_param/corner_radius = 52.0
+shader = ExtResource( 21 )
+shader_param/blur_size = 0.0
 
 [sub_resource type="StyleBoxTexture" id=10]
 texture = ExtResource( 2 )
 region_rect = Rect2( 0, 0, 1920, 1009 )
+
+[sub_resource type="Animation" id=21]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("BgImage:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("BgImage:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ true ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Bg:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ true ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Sidebar/Bg:custom_styles/disabled:bg_color")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.0627451, 0.0901961, 0.117647, 1 ) ]
+}
+
+[sub_resource type="Animation" id=22]
+resource_name = "change"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0.2, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("BgImage:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("BgImage:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Bg:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Sidebar/Bg:custom_styles/disabled:bg_color")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0.0627451, 0.0901961, 0.117647, 1 ), Color( 0.0627451, 0.0901961, 0.117647, 0.498039 ) ]
+}
 
 [sub_resource type="StyleBoxFlat" id=5]
 bg_color = Color( 0.74902, 0.74902, 0.74902, 0.211765 )
@@ -271,11 +416,15 @@ anchor_bottom = 1.0
 custom_styles/panel = SubResource( 9 )
 
 [node name="BgImage" type="Panel" parent="."]
-visible = false
+modulate = Color( 1, 1, 1, 0 )
 material = SubResource( 11 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_styles/panel = SubResource( 10 )
+
+[node name="BgFX" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 21 )
+anims/change = SubResource( 22 )
 
 [node name="Exit" type="Button" parent="."]
 anchor_left = 0.943
@@ -342,7 +491,7 @@ anchor_bottom = 0.0
 margin_top = 54.0
 margin_right = 141.0
 margin_bottom = 104.0
-entry_name = "CloudNET"
+entry_name = "Servers"
 icon_path = "servers"
 to_load = ExtResource( 5 )
 
@@ -409,9 +558,10 @@ to_load = ExtResource( 9 )
 [node name="Main" type="Control" parent="."]
 anchor_left = 0.138
 anchor_right = 1.0
-anchor_bottom = 1.005
+anchor_bottom = 1.0
 margin_left = -0.312012
 margin_right = 1.0
+margin_bottom = 3.0
 
 [node name="Tour" type="Control" parent="."]
 visible = false
@@ -445,42 +595,10 @@ margin_top = 0.199997
 margin_right = -0.0160522
 margin_bottom = 0.199951
 theme = ExtResource( 18 )
-
-[node name="HeaderServer" type="Label" parent="SettingsScreen"]
-anchor_left = 0.033
-anchor_top = 0.029
-anchor_right = 0.34
-anchor_bottom = 0.029
-margin_left = 0.148001
-margin_top = -0.138
-margin_right = -159.96
-margin_bottom = 35.862
-custom_fonts/font = SubResource( 16 )
-text = "Settings (server)"
-
-[node name="HeaderClient" type="Label" parent="SettingsScreen"]
-anchor_left = 0.483
-anchor_top = 0.029
-anchor_right = 0.483
-anchor_bottom = 0.029
-margin_left = 0.347992
-margin_top = -0.138
-margin_right = 259.348
-margin_bottom = 39.862
-custom_fonts/font = SubResource( 16 )
-text = "Settings (client)"
-
-[node name="Loader" parent="SettingsScreen" instance=ExtResource( 16 )]
-anchor_left = 0.081
-anchor_top = 0.339
-anchor_right = 0.128
-anchor_bottom = 0.416
-margin_left = -0.363998
-margin_top = 0.0419922
-margin_right = -0.0320053
-margin_bottom = -0.152008
+script = ExtResource( 22 )
 
 [node name="ServerSettings" type="Control" parent="SettingsScreen"]
+visible = false
 anchor_left = 0.033
 anchor_top = 0.113
 anchor_right = 0.443
@@ -490,10 +608,23 @@ margin_top = 0.0139961
 margin_right = 0.107971
 margin_bottom = 0.0819702
 
+[node name="HeaderServer" type="Label" parent="SettingsScreen/ServerSettings"]
+anchor_left = 0.033
+anchor_top = 0.029
+anchor_right = 0.34
+anchor_bottom = 0.029
+margin_left = -11.418
+margin_top = -72.717
+margin_right = 141.36
+margin_bottom = -32.717
+custom_fonts/font = SubResource( 16 )
+text = "Settings (server)"
+
 [node name="List" type="ScrollContainer" parent="SettingsScreen/ServerSettings"]
 anchor_right = 1.0
 anchor_bottom = 0.803
-margin_bottom = 0.180969
+margin_right = 252.0
+margin_bottom = 0.181061
 script = ExtResource( 17 )
 
 [node name="List" type="VBoxContainer" parent="SettingsScreen/ServerSettings/List"]
@@ -518,35 +649,47 @@ margin_bottom = 31.0
 custom_colors/font_color = Color( 1, 0.356863, 0.356863, 1 )
 text = "Could not load data from server."
 
-[node name="ChangeLoader" parent="SettingsScreen" instance=ExtResource( 16 )]
+[node name="ChangeLoader" parent="SettingsScreen/ServerSettings" instance=ExtResource( 16 )]
 anchor_left = 0.217
 anchor_top = 0.868
 anchor_right = 0.217
 anchor_bottom = 0.868
-margin_left = -0.14801
-margin_top = -0.0960083
-margin_right = 39.852
-margin_bottom = 39.904
+margin_left = 79.918
+margin_top = -16.564
+margin_right = 119.918
+margin_bottom = 23.436
 
-[node name="Seperator" type="ColorRect" parent="SettingsScreen"]
-anchor_left = 0.448
-anchor_top = 0.04
-anchor_right = 0.449
-anchor_bottom = 0.941
-margin_left = -0.112
-margin_top = 0.119999
-margin_right = 0.0439758
-margin_bottom = -0.202026
+[node name="Loader" parent="SettingsScreen/ServerSettings" instance=ExtResource( 16 )]
+anchor_left = 0.081
+anchor_top = 0.339
+anchor_right = 0.128
+anchor_bottom = 0.416
+margin_left = 11.974
+margin_top = -42.347
+margin_right = 35.712
+margin_bottom = -38.768
 
 [node name="ClientSettings" type="Control" parent="SettingsScreen"]
-anchor_left = 0.48
+anchor_left = 0.034
 anchor_top = 0.138
-anchor_right = 0.917
-anchor_bottom = 0.864
-margin_left = -0.120026
-margin_top = -0.0360031
-margin_right = 0.0519409
-margin_bottom = -0.00802612
+anchor_right = 0.472
+anchor_bottom = 0.888
+margin_left = 0.304001
+margin_top = -0.0359879
+margin_right = 368.632
+margin_bottom = -12.536
+
+[node name="HeaderClient" type="Label" parent="SettingsScreen/ClientSettings"]
+anchor_left = 0.483
+anchor_top = 0.029
+anchor_right = 0.483
+anchor_bottom = 0.029
+margin_left = -175.227
+margin_top = -67.991
+margin_right = 83.7731
+margin_bottom = -27.991
+custom_fonts/font = SubResource( 16 )
+text = "Settings (client)"
 
 [node name="Performance" type="Label" parent="SettingsScreen/ClientSettings"]
 anchor_right = 0.266
@@ -595,7 +738,7 @@ margin_left = 2.0
 margin_top = 44.0
 margin_right = 32.0
 margin_bottom = 77.0
-hint_tooltip = "Will enable vertical synchronisation. If there is a high input latency, disable it."
+hint_tooltip = "Will enable the design provided by your server administrator."
 text = "Use corporate design"
 
 [node name="UseBackground" type="CheckBox" parent="SettingsScreen/ClientSettings/Design"]
@@ -603,7 +746,7 @@ margin_left = 2.0
 margin_top = 96.0
 margin_right = 162.0
 margin_bottom = 129.0
-hint_tooltip = "Control if Caesar should use transparency effects. Disable it if you have performance problems."
+hint_tooltip = "Will enable a fancy background. Does not support rounded window corners"
 text = "Enable background image"
 
 [node name="BlurBackground" type="CheckBox" parent="SettingsScreen/ClientSettings/Design"]
@@ -611,7 +754,7 @@ margin_left = 2.0
 margin_top = 147.0
 margin_right = 174.0
 margin_bottom = 180.0
-hint_tooltip = "Enable this if you want to use Caesar's own window design in borderless screen mode. This may cause problems with full-sized windows."
+hint_tooltip = "Blurs the background image."
 text = "Blur background"
 
 [node name="BgSelector" type="OptionButton" parent="SettingsScreen/ClientSettings/Design"]
@@ -627,15 +770,18 @@ margin_left = 2.0
 margin_top = 331.0
 margin_right = 101.02
 margin_bottom = 364.0
-hint_tooltip = "Do NOT change this unless you know what you are doing."
+hint_tooltip = "Do NOT change this unless you know what you are doing.
+It wil change how blurring is being shaded."
 text = "Set blur renderer"
+items = [ "Set blur renderer", null, true, 0, null, "Blur", null, false, 1, null ]
+selected = 0
 
 [node name="BlurRate" type="HSlider" parent="SettingsScreen/ClientSettings/Design"]
 anchor_right = 2.927
 margin_top = 287.0
 margin_right = 0.0149994
 margin_bottom = 307.0
-max_value = 20.0
+max_value = 10.0
 step = 0.1
 value = 3.0
 
@@ -645,19 +791,48 @@ margin_right = 54.0
 margin_bottom = -2.0
 text = "Bluring"
 
+[node name="ApplyBlur" type="Button" parent="SettingsScreen/ClientSettings/Design"]
+margin_left = 5.00012
+margin_top = 383.0
+margin_right = 116.0
+margin_bottom = 416.0
+text = "Apply changes"
+
 [node name="Preview" type="Panel" parent="SettingsScreen/ClientSettings/Design"]
 material = SubResource( 20 )
 anchor_left = -4.309
-anchor_right = -0.491
-anchor_bottom = 4.225
-margin_left = -0.00500488
+anchor_right = -2.41
+anchor_bottom = 4.316
+margin_left = 8.90808
 margin_top = 248.0
-margin_right = 0.00500107
-margin_bottom = 235.025
+margin_right = 9.0542
+margin_bottom = 232.204
 custom_styles/panel = SubResource( 19 )
+
+[node name="ViewServerSett" type="Button" parent="SettingsScreen"]
+margin_left = 26.0
+margin_top = -43.0
+margin_right = 81.0
+margin_bottom = -10.0
+text = "Server"
+
+[node name="ViewClientSett" type="Button" parent="SettingsScreen"]
+margin_left = 99.0
+margin_top = -43.0
+margin_right = 149.0
+margin_bottom = -10.0
+text = "Client"
 
 [connection signal="pressed" from="Exit" to="." method="_on_Exit_pressed"]
 [connection signal="pressed" from="Settings" to="." method="_on_Settings_pressed"]
 [connection signal="pressed" from="SettingsScreen/ServerSettings/SaveSettings" to="." method="_on_SaveSettings_pressed"]
-[connection signal="item_selected" from="SettingsScreen/ClientSettings/Design/BgSelector" to="." method="_on_BgSelector_item_selected"]
+[connection signal="toggled" from="SettingsScreen/ClientSettings/Performance/TransparentEffects" to="SettingsScreen" method="_on_TransparentEffects_toggled"]
+[connection signal="toggled" from="SettingsScreen/ClientSettings/Performance/BorderlessWindow" to="SettingsScreen" method="_on_BorderlessWindow_toggled"]
+[connection signal="toggled" from="SettingsScreen/ClientSettings/Design/UseCorporate" to="SettingsScreen" method="_on_UseCorporate_toggled"]
+[connection signal="toggled" from="SettingsScreen/ClientSettings/Design/UseBackground" to="SettingsScreen" method="_on_UseBackground_toggled"]
+[connection signal="toggled" from="SettingsScreen/ClientSettings/Design/BlurBackground" to="SettingsScreen" method="_on_BlurBackground_toggled"]
+[connection signal="item_selected" from="SettingsScreen/ClientSettings/Design/BgSelector" to="SettingsScreen" method="_on_BgSelector_item_selected"]
 [connection signal="value_changed" from="SettingsScreen/ClientSettings/Design/BlurRate" to="." method="_on_BlurRate_value_changed"]
+[connection signal="pressed" from="SettingsScreen/ClientSettings/Design/ApplyBlur" to="SettingsScreen" method="_on_ApplyBlur_pressed"]
+[connection signal="pressed" from="SettingsScreen/ViewServerSett" to="SettingsScreen" method="_on_ViewServerSett_pressed"]
+[connection signal="pressed" from="SettingsScreen/ViewClientSett" to="SettingsScreen" method="_on_ViewClientSett_pressed"]

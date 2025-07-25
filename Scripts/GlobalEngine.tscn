@@ -41,6 +41,12 @@ script = ExtResource( 1 )
 
 [node name="GetConfig" type="HTTPRequest" parent="Management"]
 
+[node name="GetUsers" type="HTTPRequest" parent="Management"]
+
+[node name="Minecraft" type="Node" parent="."]
+
+[node name="GetUUIDFromName" type="HTTPRequest" parent="Minecraft"]
+
 [connection signal="request_completed" from="Auth/Auth" to="." method="_on_Auth_request_completed"]
 [connection signal="request_completed" from="Auth/AuthCN" to="." method="_on_AuthCN_request_completed"]
 [connection signal="request_completed" from="Weather/LocationService" to="." method="_on_LocationService_request_completed"]
@@ -53,3 +59,5 @@ script = ExtResource( 1 )
 [connection signal="request_completed" from="Setup/CheckConnection" to="." method="_on_CheckConnection_request_completed"]
 [connection signal="request_completed" from="Setup/ValidateCode" to="." method="_on_ValidateCode_request_completed"]
 [connection signal="request_completed" from="Management/GetConfig" to="." method="_on_GetConfig_request_completed"]
+[connection signal="request_completed" from="Management/GetUsers" to="." method="_on_GetUsers_request_completed"]
+[connection signal="request_completed" from="Minecraft/GetUUIDFromName" to="." method="_on_GetUUIDFromName_request_completed"]

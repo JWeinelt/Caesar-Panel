@@ -16,7 +16,16 @@ signal server_config_loaded(data)
 signal server_config_load_fail
 signal config_server_change_ok
 
+signal got_users(data)
+
 signal loaded_weather
+
+signal background_image_use_toggle(use_image)
+
+signal got_mc_uuid(mc_name, mc_uuid)
+
+var client_version = "1.0.0"
+var user_id = ""
 
 var caesar_auth = ""
 var cloudnet_auth = ""
@@ -35,20 +44,31 @@ var cs_settings = {
 		"username": "",
 		"caesar_host": "localhost",
 		"useSSL": false,
-		"used_background": "1",
-		"blur_background": true,
-		"blur_rate": 3.0,
-		"own_background_file": ""
 	},
-	"client_version": "0.0.1",
+	"client_version": "1.0.0",
 	"clientSettings": {
 		"useBorderlessWindow": false,
 		"useVSync": true,
+		"useTransparency": false,
+		"useCorporateDesign": false,
+		"used_background": "1",
+		"blur_background": true,
+		"blur_rate": 3.0,
+		"own_background_file": "",
+		"useBackgroundImage": false,
 	}
 }
 
 func _ready():
 	load_config()
+	apply_config()
+
+
+func apply_config():
+	if cs_settings.client_version != client_version:
+		print("Config upgrade needed.")
+	get_tree().get_root().set_transparent_background(GE.cs_settings.clientSettings.useTransparency)
+	OS.window_borderless = GE.cs_settings.clientSettings.useBorderlessWindow
 
 
 func request_location():
@@ -65,7 +85,7 @@ func cloudnet_tk():
 
 func caesar():
 	var url = cs_settings.defaults.caesar_host
-	if url.find(":") == -1: url = url + ":49850"
+	if url.find(":") == -1: url = url + ":48000"
 	if not url.begins_with("http://"): url = "http://" + url
 	if not url.ends_with("/"): url = url + "/"
 	print(url)
@@ -75,11 +95,12 @@ func caesar():
 func cloudnet():
 	if not cloud_address.begins_with("http://") and not cloud_address.begins_with("https://"):
 		cloud_address = "http://" + cloud_address
+	print(cloud_address)
 	return cloud_address
 
 
 func get_services():
-	$CloudNET/Services.request(cloudnet() + "services", cloudnet_tk())
+	$CloudNET/Services.request(cloudnet() + "service", cloudnet_tk())
 
 
 func get_tasks():
@@ -113,6 +134,10 @@ func get_greeting():
 	$Weather/WeatherGetter.request("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&current=temperature_2m,is_day,weather_code" % [
 		location.x, location.y
 	])
+
+
+func get_users():
+	$Management/GetUsers.request(caesar() + "user", caesar_tk())
 
 
 func login(username, password):
@@ -150,6 +175,7 @@ func save_config():
 
 
 func load_config():
+	print("Loading config")
 	var file = File.new()
 	if not file.file_exists("user://config.cac"): save_config()
 	file.open_encrypted_with_pass("user://config.cac", File.READ, "caesar-panel")
@@ -164,13 +190,18 @@ func _on_Auth_request_completed(_result, response_code, _headers, body):
 		print("Auth to Caesar endpoint successful")
 		server_setup_mode = data.setupMode
 		caesar_auth = data.token
+		user_id = data.userID
 		if data.useCloudNET:
+			cloud_address = data.cloudnet.host
+			if cloud_address == "localhost" or cloud_address == "127.0.0.1":
+				cloud_address = cs_settings.defaults.caesar_host
 			var header = ["Authorization: Basic " + data.cloudnet.credentials]
-			$Auth/AuthCN.request("http://" + data.cloudnet.host + "/auth", header, false, HTTPClient.METHOD_POST)
-			cloud_address = "http://" + data.cloudnet.host + "/"
+			$Auth/AuthCN.request("http://" + cloud_address + "/api/v3/auth", header, false, HTTPClient.METHOD_POST)
+			cloud_address = "http://" + cloud_address + "/api/v3/"
 			enable_cloud = true
 		else:
 			enable_cloud = false
+# warning-ignore:return_value_discarded
 			get_tree().change_scene("res://Scenes/Main.tscn")
 	else:
 		printerr("Unable to authenticate to Caesar endpoint")
@@ -226,6 +257,10 @@ func get_value_type(val):
 	else: return "UNKNOWN"
 
 
+func request_mc_id(mc_name):
+	$Minecraft/GetUUIDFromName.request("https://api.mojang.com/users/profiles/minecraft/" + mc_name)
+
+
 func _on_WeatherGetter_request_completed(_result, _response_code, _headers, body):
 	var data = JSON.parse(body.get_string_from_utf8()).result
 	print(get_greeting_from_time(data.current.time))
@@ -233,10 +268,19 @@ func _on_WeatherGetter_request_completed(_result, _response_code, _headers, body
 
 
 func _on_AuthCN_request_completed(_result, response_code, _headers, body):
+	if response_code != 200:
+		printerr("Error while logging in to CloudNET: " + str(response_code))
+		enable_cloud = false
+# warning-ignore:return_value_discarded
+		get_tree().change_scene("res://Scenes/Main.tscn")
+		return
 	var data = JSON.parse(body.get_string_from_utf8()).result
 	if response_code == 200:
+		print("CloudNET has been authenticated. Continuing...")
 		cloudnet_auth = data.accessToken.token
 		emit_signal("cloudnet_authenticated")
+# warning-ignore:return_value_discarded
+		get_tree().change_scene("res://Scenes/Main.tscn")
 
 
 func _on_Services_request_completed(_result, response_code, _headers, body):
@@ -244,6 +288,8 @@ func _on_Services_request_completed(_result, response_code, _headers, body):
 	match response_code:
 		200:
 			emit_signal("services_got", data)
+			return
+	printerr("Could not load service data: " + str(response_code))
 
 
 func _on_Tasks_request_completed(_result, response_code, _headers, body):
@@ -287,7 +333,8 @@ func _on_ValidateCode_request_completed(_result, response_code, _headers, body):
 func _on_GetConfig_request_completed(_result, response_code, _headers, body):
 	var data = JSON.parse(body.get_string_from_utf8()).result
 	if response_code == 200:
-		emit_signal("server_config_loaded", body.get_string_from_utf8())
+		emit_signal("server_config_loaded", data)
+		#emit_signal("server_config_loaded", body.get_string_from_utf8())
 	else: 
 		emit_signal("server_config_load_fail")
 		printerr("Server configuration could not be loaded: " + str(response_code))
@@ -297,3 +344,13 @@ func _on_SendConfigChange_request_completed(_result, response_code, _headers, _b
 	if response_code == 200: 
 		print("changes saved")
 		emit_signal("config_server_change_ok")
+
+
+func _on_GetUsers_request_completed(_result, _response_code, _headers, body):
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	emit_signal("got_users", data)
+
+
+func _on_GetUUIDFromName_request_completed(result, response_code, headers, body):
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	emit_signal("got_mc_uuid", data.get("name"), data.get("id"))

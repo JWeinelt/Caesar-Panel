@@ -1,0 +1,254 @@
+[gd_scene load_steps=18 format=2]
+
+[ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://Assets/icons/no_maintenance.png" type="Texture" id=2]
+[ext_resource path="res://Assets/icons/no_autodelete.png" type="Texture" id=3]
+[ext_resource path="res://Assets/icons/no_static.png" type="Texture" id=4]
+[ext_resource path="res://Assets/icons/startport.png" type="Texture" id=5]
+[ext_resource path="res://Assets/icons/minservice.png" type="Texture" id=6]
+[ext_resource path="res://Assets/icons/server/minecraft.png" type="Texture" id=7]
+[ext_resource path="res://Assets/icons/light_smart.png" type="Texture" id=8]
+[ext_resource path="res://Assets/icons/light_smart_hover.png" type="Texture" id=9]
+
+[sub_resource type="GDScript" id=10]
+script/source = "extends Control
+
+var test_data = {
+  \"name\": \"Lobby\",
+  \"disableIpRewrite\": false,
+  \"maintenance\": false,
+  \"autoDeleteOnStop\": false,
+  \"staticServices\": true,
+  \"processConfiguration\": {
+	\"environment\": \"MINECRAFT_SERVER\"
+  },
+  \"startPort\": 44955,
+  \"minServiceCount\": 1,
+}
+
+signal clicked(task)
+
+var data
+
+
+func _ready():
+	var original_stylebox = $Bg.get_stylebox(\"panel\") as StyleBoxFlat
+	var unique_stylebox = original_stylebox.duplicate()
+	$Bg.add_stylebox_override(\"panel\", unique_stylebox)
+	$Overlay.show()
+	setup(test_data)
+
+
+func setup(json):
+	data = json
+	
+	$Name.text = json.get(\"name\")
+	
+	var font = $Name.get_font(\"font\")
+	var size = font.get_string_size(json.get(\"name\")).x
+	$Maintenance.rect_position.x = size + 10
+	$Static.rect_position.x = size + 10 + 25 + 10
+	$AutoDelete.rect_position.x = size + 10 + 25 + 10 + 25 + 10
+	
+	if data.maintenance: $Maintenance.texture = load(\"res://Assets/icons/maintenance.png\")
+	if data.autoDeleteOnStop: $AutoDelete.texture = load(\"res://Assets/icons/autodelete.png\")
+	if data.staticServices: $Static.texture = load(\"res://Assets/icons/static.png\")
+	
+	$Environment.texture = get_environment_texture()
+
+
+func _on_Overlay_mouse_entered():
+	$FX.play(\"hover_on\")
+
+
+func _on_Overlay_mouse_exited():
+	$FX.play(\"hover_off\")
+
+
+func _on_Overlay_gui_input(event):
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == BUTTON_LEFT:
+			emit_signal(\"clicked\", data)
+
+
+func get_environment_texture():
+	match data.processConfiguration.environment:
+		\"MINECRAFT_SERVER\":
+			return load(\"res://Assets/icons/server/minecraft.png\")
+		\"MODDED_MINECRAFT_SERVER\":
+			return load(\"res://Assets/icons/server/modded.png\")
+		\"MINESTOM\":
+			return load(\"res://Assets/icons/server/minestom.png\")
+		\"LIMBO_LOOHP\":
+			return load(\"res://Assets/icons/server/limbo.png\")
+		\"BUNGEECORD\":
+			return load(\"res://Assets/icons/server/bungeecord.png\")
+		\"VELOCITY\":
+			return load(\"res://Assets/icons/server/velocity.png\")
+		\"WATERDOG_PE\":
+			return load(\"res://Assets/icons/server/waterdog.png\")
+		\"NUKKIT\":
+			return load(\"res://Assets/icons/server/nukkit.png\")
+"
+
+[sub_resource type="StyleBoxFlat" id=19]
+bg_color = Color( 0.0313726, 0.0313726, 0.133333, 1 )
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="DynamicFont" id=2]
+size = 20
+font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxTexture" id=15]
+texture = ExtResource( 9 )
+region_rect = Rect2( 0, 0, 612, 612 )
+
+[sub_resource type="StyleBoxTexture" id=14]
+texture = ExtResource( 8 )
+region_rect = Rect2( 0, 0, 612, 612 )
+
+[sub_resource type="Animation" id=16]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:custom_styles/panel:bg_color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.0313726, 0.0313726, 0.133333, 1 ) ]
+}
+
+[sub_resource type="Animation" id=18]
+resource_name = "hover_off"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:custom_styles/panel:bg_color")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0.101961, 0.101961, 0.203922, 1 ), Color( 0.0313726, 0.0313726, 0.133333, 1 ) ]
+}
+
+[sub_resource type="Animation" id=17]
+resource_name = "hover_on"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:custom_styles/panel:bg_color")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0.0313726, 0.0313726, 0.133333, 1 ), Color( 0.101961, 0.101961, 0.203922, 1 ) ]
+}
+
+[node name="TaskEntry" type="Control"]
+anchor_right = 0.301
+margin_right = -0.22406
+margin_bottom = 88.0
+rect_min_size = Vector2( 308, 88 )
+script = SubResource( 10 )
+
+[node name="Bg" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 19 )
+
+[node name="Name" type="Label" parent="."]
+margin_left = 5.0
+margin_top = 3.0
+margin_right = 63.0
+margin_bottom = 26.0
+custom_fonts/font = SubResource( 2 )
+text = "Lobby"
+
+[node name="Maintenance" type="TextureRect" parent="."]
+margin_left = 128.0
+margin_top = 8.0
+margin_right = 178.0
+margin_bottom = 58.0
+rect_scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 2 )
+stretch_mode = 1
+
+[node name="Static" type="TextureRect" parent="."]
+margin_left = 155.0
+margin_top = 8.0
+margin_right = 205.0
+margin_bottom = 58.0
+rect_scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 4 )
+stretch_mode = 1
+
+[node name="AutoDelete" type="TextureRect" parent="."]
+margin_left = 183.0
+margin_top = 8.0
+margin_right = 233.0
+margin_bottom = 58.0
+rect_scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 3 )
+stretch_mode = 1
+
+[node name="Port" type="TextureRect" parent="."]
+margin_left = 3.00001
+margin_top = 36.0
+margin_right = 53.0
+margin_bottom = 86.0
+rect_scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 5 )
+stretch_mode = 1
+
+[node name="MinService" type="TextureRect" parent="."]
+margin_left = 3.00001
+margin_top = 63.0
+margin_right = 53.0
+margin_bottom = 113.0
+rect_scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 6 )
+stretch_mode = 1
+
+[node name="Environment" type="TextureRect" parent="."]
+margin_left = 276.0
+margin_top = 5.0
+margin_right = 532.0
+margin_bottom = 261.0
+rect_scale = Vector2( 0.09, 0.09 )
+texture = ExtResource( 7 )
+
+[node name="SmartConfig" type="Button" parent="."]
+margin_left = 268.0
+margin_top = 50.0
+margin_right = 298.0
+margin_bottom = 80.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/pressed = SubResource( 14 )
+custom_styles/normal = SubResource( 14 )
+
+[node name="Overlay" type="Control" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="FX" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 16 )
+anims/hover_off = SubResource( 18 )
+anims/hover_on = SubResource( 17 )
+
+[connection signal="gui_input" from="Overlay" to="." method="_on_Overlay_gui_input"]
+[connection signal="mouse_entered" from="Overlay" to="." method="_on_Overlay_mouse_entered"]
+[connection signal="mouse_exited" from="Overlay" to="." method="_on_Overlay_mouse_exited"]

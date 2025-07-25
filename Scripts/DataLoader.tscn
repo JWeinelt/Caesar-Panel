@@ -1,0 +1,81 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node
+
+
+func load_image(url: String, target: Object, callback_method: String):
+	var cache = File.new()
+	var cacheFile = \"user://.cache/\" + hash_string(url) + \".png\"
+	if cache.file_exists(cacheFile):
+		target.call(callback_method, load_texture_from_file(cacheFile))
+		print(\"loading cache\")
+		return
+	
+	var http_request := HTTPRequest.new()
+	add_child(http_request)
+
+# warning-ignore:return_value_discarded
+	http_request.connect(\"request_completed\", self, \"_on_request_completed\", [http_request, target, callback_method, url])
+
+	var err = http_request.request(url)
+	if err != OK:
+		push_error(\"Fehler beim Starten des Requests: %s\" % err)
+		http_request.queue_free()
+
+
+func _on_request_completed(_result, response_code, _headers, body, http_request: HTTPRequest, target: Object, callback_method: String, url: String):
+	if response_code != 200:
+		push_error(\"HTTP-Fehler: %s\" % response_code)
+		http_request.queue_free()
+		return
+
+	var image := Image.new()
+	var err = image.load_png_from_buffer(body)
+	if err != OK:
+		err = image.load_jpg_from_buffer(body)
+
+	if err != OK:
+		push_error(\"Fehler beim Laden des Bildes: %s\" % err)
+		http_request.queue_free()
+		return
+
+	var texture := ImageTexture.new()
+	texture.create_from_image(image)
+
+	# Callback aufrufen
+	if target.has_method(callback_method):
+		target.call(callback_method, texture)
+		var path = \"user://.cache/\" + hash_string(url) + \".png\"
+		save_texture_as_png(texture, path)
+		
+	else:
+		push_warning(\"Zielmethode '%s' nicht gefunden auf %s\" % [callback_method, target])
+
+	http_request.queue_free()
+
+
+func hash_string(obj):
+	return str(hash(obj))
+
+
+func load_texture_from_file(path: String) -> ImageTexture:
+	var image = Image.new()
+	var err = image.load(path)
+	if err != OK:
+		push_error(\"Fehler beim Laden des Bildes: %s\" % err)
+		return null
+
+	var texture = ImageTexture.new()
+	texture.create_from_image(image)
+	return texture
+
+func save_texture_as_png(texture: ImageTexture, path: String) -> void:
+	var image: Image = texture.get_data()
+	var err = image.save_png(path)
+	if err != OK:
+		push_error(\"Fehler beim Speichern des Bildes: %s\" % err)
+"
+
+[node name="DataLoader" type="Node"]
+script = SubResource( 1 )

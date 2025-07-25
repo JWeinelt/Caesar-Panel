@@ -14,7 +14,7 @@ func _ready():
 	var font = get_font("font")
 	var text_size = font.get_string_size(key)
 	
-	$Check.rect_position.x = text_size.x + 10
+	$Check.rect_position.x = text_size.x + 30
 
 
 func value():

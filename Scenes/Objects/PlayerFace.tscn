@@ -1,0 +1,234 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+var hover_overlay = false
+var hover_info = false
+
+var id = \"\"
+var data = {
+		\"uniqueId\": \"12c88937-10af-4f25-9d69-858257308b5b\",
+		\"name\": \"_JustCody\",
+		\"xBoxId\": null,
+		\"address\": {
+		  \"host\": \"84.151.236.208\",
+		  \"port\": 51850
+		}
+	}
+
+var http_request: HTTPRequest
+var image_texture := ImageTexture.new()
+
+onready var texture_rect := $TextureRect
+
+func _ready():
+	DataLoader.load_image(\"https://crafatar.com/avatars/%s?size=40\" % id, self, \"_on_image_set\")
+	
+	$Hover/PlayerName.bbcode_text = data.get(\"name\")
+	$Hover/UUID.text = data.uniqueId
+
+
+func _on_request_completed(_result, response_code, _headers, body):
+	if response_code != 200:
+		print(\"HTTP-Fehler: \", response_code)
+		return
+
+	var image = Image.new()
+	var err = image.load_png_from_buffer(body)
+	if err != OK:
+		print(\"Fehler beim Laden des Bildes: \", err)
+
+	image_texture.create_from_image(image)
+	texture_rect.texture = image_texture
+
+
+func _on_image_set(texture):
+	texture_rect.texture = texture
+
+
+func _on_TextureRect_mouse_entered():
+	$FX.play(\"show\")
+	hover_overlay = true
+
+
+func _on_TextureRect_mouse_exited():
+	$HoverTimer.start()
+
+
+func _on_Hover_mouse_exited():
+	$FX.play(\"hide\")
+	hover_overlay = false
+	hover_info = false
+
+
+func _on_HoverTimer_timeout():
+	if hover_overlay and $Hover.visible and not hover_info:
+		$FX.play(\"hide\")
+
+
+func _on_Hover_mouse_entered():
+	hover_overlay = true
+	hover_info = true
+
+
+func _on_PlayerName_mouse_entered():
+	$Hover/PlayerName.bbcode_text = \"[u]\" + $Hover/PlayerName.bbcode_text + \"[/u]\"
+	hover_info = true
+
+
+func _on_PlayerName_mouse_exited():
+	$Hover/PlayerName.bbcode_text = $Hover/PlayerName.bbcode_text.replace(\"[u]\", \"\").replace(\"[/u]\", \"\")
+"
+
+[sub_resource type="DynamicFont" id=7]
+size = 12
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 10
+font_data = ExtResource( 1 )
+
+[sub_resource type="Animation" id=4]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Hover:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ false ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Hover:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_name = "hide"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/path = NodePath("Hover:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ true, false ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Hover:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=6]
+resource_name = "show"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/path = NodePath("Hover:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Hover:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[node name="PlayerFace" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -984.0
+margin_bottom = -560.0
+rect_min_size = Vector2( 40, 40 )
+script = SubResource( 1 )
+
+[node name="TextureRect" type="TextureRect" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 40, 40 )
+
+[node name="Hover" type="ColorRect" parent="."]
+visible = false
+modulate = Color( 1, 1, 1, 0 )
+margin_left = -38.0
+margin_top = 34.0
+margin_right = 96.0
+margin_bottom = 74.0
+color = Color( 0.168627, 0.192157, 0.25098, 1 )
+
+[node name="PlayerName" type="RichTextLabel" parent="Hover"]
+margin_left = 17.0
+margin_right = 133.0
+margin_bottom = 17.0
+custom_colors/default_color = Color( 0.317647, 0.454902, 0.666667, 1 )
+custom_fonts/normal_font = SubResource( 7 )
+bbcode_enabled = true
+bbcode_text = "_JustCody"
+text = "_JustCody"
+scroll_active = false
+
+[node name="UUID" type="Label" parent="Hover"]
+margin_left = 1.0
+margin_top = 18.0
+margin_right = 176.0
+margin_bottom = 32.0
+custom_fonts/font = SubResource( 3 )
+text = "12c88937-10af-4f25-9d69-858257308b5b"
+percent_visible = 0.763
+
+[node name="FX" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 4 )
+anims/hide = SubResource( 5 )
+anims/show = SubResource( 6 )
+
+[node name="HoverTimer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true
+
+[connection signal="mouse_entered" from="TextureRect" to="." method="_on_TextureRect_mouse_entered"]
+[connection signal="mouse_exited" from="TextureRect" to="." method="_on_TextureRect_mouse_exited"]
+[connection signal="mouse_entered" from="Hover" to="." method="_on_Hover_mouse_entered"]
+[connection signal="mouse_exited" from="Hover" to="." method="_on_Hover_mouse_exited"]
+[connection signal="mouse_entered" from="Hover/PlayerName" to="." method="_on_PlayerName_mouse_entered"]
+[connection signal="mouse_exited" from="Hover/PlayerName" to="." method="_on_PlayerName_mouse_exited"]
+[connection signal="timeout" from="HoverTimer" to="." method="_on_HoverTimer_timeout"]

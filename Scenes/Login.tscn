@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/Shaders/Rounded_Corners.tres" type="Shader" id=2]
@@ -7,6 +7,9 @@
 [ext_resource path="res://Assets/Backgrounds/bg8.png" type="Texture" id=5]
 [ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=6]
 [ext_resource path="res://Scripts/Startup.gd" type="Script" id=7]
+[ext_resource path="res://Scenes/Objects/Loader.tscn" type="PackedScene" id=8]
+[ext_resource path="res://Assets/icons/pw_hidden.png" type="Texture" id=9]
+[ext_resource path="res://Assets/icons/pw_vis.png" type="Texture" id=10]
 
 [sub_resource type="ShaderMaterial" id=2]
 shader = ExtResource( 2 )
@@ -42,6 +45,18 @@ corner_radius_bottom_left = 25
 [sub_resource type="DynamicFont" id=9]
 size = 24
 font_data = ExtResource( 6 )
+
+[sub_resource type="StyleBoxTexture" id=11]
+texture = ExtResource( 9 )
+region_rect = Rect2( 0, 0, 512, 512 )
+
+[sub_resource type="StyleBoxTexture" id=12]
+texture = ExtResource( 10 )
+region_rect = Rect2( 0, 0, 512, 512 )
+
+[sub_resource type="StyleBoxEmpty" id=14]
+
+[sub_resource type="StyleBoxEmpty" id=15]
 
 [sub_resource type="DynamicFont" id=10]
 size = 17
@@ -114,6 +129,19 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = -3.0
 margin_bottom = 32.0
+secret = true
+
+[node name="ShowPW" type="Button" parent="Password"]
+margin_left = 243.0
+margin_top = 38.0
+margin_right = 278.0
+margin_bottom = 73.0
+custom_styles/hover = SubResource( 11 )
+custom_styles/pressed = SubResource( 12 )
+custom_styles/focus = SubResource( 14 )
+custom_styles/disabled = SubResource( 15 )
+custom_styles/normal = SubResource( 11 )
+toggle_mode = true
 
 [node name="Error" type="Label" parent="."]
 anchor_left = 0.5
@@ -150,7 +178,14 @@ margin_right = 37.0
 margin_bottom = -108.0
 text = "Login"
 
+[node name="Loader" parent="." instance=ExtResource( 8 )]
+margin_left = 564.0
+margin_top = 454.0
+margin_right = -420.0
+margin_bottom = -106.0
+
 [connection signal="pressed" from="Exit" to="." method="_on_Exit_pressed"]
 [connection signal="text_entered" from="Username/UEnter" to="." method="_on_UEnter_text_entered"]
 [connection signal="text_entered" from="Password/PEnter" to="." method="_on_PEnter_text_entered"]
+[connection signal="toggled" from="Password/ShowPW" to="." method="_on_ShowPW_toggled"]
 [connection signal="pressed" from="Login" to="." method="_on_Login_pressed"]

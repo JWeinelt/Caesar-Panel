@@ -19,7 +19,7 @@ func _ready():
 		$LineEdit.rect_size.x = text_size_edit.x
 	else: $LineEdit.rect_size.x = 180
 	
-	$LineEdit.rect_position.x = text_size.x + 10
+	$LineEdit.rect_position.x = text_size.x + 30
 	
 	if key.to_lower().find("secret") != -1:
 		$LineEdit.secret = true

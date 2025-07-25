@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
+[ext_resource path="res://Assets/Customizabletheme/theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://addons/SmoothScroll/SmoothScrollContainer.gd" type="Script" id=3]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
@@ -9,11 +10,89 @@ script/source = "extends Control
 
 func _ready():
 	pass
+
+
+func _on_AddMCAccount_pressed():
+	$AddMCAccountDialogue.popup()
+
+
+func _on_CreatePlayer_pressed():
+	$CreatePlayerDialogue.popup()
 "
 
 [sub_resource type="DynamicFont" id=2]
 size = 33
 font_data = ExtResource( 2 )
+
+[sub_resource type="GDScript" id=4]
+script/source = "extends ConfirmationDialog
+
+var rng = RandomNumberGenerator.new()
+
+
+func _on_AddMCAccountDialogue_mc_account_added(mc_id, mc_name):
+	var data = {
+		\"mc_id\": mc_id,
+		\"mc_name\": mc_name
+	}
+	
+	var acc = load(\"res://Scenes/Objects/iObj/MinecraftAccount.tscn\").instance()
+	$Layer/MinecraftAccounts/MCAccList.add_child(acc)
+	acc.setup(data)
+
+
+
+func generate_uuid() -> String:
+	return \"%s-%s-4%s-%s%s-%s\" % [
+		random_hex(8),
+		random_hex(4),
+		random_hex(3),
+		str(8 + rng.randi() % 4, 16),
+		random_hex(3),
+		random_hex(12)
+	]
+
+
+func random_hex(length: int) -> String:
+	var s = \"\"
+	for i in range(length):
+		var value = rng.randi() % 16
+		s += \"0123456789abcdef\"[value]
+	return s
+
+
+func _on_CreatePlayerDialogue_about_to_show():
+	$Layer/PlayerUUID.text = generate_uuid()
+	$Layer/PlayerNumber.text = str(rng.randi_range(1000, 9999))
+"
+
+[sub_resource type="GDScript" id=3]
+script/source = "extends ConfirmationDialog
+
+signal mc_account_added(mc_id, mc_name)
+
+var mc_id
+var mc_name
+
+
+func _ready():
+# warning-ignore:return_value_discarded
+	GE.connect(\"got_mc_uuid\", self, \"_on_fetched_mc_uuid\")
+
+
+func _on_FetchMCUUID_pressed():
+	GE.request_mc_id($Layer/MCPlayerNameEnter.text)
+
+
+func _on_fetched_mc_uuid(mc_name2, mc_id2):
+	$Layer/MCPlayerUUID.text = mc_id2
+	mc_id = mc_id2
+	mc_name = mc_name2
+
+
+func _on_AddMCAccountDialogue_confirmed():
+	emit_signal(\"mc_account_added\", mc_id, mc_name)
+"
 
 [node name="Support" type="Control"]
 anchor_right = 0.862
@@ -22,37 +101,192 @@ margin_right = 0.311951
 theme = ExtResource( 1 )
 script = SubResource( 1 )
 __meta__ = {
-"_edit_horizontal_guides_": [ 60.0, 270.0, 510.0, 300.0 ],
-"_edit_vertical_guides_": [ 883.0, 56.0, 401.0, 481.0, 826.0 ]
+"_edit_vertical_guides_": [ 888.0 ]
 }
 
 [node name="Header" type="Label" parent="."]
 margin_right = 881.0
 margin_bottom = 45.0
 custom_fonts/font = SubResource( 2 )
-text = "Welcome back"
+text = "Support"
 align = 1
 
-[node name="Dash1" type="Control" parent="."]
-margin_left = 56.0
-margin_top = 60.0
-margin_right = 401.0
-margin_bottom = 270.0
+[node name="PlayerSearch" type="Control" parent="."]
+margin_left = 49.0
+margin_top = 61.0
+margin_right = 472.0
+margin_bottom = 286.0
 
-[node name="Dash2" type="Control" parent="."]
-margin_left = 481.0
-margin_top = 60.0
-margin_right = 826.0
-margin_bottom = 270.0
+[node name="PlayerIDEnter" type="LineEdit" parent="PlayerSearch"]
+margin_left = 14.0
+margin_top = 12.0
+margin_right = 134.0
+margin_bottom = 47.0
+placeholder_text = "Player ID"
+caret_blink = true
 
-[node name="Dash3" type="Control" parent="."]
-margin_left = 481.0
-margin_top = 300.0
-margin_right = 826.0
-margin_bottom = 510.0
+[node name="IDSearch" type="Button" parent="PlayerSearch"]
+margin_left = 155.0
+margin_top = 17.0
+margin_right = 212.0
+margin_bottom = 42.0
+text = "Search"
 
-[node name="Dash4" type="Control" parent="."]
-margin_left = 56.0
-margin_top = 300.0
-margin_right = 401.0
-margin_bottom = 510.0
+[node name="CreatePlayer" type="Button" parent="PlayerSearch"]
+margin_left = 17.0
+margin_top = 52.0
+margin_right = 103.0
+margin_bottom = 76.0
+text = "Create Player"
+
+[node name="PlayerResult" type="Control" parent="."]
+margin_left = 276.0
+margin_top = 68.0
+margin_right = 887.0
+margin_bottom = 600.0
+
+[node name="Bg" type="ColorRect" parent="PlayerResult"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 0.360784 )
+
+[node name="PlayerUUID" type="LineEdit" parent="PlayerResult"]
+margin_left = 116.0
+margin_top = 20.0
+margin_right = 211.0
+margin_bottom = 55.0
+
+[node name="Info" type="Label" parent="PlayerResult/PlayerUUID"]
+margin_left = -101.0
+margin_top = 9.0
+margin_right = -16.0
+margin_bottom = 32.0
+text = "Player-UUID"
+
+[node name="PlayerName" type="LineEdit" parent="PlayerResult"]
+margin_left = 116.0
+margin_top = 74.0
+margin_right = 225.0
+margin_bottom = 109.0
+
+[node name="Info" type="Label" parent="PlayerResult/PlayerName"]
+margin_left = -101.0
+margin_top = 9.0
+margin_right = -16.0
+margin_bottom = 32.0
+text = "Player-Name"
+
+[node name="Categories" type="TabContainer" parent="PlayerResult"]
+margin_left = 237.0
+margin_right = 611.0
+margin_bottom = 274.0
+
+[node name="Punishments" type="Tabs" parent="PlayerResult/Categories"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="Accounts" type="Tabs" parent="PlayerResult/Categories"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="Processes" type="Tabs" parent="PlayerResult/Categories"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="Notes" type="Tabs" parent="PlayerResult/Categories"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+
+[node name="CreatePlayerDialogue" type="ConfirmationDialog" parent="."]
+margin_left = 149.0
+margin_top = 155.0
+margin_right = 752.0
+margin_bottom = 508.0
+window_title = "Create player"
+script = SubResource( 4 )
+
+[node name="Layer" type="Control" parent="CreatePlayerDialogue"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="PlayerUUID" type="LineEdit" parent="CreatePlayerDialogue/Layer"]
+margin_left = 14.0
+margin_top = 95.0
+margin_right = 151.0
+margin_bottom = 125.0
+editable = false
+placeholder_text = "UUID"
+
+[node name="PlayerNumber" type="LineEdit" parent="CreatePlayerDialogue/Layer"]
+margin_left = 14.0
+margin_top = 53.0
+margin_right = 157.0
+margin_bottom = 86.0
+max_length = 4
+placeholder_text = "Player Number"
+caret_blink = true
+
+[node name="MinecraftAccounts" type="ScrollContainer" parent="CreatePlayerDialogue/Layer"]
+margin_left = 407.0
+margin_top = 3.0
+margin_right = 576.0
+margin_bottom = 235.0
+script = ExtResource( 3 )
+
+[node name="MCAccList" type="VBoxContainer" parent="CreatePlayerDialogue/Layer/MinecraftAccounts"]
+
+[node name="AddMCAccount" type="Button" parent="CreatePlayerDialogue/Layer"]
+margin_left = 370.0
+margin_top = 13.0
+margin_right = 392.0
+margin_bottom = 29.0
+text = "+"
+
+[node name="AddMCAccountDialogue" type="ConfirmationDialog" parent="."]
+margin_left = 270.0
+margin_top = 230.0
+margin_right = 597.0
+margin_bottom = 421.0
+window_title = "Add Minecraft account"
+script = SubResource( 3 )
+
+[node name="Layer" type="Control" parent="AddMCAccountDialogue"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="MCPlayerNameEnter" type="LineEdit" parent="AddMCAccountDialogue/Layer"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 106.0
+margin_bottom = 38.0
+placeholder_text = "Enter name"
+caret_blink = true
+
+[node name="MCPlayerUUID" type="LineEdit" parent="AddMCAccountDialogue/Layer"]
+margin_left = 11.0
+margin_top = 56.0
+margin_right = 222.0
+margin_bottom = 86.0
+editable = false
+placeholder_text = "UUID"
+
+[node name="FetchMCUUID" type="Button" parent="AddMCAccountDialogue/Layer"]
+margin_left = 115.0
+margin_top = 9.0
+margin_right = 177.0
+margin_bottom = 39.0
+text = "Fetch"
+
+[connection signal="pressed" from="PlayerSearch/CreatePlayer" to="." method="_on_CreatePlayer_pressed"]
+[connection signal="about_to_show" from="CreatePlayerDialogue" to="CreatePlayerDialogue" method="_on_CreatePlayerDialogue_about_to_show"]
+[connection signal="pressed" from="CreatePlayerDialogue/Layer/AddMCAccount" to="." method="_on_AddMCAccount_pressed"]
+[connection signal="confirmed" from="AddMCAccountDialogue" to="AddMCAccountDialogue" method="_on_AddMCAccountDialogue_confirmed"]
+[connection signal="mc_account_added" from="AddMCAccountDialogue" to="CreatePlayerDialogue" method="_on_AddMCAccountDialogue_mc_account_added"]
+[connection signal="pressed" from="AddMCAccountDialogue/Layer/FetchMCUUID" to="AddMCAccountDialogue" method="_on_FetchMCUUID_pressed"]

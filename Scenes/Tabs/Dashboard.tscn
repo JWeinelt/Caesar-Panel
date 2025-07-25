@@ -1,7 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://Scenes/Objects/Dashboard/DashboardInfo.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/Objects/Dashboard/NotAvailable.tscn" type="PackedScene" id=4]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
@@ -16,8 +18,13 @@ size = 33
 font_data = ExtResource( 2 )
 
 [node name="Dashboard" type="Control"]
+anchor_top = 0.115
+anchor_bottom = 0.275
+margin_top = -69.0
 margin_right = 883.0
-margin_bottom = 600.0
+margin_bottom = 435.0
+grow_horizontal = 0
+grow_vertical = 0
 theme = ExtResource( 1 )
 script = SubResource( 1 )
 __meta__ = {
@@ -26,32 +33,53 @@ __meta__ = {
 }
 
 [node name="Header" type="Label" parent="."]
+anchor_top = -0.126
+anchor_bottom = -0.126
+margin_top = 84.6
 margin_right = 881.0
-margin_bottom = 45.0
+margin_bottom = 129.6
 custom_fonts/font = SubResource( 2 )
 text = "Welcome back"
 align = 1
 
 [node name="Dash1" type="Control" parent="."]
-margin_left = 56.0
-margin_top = 60.0
-margin_right = 401.0
-margin_bottom = 270.0
+anchor_left = 0.063
+anchor_top = 0.1
+anchor_right = 0.454
+anchor_bottom = 0.45
+margin_left = 0.370998
+margin_right = 0.117981
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DashboardCard" parent="Dash1" instance=ExtResource( 4 )]
 
 [node name="Dash2" type="Control" parent="."]
-margin_left = 481.0
-margin_top = 60.0
-margin_right = 826.0
-margin_bottom = 270.0
+anchor_left = 0.545
+anchor_top = 0.1
+anchor_right = 0.935
+anchor_bottom = 0.45
+margin_left = -0.235016
+margin_right = 0.394958
+
+[node name="DashboardCard" parent="Dash2" instance=ExtResource( 3 )]
 
 [node name="Dash3" type="Control" parent="."]
-margin_left = 481.0
-margin_top = 300.0
-margin_right = 826.0
-margin_bottom = 510.0
+anchor_left = 0.545
+anchor_top = 0.5
+anchor_right = 0.935
+anchor_bottom = 0.85
+margin_left = -0.235016
+margin_right = 0.394958
+
+[node name="DashboardCard" parent="Dash3" instance=ExtResource( 3 )]
 
 [node name="Dash4" type="Control" parent="."]
-margin_left = 56.0
-margin_top = 300.0
-margin_right = 401.0
-margin_bottom = 510.0
+anchor_left = 0.063
+anchor_top = 0.5
+anchor_right = 0.454
+anchor_bottom = 0.85
+margin_left = 0.370998
+margin_right = 0.117981
+
+[node name="DashboardCard" parent="Dash4" instance=ExtResource( 3 )]

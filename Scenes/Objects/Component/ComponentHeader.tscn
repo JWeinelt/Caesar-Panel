@@ -12,7 +12,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -970.0
 margin_bottom = -577.0
-rect_min_size = Vector2( 0, 50 )
+rect_min_size = Vector2( 0, 70 )
 theme = ExtResource( 1 )
 custom_fonts/font = SubResource( 1 )
 text = "dawda"
@@ -21,5 +21,5 @@ script = ExtResource( 2 )
 [node name="Children" type="VBoxContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_top = 26.0
-margin_bottom = 26.0
+margin_top = 46.0
+margin_bottom = 46.0
