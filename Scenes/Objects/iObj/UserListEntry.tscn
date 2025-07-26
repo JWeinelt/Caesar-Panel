@@ -64,6 +64,7 @@ tracks/0/keys = {
 [node name="UserListEntry" type="Control"]
 margin_right = 157.0
 margin_bottom = 41.0
+rect_min_size = Vector2( 157, 41 )
 script = ExtResource( 2 )
 
 [node name="Bg" type="Panel" parent="."]

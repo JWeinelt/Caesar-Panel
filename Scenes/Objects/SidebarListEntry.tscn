@@ -7,23 +7,50 @@ script/source = "extends Control
 
 signal pressed(entry_name)
 
+var currently_open = false
+
 export(String) var entry_name
 export(String) var icon_path
+
+export(bool) var needs_activation = false
+export(bool) var needs_permission = false
+export(bool) var initial_open = false
+export(String) var permission
 
 export(PackedScene) var to_load
 
 func _ready():
+	if initial_open: 
+		$FX.play(\"fade_in\")
+		currently_open = true
+	if needs_activation and not GE.feature_enabled(entry_name) or needs_permission and not GE.has_permission(permission): 
+		hide()
+		return
 	$Name.text = entry_name
+	if $Name.text == \"Mails\": $Name.text = \"Courier\"
 	var style = StyleBoxTexture.new()
 	style.texture = load(\"res://Assets/sidebar/%s.png\" % icon_path)
 	$Icon.set(\"custom_styles/panel\", style)
+	
+
+
+func select(selected):
+	if not currently_open:
+		if selected:
+			$FX.play(\"fade_in\")
+	else:
+		if not selected: $FX.play(\"fade_out\")
+	currently_open = selected
+
 
 func _on_Overlay_mouse_entered():
-	$FX.play(\"fade_in\")
+	if not currently_open:
+		$FX.play(\"fade_in\")
 
 
 func _on_Overlay_mouse_exited():
-	$FX.play(\"fade_out\")
+	if not currently_open:
+		$FX.play(\"fade_out\")
 
 
 func _on_Overlay_gui_input(event):

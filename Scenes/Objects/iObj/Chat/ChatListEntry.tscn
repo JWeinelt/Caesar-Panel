@@ -1,0 +1,105 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://Assets/icons/stopped.png" type="Texture" id=2]
+
+[sub_resource type="GDScript" id=3]
+script/source = "extends Control
+
+signal open_chat(data)
+
+var data
+
+func _ready():
+	$OptionMenu.get_popup().connect(\"id_pressed\", self, \"_on_option_selected\")
+
+func setup(chat_data):
+	$Name.text = chat_data.customName
+	data = chat_data
+
+func rename(new_name):
+	$Name.text = new_name
+
+
+func notify_chat():
+	$Notification.show()
+
+
+func _on_Layout_gui_input(event):
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == BUTTON_LEFT:
+			emit_signal(\"open_chat\", data)
+			$Notification.hide()
+
+
+func _on_option_selected(idx):
+	if idx == 3:
+		$OptionMenu/NewName.show()
+
+
+func _on_NewName_text_entered(new_text):
+	$OptionMenu/NewName.hide()
+	ChatClient.rename_chat(data.uniqueID, new_text)
+"
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.215686, 0.215686, 0.215686, 1 )
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="DynamicFont" id=2]
+size = 19
+font_data = ExtResource( 1 )
+
+[node name="ChatListEntry" type="Control"]
+anchor_right = 0.146
+anchor_bottom = 0.067
+margin_right = 0.495987
+margin_bottom = -0.200001
+rect_min_size = Vector2( 150, 40 )
+script = SubResource( 3 )
+
+[node name="Bg" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 1 )
+
+[node name="Name" type="Label" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = SubResource( 2 )
+text = "Chatname"
+valign = 1
+
+[node name="Layout" type="Control" parent="."]
+margin_right = 149.0
+margin_bottom = 40.0
+
+[node name="OptionMenu" type="MenuButton" parent="."]
+margin_left = 117.0
+margin_top = 11.0
+margin_right = 141.0
+margin_bottom = 31.0
+text = "..."
+items = [ "Leave", null, 0, false, false, 0, 0, null, "", false, "Delete", null, 0, false, false, 1, 0, null, "", false, "Call", null, 0, false, false, 2, 0, null, "", false, "Rename", null, 0, false, false, 3, 0, null, "", false ]
+
+[node name="NewName" type="LineEdit" parent="OptionMenu"]
+visible = false
+margin_left = -108.0
+margin_top = 38.0
+margin_right = 15.0
+margin_bottom = 62.0
+
+[node name="Notification" type="TextureRect" parent="."]
+visible = false
+margin_left = 133.0
+margin_top = -8.0
+margin_right = 333.0
+margin_bottom = 192.0
+rect_scale = Vector2( 0.112, 0.112 )
+texture = ExtResource( 2 )
+
+[connection signal="gui_input" from="Layout" to="." method="_on_Layout_gui_input"]
+[connection signal="text_entered" from="OptionMenu/NewName" to="." method="_on_NewName_text_entered"]

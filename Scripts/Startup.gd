@@ -20,8 +20,9 @@ func login():
 	var username = $Username/UEnter.text
 	var password = $Password/PEnter.text
 	if username.empty() or password.empty():
+		$Loader.end_loading()
 		$Error.show()
-		$Error.text = "Please provide a username and a password."
+		$Error.text = "Invalid username or password"
 		return
 	GE.login(username, password)
 
@@ -44,7 +45,11 @@ func _on_UEnter_text_entered(_new_text):
 
 func _on_caesar_auth_fail(reason):
 	$Error.show()
-	$Error.text = "Response from server: " + reason
+	var text = "Response from server: " + reason
+	if reason == "PASSWORD_INVALID": text = "Invalid username or password."
+	if reason == "USER_DISABLED": text = "This user cannot be used to log in."
+	$Error.text = text
+	$Loader.end_loading()
 
 
 func _on_ShowPW_toggled(button_pressed):

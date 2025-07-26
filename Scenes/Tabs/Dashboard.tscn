@@ -19,10 +19,11 @@ font_data = ExtResource( 2 )
 
 [node name="Dashboard" type="Control"]
 anchor_top = 0.115
-anchor_bottom = 0.275
+anchor_right = 0.862
+anchor_bottom = 0.288
 margin_top = -69.0
-margin_right = 883.0
-margin_bottom = 435.0
+margin_right = 0.311951
+margin_bottom = 427.2
 grow_horizontal = 0
 grow_vertical = 0
 theme = ExtResource( 1 )
@@ -33,11 +34,9 @@ __meta__ = {
 }
 
 [node name="Header" type="Label" parent="."]
-anchor_top = -0.126
-anchor_bottom = -0.126
-margin_top = 84.6
-margin_right = 881.0
-margin_bottom = 129.6
+anchor_right = 0.998
+anchor_bottom = 0.075
+margin_right = -0.234009
 custom_fonts/font = SubResource( 2 )
 text = "Welcome back"
 align = 1

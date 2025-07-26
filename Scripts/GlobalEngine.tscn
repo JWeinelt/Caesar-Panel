@@ -43,6 +43,14 @@ script = ExtResource( 1 )
 
 [node name="GetUsers" type="HTTPRequest" parent="Management"]
 
+[node name="GetRoles" type="HTTPRequest" parent="Management"]
+
+[node name="CreateRole" type="HTTPRequest" parent="Management"]
+
+[node name="GetPermissions" type="HTTPRequest" parent="Management"]
+
+[node name="SendPermissions" type="HTTPRequest" parent="Management"]
+
 [node name="Minecraft" type="Node" parent="."]
 
 [node name="GetUUIDFromName" type="HTTPRequest" parent="Minecraft"]
@@ -58,6 +66,11 @@ script = ExtResource( 1 )
 [connection signal="request_completed" from="CloudNET/Action" to="." method="_on_Action_request_completed"]
 [connection signal="request_completed" from="Setup/CheckConnection" to="." method="_on_CheckConnection_request_completed"]
 [connection signal="request_completed" from="Setup/ValidateCode" to="." method="_on_ValidateCode_request_completed"]
+[connection signal="request_completed" from="Management/UserAction" to="." method="_on_UserAction_request_completed"]
 [connection signal="request_completed" from="Management/GetConfig" to="." method="_on_GetConfig_request_completed"]
 [connection signal="request_completed" from="Management/GetUsers" to="." method="_on_GetUsers_request_completed"]
+[connection signal="request_completed" from="Management/GetRoles" to="." method="_on_GetRoles_request_completed"]
+[connection signal="request_completed" from="Management/CreateRole" to="." method="_on_CreateRole_request_completed"]
+[connection signal="request_completed" from="Management/GetPermissions" to="." method="_on_GetPermissions_request_completed"]
+[connection signal="request_completed" from="Management/SendPermissions" to="." method="_on_SendPermissions_request_completed"]
 [connection signal="request_completed" from="Minecraft/GetUUIDFromName" to="." method="_on_GetUUIDFromName_request_completed"]

@@ -181,6 +181,9 @@ CN="*res://Scripts/CloudNET.gd"
 GE="*res://Scripts/GlobalEngine.tscn"
 JsonDataParser="*res://Scripts/JsonDataParser.gd"
 DataLoader="*res://Scripts/DataLoader.tscn"
+Worker="*res://Scripts/CaesarWorker.tscn"
+ChatClient="*res://Scripts/Chat/ChatClient.tscn"
+EmojiWrapper="*res://Scripts/EmojiWrapper.gd"
 
 [display]
 

@@ -7,6 +7,13 @@ onready var cBtn = $ViewClientSett
 onready var sBtn = $ViewServerSett
 
 func _ready():
+	if not GE.has_permission("caesar.admin.change-config"):
+		serv.hide()
+		client.show()
+		cBtn.hide()
+		sBtn.hide()
+		$ClientSettings/HeaderClient.text = "Preferences"
+		return
 	serv.hide()
 	client.show()
 	cBtn.disabled = true

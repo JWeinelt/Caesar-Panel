@@ -55,7 +55,7 @@ func generate_uuid() -> String:
 
 func random_hex(length: int) -> String:
 	var s = \"\"
-	for i in range(length):
+	for _i in range(length):
 		var value = rng.randi() % 16
 		s += \"0123456789abcdef\"[value]
 	return s
@@ -122,6 +122,7 @@ margin_left = 14.0
 margin_top = 12.0
 margin_right = 134.0
 margin_bottom = 47.0
+custom_colors/cursor_color = Color( 1, 1, 1, 1 )
 placeholder_text = "Player ID"
 caret_blink = true
 
@@ -155,6 +156,8 @@ margin_left = 116.0
 margin_top = 20.0
 margin_right = 211.0
 margin_bottom = 55.0
+custom_colors/cursor_color = Color( 1, 1, 1, 1 )
+caret_blink = true
 
 [node name="Info" type="Label" parent="PlayerResult/PlayerUUID"]
 margin_left = -101.0
@@ -168,6 +171,8 @@ margin_left = 116.0
 margin_top = 74.0
 margin_right = 225.0
 margin_bottom = 109.0
+custom_colors/cursor_color = Color( 1, 1, 1, 1 )
+caret_blink = true
 
 [node name="Info" type="Label" parent="PlayerResult/PlayerName"]
 margin_left = -101.0
@@ -213,8 +218,10 @@ window_title = "Create player"
 script = SubResource( 4 )
 
 [node name="Layer" type="Control" parent="CreatePlayerDialogue"]
-margin_right = 40.0
-margin_bottom = 40.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 595.0
+margin_bottom = 321.0
 
 [node name="PlayerUUID" type="LineEdit" parent="CreatePlayerDialogue/Layer"]
 margin_left = 14.0
@@ -258,8 +265,10 @@ window_title = "Add Minecraft account"
 script = SubResource( 3 )
 
 [node name="Layer" type="Control" parent="AddMCAccountDialogue"]
-margin_right = 40.0
-margin_bottom = 40.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 319.0
+margin_bottom = 159.0
 
 [node name="MCPlayerNameEnter" type="LineEdit" parent="AddMCAccountDialogue/Layer"]
 margin_left = 8.0

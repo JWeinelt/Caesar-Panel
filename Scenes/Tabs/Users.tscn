@@ -1,23 +1,59 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=13 format=2]
 
-[ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
+[ext_resource path="res://Assets/Customizabletheme/theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://addons/SmoothScroll/SmoothScrollContainer.gd" type="Script" id=3]
+[ext_resource path="res://Assets/fonts/Segoe UI Bold Italic.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://Assets/fonts/Segoe UI Italic.ttf" type="DynamicFontData" id=5]
+[ext_resource path="res://Scripts/ScriptPartsUI/Background.gd" type="Script" id=6]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
 
 var selected_user_obj
+var is_creating_new = false
+
+var waiting_for_respone = false
+var selected_user = \"\"
+
+var user_mode = true
+var available_perms = []
+var selected_perms = []
+
+var user_perms_server = []
 
 func _ready():
+	if not GE.has_permission(\"caesar.admin.user.view\") or not GE.has_permission(\"caesar.admin.user.list\"): return
 # warning-ignore:return_value_discarded
 	GE.connect(\"got_users\", self, \"_on_users_loaded_from_server\")
+# warning-ignore:return_value_discarded
+	GE.connect(\"got_roles\", self, \"_on_roles_loaded_from_server\")
+# warning-ignore:return_value_discarded
+	GE.connect(\"got_permissions\", self, \"_on_permissions_loaded_from_server\")
+# warning-ignore:return_value_discarded
+	GE.connect(\"user_action_success\", self, \"_on_user_action_success\")
 	GE.get_users()
+	GE.get_roles()
+	GE.get_permissions()
+
+
+func update_mode_display():
+	if user_mode:
+		$TabButtons/Mode.text = \"Roles\"
+		$Roles.hide()
+		$UserList.show()
+		$TabButtons/CreateUser.show()
+	else:
+		$TabButtons/Mode.text = \"Users\"
+		$Roles.show()
+		$UserList.hide()
+		$TabButtons/CreateUser.hide()
 
 
 func _on_users_loaded_from_server(data):
-	print(data)
+	for i in $UserList/List.get_children(): i.queue_free()
 	for i in data:
+		user_perms_server.append({\"username\": i.username, \"permissions\": i.permissions})
 		var userlist_entry = load(\"res://Scenes/Objects/iObj/UserListEntry.tscn\").instance()
 		userlist_entry.json = i
 		userlist_entry.connect(\"clicked\", self, \"_on_user_list_selected\")
@@ -28,12 +64,66 @@ func _on_users_loaded_from_server(data):
 		userlist_entry.change_name(i.username)
 
 
+func _on_roles_loaded_from_server(data):
+	for i in $Roles/RolesList/List.get_children(): i.queue_free()
+	for i in data:
+		var userlist_entry = load(\"res://Scenes/Objects/iObj/RoleListEntry.tscn\").instance()
+		userlist_entry.json = i
+		userlist_entry.connect(\"clicked\", self, \"_on_user_list_selected\")
+		$Roles/RolesList/List.add_child(userlist_entry)
+		userlist_entry.change_name(i.name)
+		userlist_entry.change_color(i.color)
+
+
+func _on_permissions_loaded_from_server(data):
+	available_perms = data
+	
+	for i in data:
+		var perm = load(\"res://Scenes/Objects/iObj/PermissionListEntry.tscn\").instance()
+		perm.setup(i.permissionKey)
+		perm.selectable = true
+		perm.connect(\"perm_selected\", self, \"_on_available_perms_list_perm_selected\")
+		$UserCreation/PermissionSelection/Layer/AllPermList/Perms.add_child(perm)
+
+
+func _on_available_perms_list_perm_selected(permission):
+	var perm = load(\"res://Scenes/Objects/iObj/PermissionListEntry.tscn\").instance()
+	perm.setup(permission)
+	perm.selectable = false
+	perm.connect(\"remove_perm\", self, \"_on_selected_perms_perm_remove\")
+	$UserCreation/Permissions/PermissionList/List.add_child(perm)
+	selected_perms.append(permission)
+	$UserCreation/PermissionSelection.hide()
+	
+	for i in $UserCreation/PermissionSelection/Layer/AllPermList/Perms.get_children():
+		if selected_perms.find(i.permission_name) != -1: i.hide()
+		else: i.show()
+
+
+func _on_selected_perms_perm_remove(perm):
+	selected_perms.remove(perm)
+	for i in $UserCreation/Permissions/PermissionList/List.get_children():
+		if i.permission_name == perm: i.queue_free()
+	for i in $UserCreation/PermissionSelection/Layer/AllPermList/Perms.get_children():
+		if selected_perms.find(i.permission_name) != -1: i.hide()
+		else: i.show()
+
+
 func _on_user_list_selected(json):
+	for i in $UserCreation/Permissions/PermissionList/List.get_children():
+		_on_selected_perms_perm_remove(i.permission_name)
+	
 	for i in $UserList/List.get_children():
 		if not i.has_method(\"username\"): continue
 		if json.username == i.username(): 
 			selected_user_obj = i
 			$UserCreation/UsernameEnter.text = json.username
+			$UserCreation.show()
+			selected_user = json.username
+			is_creating_new = false
+			for p in user_perms_server:
+				if p.username == json.username:
+					for j in p.permissions: _on_available_perms_list_perm_selected(j)
 			break
 
 
@@ -41,10 +131,54 @@ func _on_UsernameEnter_text_changed(new_text):
 	if selected_user_obj == null: return
 	
 	selected_user_obj.change_name(new_text)
+	selected_user = new_text
 
 
 func _on_CreateUser_pressed():
-	pass # Replace with function body.
+	$UserCreation.show()
+	is_creating_new = true
+
+
+func _on_UserCreate_pressed():
+	if is_creating_new:
+		GE.create_user($UserCreation/UsernameEnter.text, $UserCreation/PasswordEnter.text)
+		waiting_for_respone = true
+	else:
+		GE.update_permissions(selected_user, selected_perms)
+
+
+func _on_user_action_success():
+	if waiting_for_respone:
+		GE.update_permissions(selected_user, selected_perms)
+
+
+func _on_Mode_pressed():
+	user_mode = not user_mode
+	update_mode_display()
+
+
+func _on_CreateRole_pressed():
+	$Roles/RoleCreation.show()
+
+
+func _on_CreateRoleButton_pressed():
+	GE.create_role($Roles/RoleCreation/RoleNameEnter.text, $Roles/RoleCreation/RolePickColor/ColorPreview.color)
+
+
+func _on_RoleColorPicker_color_changed(color):
+	$Roles/RoleCreation/RolePickColor/ColorPreview.color = color
+
+
+func _on_RolePickColor_pressed():
+	$Roles/RoleCreation/RoleColorPicker.visible = not $Roles/RoleCreation/RoleColorPicker.visible
+
+
+func _on_RoleSelectColor_pressed():
+	$Roles/RoleCreation/RoleColorPicker.hide()
+
+
+func _on_AddPermissionFromList_pressed():
+	$UserCreation/PermissionSelection.popup()
 "
 
 [sub_resource type="DynamicFont" id=2]
@@ -57,6 +191,21 @@ corner_radius_top_left = 30
 corner_radius_top_right = 30
 corner_radius_bottom_right = 30
 corner_radius_bottom_left = 30
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.090332, 0.125826, 0.15625, 1 )
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="DynamicFont" id=5]
+size = 24
+font_data = ExtResource( 4 )
+
+[sub_resource type="DynamicFont" id=6]
+size = 19
+font_data = ExtResource( 5 )
 
 [node name="Users" type="Control"]
 anchor_right = 0.862
@@ -79,13 +228,14 @@ align = 1
 [node name="Bg3" type="Panel" parent="."]
 anchor_left = 0.053
 anchor_top = 0.123
-anchor_right = 0.95
+anchor_right = 1.06
 anchor_bottom = 0.953
-margin_left = 0.201
+margin_left = 0.201004
 margin_top = 0.199997
-margin_right = 0.150024
-margin_bottom = 0.199951
+margin_right = 0.0200195
+margin_bottom = 0.200012
 custom_styles/panel = SubResource( 3 )
+script = ExtResource( 6 )
 
 [node name="TabButtons" type="HBoxContainer" parent="."]
 margin_left = 67.0
@@ -95,14 +245,15 @@ margin_bottom = 132.0
 custom_constants/separation = 40
 
 [node name="CreateUser" type="Button" parent="TabButtons"]
-margin_right = 89.0
+margin_right = 75.0
 margin_bottom = 40.0
 text = "Create user"
 
-[node name="Roles" type="Button" parent="TabButtons"]
-margin_left = 129.0
-margin_right = 203.0
+[node name="Mode" type="Button" parent="TabButtons"]
+margin_left = 115.0
+margin_right = 177.0
 margin_bottom = 40.0
+disabled = true
 text = "Edit roles"
 
 [node name="UserList" type="ScrollContainer" parent="."]
@@ -113,6 +264,92 @@ margin_bottom = 546.0
 script = ExtResource( 3 )
 
 [node name="List" type="VBoxContainer" parent="UserList"]
+
+[node name="Roles" type="Control" parent="."]
+visible = false
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="RolesList" type="ScrollContainer" parent="Roles"]
+margin_left = 61.0
+margin_top = 154.0
+margin_right = 218.0
+margin_bottom = 546.0
+script = ExtResource( 3 )
+
+[node name="List" type="VBoxContainer" parent="Roles/RolesList"]
+
+[node name="CreateRole" type="Button" parent="Roles"]
+margin_left = 230.0
+margin_top = 160.0
+margin_right = 251.0
+margin_bottom = 193.0
+text = "+"
+
+[node name="RoleCreation" type="Control" parent="Roles"]
+margin_left = 299.0
+margin_top = 177.0
+margin_right = 786.0
+margin_bottom = 536.0
+
+[node name="Bg" type="Panel" parent="Roles/RoleCreation"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 4 )
+
+[node name="Header" type="Label" parent="Roles/RoleCreation"]
+margin_left = 31.0
+margin_top = 7.0
+margin_right = 206.0
+margin_bottom = 40.0
+custom_fonts/font = SubResource( 5 )
+text = "Create new role"
+
+[node name="RoleNameEnter" type="LineEdit" parent="Roles/RoleCreation"]
+margin_left = 17.0
+margin_top = 55.0
+margin_right = 148.0
+margin_bottom = 90.0
+placeholder_text = "Enter name"
+
+[node name="RoleColorPicker" type="ColorPicker" parent="Roles/RoleCreation"]
+visible = false
+margin_left = 267.0
+margin_top = -54.0
+margin_right = 557.0
+margin_bottom = 467.0
+rect_scale = Vector2( 0.8, 0.8 )
+edit_alpha = false
+presets_enabled = false
+presets_visible = false
+
+[node name="RolePickColor" type="Button" parent="Roles/RoleCreation"]
+margin_left = 23.0
+margin_top = 107.0
+margin_right = 115.0
+margin_bottom = 130.0
+text = "Select Color"
+
+[node name="ColorPreview" type="ColorRect" parent="Roles/RoleCreation/RolePickColor"]
+margin_left = 103.0
+margin_top = -9.0
+margin_right = 143.0
+margin_bottom = 31.0
+
+[node name="RoleSelectColor" type="Button" parent="Roles/RoleCreation"]
+visible = false
+margin_left = 199.0
+margin_top = 330.0
+margin_right = 238.0
+margin_bottom = 346.0
+text = "OK"
+
+[node name="CreateRoleButton" type="Button" parent="Roles/RoleCreation"]
+margin_left = 32.0
+margin_top = 194.0
+margin_right = 126.0
+margin_bottom = 223.0
+text = "Create Role"
 
 [node name="UserCreation" type="Control" parent="."]
 margin_left = 256.0
@@ -125,6 +362,8 @@ margin_left = 94.0
 margin_top = 41.0
 margin_right = 228.0
 margin_bottom = 76.0
+custom_colors/cursor_color = Color( 1, 1, 1, 1 )
+caret_blink = true
 
 [node name="Label" type="Label" parent="UserCreation/UsernameEnter"]
 margin_left = -88.0
@@ -139,7 +378,9 @@ margin_left = 94.0
 margin_top = 88.0
 margin_right = 228.0
 margin_bottom = 123.0
+custom_colors/cursor_color = Color( 1, 1, 1, 1 )
 secret = true
+caret_blink = true
 
 [node name="Label" type="Label" parent="UserCreation/PasswordEnter"]
 margin_left = -88.0
@@ -154,8 +395,71 @@ margin_left = 8.0
 margin_top = 138.0
 margin_right = 210.0
 margin_bottom = 171.0
+hint_tooltip = "This option is currently not available"
 disabled = true
 text = "Enforce password policy"
+
+[node name="Permissions" type="ColorRect" parent="UserCreation"]
+margin_left = 286.0
+margin_top = 41.0
+margin_right = 501.0
+margin_bottom = 402.0
+color = Color( 0.113725, 0.113725, 0.113725, 1 )
+
+[node name="Header" type="Label" parent="UserCreation/Permissions"]
+anchor_right = 1.0
+margin_bottom = 34.0
+custom_fonts/font = SubResource( 6 )
+text = "Permissions"
+align = 1
+
+[node name="PermissionList" type="ScrollContainer" parent="UserCreation/Permissions"]
+anchor_top = 0.136
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -0.0960045
+margin_right = 34.0
+script = ExtResource( 3 )
+
+[node name="List" type="VBoxContainer" parent="UserCreation/Permissions/PermissionList"]
+
+[node name="AddPermissionFromList" type="Button" parent="UserCreation/Permissions"]
+margin_left = 12.0
+margin_top = 12.0
+margin_right = 30.0
+margin_bottom = 28.0
+text = "+"
+
+[node name="PermissionSelection" type="AcceptDialog" parent="UserCreation"]
+margin_left = 55.0
+margin_top = 69.0
+margin_right = 330.0
+margin_bottom = 368.0
+window_title = "Select permissions"
+
+[node name="Layer" type="Control" parent="UserCreation/PermissionSelection"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 267.0
+margin_bottom = 267.0
+
+[node name="AllPermList" type="ScrollContainer" parent="UserCreation/PermissionSelection/Layer"]
+margin_left = 19.0
+margin_top = 58.0
+margin_right = 260.0
+margin_bottom = 242.0
+script = ExtResource( 3 )
+
+[node name="Perms" type="VBoxContainer" parent="UserCreation/PermissionSelection/Layer/AllPermList"]
+
+[node name="SearchPerms" type="LineEdit" parent="UserCreation/PermissionSelection/Layer"]
+margin_left = 14.0
+margin_top = 5.0
+margin_right = 210.0
+margin_bottom = 35.0
+custom_colors/cursor_color = Color( 1, 1, 1, 1 )
+placeholder_text = "Search..."
+caret_blink = true
 
 [node name="UserCreate" type="Button" parent="UserCreation"]
 margin_top = 198.0
@@ -164,4 +468,12 @@ margin_bottom = 231.0
 text = "Apply"
 
 [connection signal="pressed" from="TabButtons/CreateUser" to="." method="_on_CreateUser_pressed"]
+[connection signal="pressed" from="TabButtons/Mode" to="." method="_on_Mode_pressed"]
+[connection signal="pressed" from="Roles/CreateRole" to="." method="_on_CreateRole_pressed"]
+[connection signal="color_changed" from="Roles/RoleCreation/RoleColorPicker" to="." method="_on_RoleColorPicker_color_changed"]
+[connection signal="pressed" from="Roles/RoleCreation/RolePickColor" to="." method="_on_RolePickColor_pressed"]
+[connection signal="pressed" from="Roles/RoleCreation/RoleSelectColor" to="." method="_on_RoleSelectColor_pressed"]
+[connection signal="pressed" from="Roles/RoleCreation/CreateRoleButton" to="." method="_on_CreateRoleButton_pressed"]
 [connection signal="text_changed" from="UserCreation/UsernameEnter" to="." method="_on_UsernameEnter_text_changed"]
+[connection signal="pressed" from="UserCreation/Permissions/AddPermissionFromList" to="." method="_on_AddPermissionFromList_pressed"]
+[connection signal="pressed" from="UserCreation/UserCreate" to="." method="_on_UserCreate_pressed"]

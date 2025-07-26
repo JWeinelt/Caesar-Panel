@@ -1,14 +1,83 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://addons/SmoothScroll/SmoothScrollContainer.gd" type="Script" id=3]
+[ext_resource path="res://Scripts/ScriptPartsUI/Background.gd" type="Script" id=4]
+[ext_resource path="res://Assets/Emoji/tile000.png" type="Texture" id=5]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
 
+var current_chat_open = \"\"
 
 func _ready():
-	pass
+	ChatClient.start()
+	ChatClient.connect(\"got_chat_list\", self, \"_on_get_chat_list\")
+	ChatClient.connect(\"message_received\", self, \"_on_message_received\")
+	ChatClient.connect(\"chat_renamed\", self, \"_on_chat_renamed\")
+
+
+func _on_get_chat_list(chats):
+	for i in $Screen/Chats/ChatList.get_children(): i.queue_free()
+	
+	for i in chats:
+		var chat_entry = load(\"res://Scenes/Objects/iObj/Chat/ChatListEntry.tscn\").instance()
+		$Screen/Chats/ChatList.add_child(chat_entry)
+		chat_entry.setup(i)
+		chat_entry.connect(\"open_chat\", self, \"_on_open_chat\")
+
+
+func _on_open_chat(data):
+	ChatClient.request_chats()
+	current_chat_open = data.uniqueID
+	print(current_chat_open)
+	for i in $Screen/Chat/List/ChatMessages.get_children(): i.queue_free()
+	
+	for msg in data.messages:
+		if msg.sender != \"SYSTEM\":
+			var message = load(\"res://Scenes/Objects/iObj/Chat/ChatMessage.tscn\").instance()
+			$Screen/Chat/List/ChatMessages.add_child(message)
+			message.setup(msg.sender, msg.message, msg.date)
+		else:
+			var message = load(\"res://Scenes/Objects/iObj/Chat/ChatMessageSystem.tscn\").instance()
+			$Screen/Chat/List/ChatMessages.add_child(message)
+			message.setup(msg.message, msg.date)
+
+
+func _on_message_received(data):
+	if data.chat == current_chat_open:
+		if data.sender.username != \"SYSTEM\":
+			var message = load(\"res://Scenes/Objects/iObj/Chat/ChatMessage.tscn\").instance()
+			$Screen/Chat/List/ChatMessages.add_child(message)
+			message.setup(data.sender.username, data.message, data.timestamp)
+		else:
+			var message = load(\"res://Scenes/Objects/iObj/Chat/ChatMessageSystem.tscn\").instance()
+			$Screen/Chat/List/ChatMessages.add_child(message)
+			message.setup(data.message, data.timestamp)
+	else:
+		for c in $Screen/Chats/ChatList.get_children():
+			if c.data.uniqueID == data.chat:
+				c.notify_chat()
+
+
+func _on_chat_renamed(chat, rename):
+	for i in $Screen/Chats/ChatList.get_children():
+		if i.data.uniqueID == chat:
+			i.rename(rename)
+
+
+func _on_CreateChat_pressed():
+	ChatClient.create_chat()
+
+
+func _on_ChatInput_text_entered(new_text):
+	ChatClient.send_chat_message(current_chat_open, new_text)
+	$Screen/Chat/ChatInput.text = \"\"
+
+
+func _on_MemberSearch_text_entered(new_text):
+	ChatClient.add_member_to_chat(current_chat_open, new_text)
 "
 
 [sub_resource type="DynamicFont" id=2]
@@ -22,37 +91,107 @@ margin_right = 0.311951
 theme = ExtResource( 1 )
 script = SubResource( 1 )
 __meta__ = {
-"_edit_horizontal_guides_": [ 60.0, 270.0, 510.0, 300.0 ],
-"_edit_vertical_guides_": [ 883.0, 56.0, 401.0, 481.0, 826.0 ]
+"_edit_vertical_guides_": [ 882.0 ]
 }
 
 [node name="Header" type="Label" parent="."]
 margin_right = 881.0
 margin_bottom = 45.0
 custom_fonts/font = SubResource( 2 )
-text = "Welcome back"
+text = "Echo"
 align = 1
 
-[node name="Dash1" type="Control" parent="."]
-margin_left = 56.0
-margin_top = 60.0
-margin_right = 401.0
-margin_bottom = 270.0
+[node name="Screen" type="HBoxContainer" parent="."]
+margin_left = -1.0
+margin_top = 56.0
+margin_right = 883.0
+margin_bottom = 602.0
 
-[node name="Dash2" type="Control" parent="."]
-margin_left = 481.0
-margin_top = 60.0
-margin_right = 826.0
-margin_bottom = 270.0
+[node name="Chats" type="Panel" parent="Screen"]
+margin_right = 150.0
+margin_bottom = 546.0
+rect_min_size = Vector2( 150, 0 )
+script = ExtResource( 4 )
 
-[node name="Dash3" type="Control" parent="."]
-margin_left = 481.0
-margin_top = 300.0
-margin_right = 826.0
-margin_bottom = 510.0
+[node name="Header" type="Label" parent="Screen/Chats"]
+margin_right = 150.0
+margin_bottom = 23.0
+text = "Chats"
+align = 1
 
-[node name="Dash4" type="Control" parent="."]
-margin_left = 56.0
-margin_top = 300.0
-margin_right = 401.0
-margin_bottom = 510.0
+[node name="CreateChat" type="Button" parent="Screen/Chats"]
+margin_left = 128.0
+margin_top = -4.0
+margin_right = 149.0
+margin_bottom = 29.0
+text = "+"
+flat = true
+
+[node name="ChatList" type="VBoxContainer" parent="Screen/Chats"]
+anchor_top = 0.139
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 0.105995
+
+[node name="Chat" type="Panel" parent="Screen"]
+margin_left = 154.0
+margin_right = 724.0
+margin_bottom = 546.0
+rect_min_size = Vector2( 570, 0 )
+script = ExtResource( 4 )
+
+[node name="List" type="ScrollContainer" parent="Screen/Chat"]
+margin_right = 570.0
+margin_bottom = 476.0
+script = ExtResource( 3 )
+hide_scrollbar_over_time = true
+scrollbar_hide_time = 1.0
+
+[node name="ChatMessages" type="VBoxContainer" parent="Screen/Chat/List"]
+
+[node name="ChatInput" type="LineEdit" parent="Screen/Chat"]
+margin_left = 5.0
+margin_top = 504.0
+margin_right = 499.0
+margin_bottom = 539.0
+custom_colors/cursor_color = Color( 1, 1, 1, 1 )
+placeholder_text = "Enter message"
+caret_blink = true
+
+[node name="Emojis" type="Control" parent="Screen/Chat"]
+margin_left = 520.0
+margin_top = 501.0
+margin_right = 560.0
+margin_bottom = 541.0
+
+[node name="Smiley" type="TextureRect" parent="Screen/Chat/Emojis"]
+margin_right = 40.0
+margin_bottom = 40.0
+texture = ExtResource( 5 )
+stretch_mode = 1
+
+[node name="Members" type="Panel" parent="Screen"]
+margin_left = 728.0
+margin_right = 878.0
+margin_bottom = 546.0
+rect_min_size = Vector2( 150, 0 )
+script = ExtResource( 4 )
+
+[node name="Header" type="Label" parent="Screen/Members"]
+margin_right = 150.0
+margin_bottom = 23.0
+text = "Members"
+align = 1
+
+[node name="MemberSearch" type="LineEdit" parent="Screen/Members"]
+margin_left = 4.0
+margin_top = 34.0
+margin_right = 146.0
+margin_bottom = 69.0
+custom_colors/cursor_color = Color( 1, 1, 1, 1 )
+placeholder_text = "Invite members.."
+caret_blink = true
+
+[connection signal="pressed" from="Screen/Chats/CreateChat" to="." method="_on_CreateChat_pressed"]
+[connection signal="text_entered" from="Screen/Chat/ChatInput" to="." method="_on_ChatInput_text_entered"]
+[connection signal="text_entered" from="Screen/Members/MemberSearch" to="." method="_on_MemberSearch_text_entered"]

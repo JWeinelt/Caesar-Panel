@@ -5,6 +5,11 @@ signal clicked(json)
 var username = "New User"
 var json
 
+func _ready():
+	var original_stylebox = $Bg.get_stylebox("panel") as StyleBoxFlat
+	var unique_stylebox = original_stylebox.duplicate()
+	$Bg.add_stylebox_override("panel", unique_stylebox)
+
 
 func change_name(username_new):
 	username = username_new

@@ -1,0 +1,96 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://Scenes/Objects/iObj/RoleListEntry.gd" type="Script" id=2]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.109804, 0.101961, 0.203922, 1 )
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="DynamicFont" id=2]
+size = 20
+font_data = ExtResource( 1 )
+
+[sub_resource type="Animation" id=3]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:custom_styles/panel:bg_color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 0.109804, 0.101961, 0.203922, 1 ) ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_name = "hover_off"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:custom_styles/panel:bg_color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0.2, 0.188235, 0.345098, 1 ), Color( 0.109804, 0.101961, 0.203922, 1 ) ]
+}
+
+[sub_resource type="Animation" id=4]
+resource_name = "hover_on"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath("Bg:custom_styles/panel:bg_color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0.109804, 0.101961, 0.203922, 1 ), Color( 0.2, 0.188235, 0.345098, 1 ) ]
+}
+
+[node name="RoleListEntry" type="Control"]
+margin_right = 157.0
+margin_bottom = 41.0
+rect_min_size = Vector2( 157, 41 )
+script = ExtResource( 2 )
+
+[node name="Bg" type="Panel" parent="."]
+margin_right = 157.0
+margin_bottom = 41.0
+custom_styles/panel = SubResource( 1 )
+
+[node name="Name" type="Label" parent="."]
+margin_left = 8.0
+margin_top = 1.0
+margin_right = 145.0
+margin_bottom = 41.0
+custom_fonts/font = SubResource( 2 )
+text = "New User"
+valign = 1
+clip_text = true
+
+[node name="Layout" type="Control" parent="."]
+margin_right = 157.0
+margin_bottom = 41.0
+
+[node name="FX" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 3 )
+anims/hover_off = SubResource( 5 )
+anims/hover_on = SubResource( 4 )
+
+[connection signal="gui_input" from="Layout" to="." method="_on_Layout_gui_input"]
+[connection signal="mouse_entered" from="Layout" to="." method="_on_Layout_mouse_entered"]
+[connection signal="mouse_exited" from="Layout" to="." method="_on_Layout_mouse_exited"]

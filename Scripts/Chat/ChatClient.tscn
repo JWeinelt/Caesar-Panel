@@ -1,0 +1,114 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node
+
+signal got_chat_list(data)
+signal loaded_chat_content(data)
+signal join_chat(chat_name)
+signal leave_chat(chat_name)
+signal message_received(message_data)
+signal chat_renamed(chat, new_name)
+
+
+var server: WebSocketClient
+
+func start():
+	server = WebSocketClient.new()
+# warning-ignore:return_value_discarded
+	server.connect(\"data_received\", self, \"_on_data_received\")
+	server.connect(\"connection_established\", self, \"_on_connection_success\")
+	var err = server.connect_to_url(\"ws://\" + GE.cs_settings.defaults.caesar_host + \":\" + str(GE.chat_server_port))
+	if err == OK:
+		print(\"Connecting to chat server...\")
+
+
+func _process(delta):
+	if server != null: server.poll()
+
+
+func _on_connection_success(_protocol):
+	send_auth()
+
+
+func _on_data_received():
+	var message := server.get_peer(1).get_packet().get_string_from_utf8()
+	print_debug(\"Received data\")
+	var vm = JSON.parse(message).result
+	parse_action(vm)
+
+
+func parse_action(data):
+	var type = data.get(\"type\")
+	match type:
+		\"SEND_CHAT_LIST\":
+			emit_signal(\"got_chat_list\", data.get(\"chats\"))
+		\"HANDSHAKE\":
+			print(\"Received handshake from server\")
+		\"MESSAGE\":
+			print(\"Received new message\")
+			emit_signal(\"message_received\", data)
+
+
+func rename_chat(chat, new_name):
+	var body = {
+		\"type\": \"RENAME_CHAT\",
+		\"chat\": chat,
+		\"newName\": new_name
+	}
+	send_data(body)
+
+
+func send_auth():
+	var body = {
+		\"type\": \"AUTHENTICATE\",
+		\"myID\": GE.user_id
+	}
+	send_data(body)
+
+func create_chat():
+	var body = {
+		\"type\": \"CREATE_CHAT\"
+	}
+	send_data(body)
+
+
+func send_chat_message(chat, message):
+	print(\"Sending message\")
+	var body = {
+		\"type\": \"SEND_MESSAGE\",
+		\"sender\": {
+			\"uuid\": GE.user_id
+		},
+		\"chat\": chat,
+		\"message\": message
+	}
+	send_data(body)
+
+
+func add_member_to_chat(chat, username):
+	var body = {
+		\"type\": \"ADD_USER\",
+		\"toAdd\": username,
+		\"chat\": chat
+	}
+	send_data(body)
+
+
+func request_chats():
+	var body = {
+		\"type\": \"SEND_CHAT_LIST\",
+		\"user\": GE.user_id
+	}
+	send_data(body)
+
+
+func send_data(data):
+	var err = server.get_peer(1).put_packet(JSON.print(data).to_utf8())
+	if err != OK:
+		print_debug(\"A problem occurred while sending data to chat server.\")
+		printerr(\"Error: \" + str(err))
+"
+
+[node name="ChatClient" type="Node"]
+script = SubResource( 1 )

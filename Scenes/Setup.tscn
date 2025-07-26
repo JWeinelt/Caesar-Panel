@@ -1,6 +1,6 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=20 format=2]
 
-[ext_resource path="res://Assets/Backgrounds/bg31.png" type="Texture" id=1]
+[ext_resource path="res://Assets/Backgrounds/non_blur/bg24.png" type="Texture" id=1]
 [ext_resource path="res://Assets/Theme-Icons/window_close_white.png" type="Texture" id=2]
 [ext_resource path="res://Assets/Shaders/Rounded_Corners.tres" type="Shader" id=3]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=4]
@@ -11,10 +11,42 @@
 [sub_resource type="GDScript" id=12]
 script/source = "extends Control
 
+var first_conn = true
+
 func _ready():
 	get_tree().get_root().set_transparent_background(true)
 	OS.window_borderless = true
 	
+
+
+func _on_GetStarted_pressed():
+	$FX.play(\"ToPage2\")
+
+
+func _on_CheckConnection_pressed():
+	$ConnectionChecker.request(\"http://\" + $Page2/ServerAddress.text + \":48000/csetup/checkconnection\")
+
+
+func _on_ConnectionChecker_request_completed(result, response_code, headers, body):
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	if data.success:
+		if first_conn:
+			first_conn = false
+			$Page2/CodeEnter.show()
+		else:
+			$FX.play(\"Finish\")
+
+
+func _on_CodeEnter_text_entered(new_text):
+	var body = {
+		\"code\": int(new_text)
+	}
+	$ConnectionChecker.request(\"http://\" + $Page2/ServerAddress.text + \":48000/csetup/checkcode\", [], false, HTTPClient.METHOD_POST, JSON.print(body))
+
+
+func _on_Finshup_pressed():
+	GE.cs_settings.default.caesar_host = $Page2/ServerAddress.text
+	get_tree().change_scene(\"res://Scenes/Login.tscn\")
 "
 
 [sub_resource type="ShaderMaterial" id=8]
@@ -55,6 +87,57 @@ font_data = ExtResource( 4 )
 [sub_resource type="DynamicFont" id=14]
 size = 29
 font_data = ExtResource( 7 )
+
+[sub_resource type="Animation" id=17]
+resource_name = "Finish"
+tracks/0/type = "value"
+tracks/0/path = NodePath("../Finish:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../Finish:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../Page2:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.5, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ true, true, false ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("../Page2:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
 
 [sub_resource type="Animation" id=15]
 length = 0.001
@@ -104,7 +187,7 @@ tracks/3/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Vector2( 128, 283 ) ]
+"values": [ Vector2( 256, 283 ) ]
 }
 tracks/4/type = "value"
 tracks/4/path = NodePath("GetStarted:modulate")
@@ -119,7 +202,7 @@ tracks/4/keys = {
 "values": [ Color( 1, 1, 1, 1 ) ]
 }
 tracks/5/type = "value"
-tracks/5/path = NodePath("Admin:modulate")
+tracks/5/path = NodePath("Logo:rect_position")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/imported = false
@@ -128,10 +211,10 @@ tracks/5/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Color( 1, 1, 1, 0 ) ]
+"values": [ Vector2( 408, 12 ) ]
 }
 tracks/6/type = "value"
-tracks/6/path = NodePath("EndUser:modulate")
+tracks/6/path = NodePath("Logo:rect_scale")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/imported = false
@@ -140,11 +223,120 @@ tracks/6/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
+"values": [ Vector2( 0.2, 0.2 ) ]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Header:modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+tracks/8/type = "value"
+tracks/8/path = NodePath("Header:text")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ "Welcome to Caesar!" ]
+}
+tracks/9/type = "value"
+tracks/9/path = NodePath("Header:rect_position")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 347, 222 ) ]
+}
+tracks/10/type = "value"
+tracks/10/path = NodePath("../Page2:modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ) ]
+}
+tracks/11/type = "value"
+tracks/11/path = NodePath("../Page2:visible")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ false ]
+}
+tracks/12/type = "value"
+tracks/12/path = NodePath(".:visible")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ true ]
+}
+tracks/13/type = "value"
+tracks/13/path = NodePath(".:modulate")
+tracks/13/interp = 1
+tracks/13/loop_wrap = true
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+tracks/14/type = "value"
+tracks/14/path = NodePath("../Finish:visible")
+tracks/14/interp = 1
+tracks/14/loop_wrap = true
+tracks/14/imported = false
+tracks/14/enabled = true
+tracks/14/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ false ]
+}
+tracks/15/type = "value"
+tracks/15/path = NodePath("../Finish:modulate")
+tracks/15/interp = 1
+tracks/15/loop_wrap = true
+tracks/15/imported = false
+tracks/15/enabled = true
+tracks/15/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
 "values": [ Color( 1, 1, 1, 0 ) ]
 }
 
 [sub_resource type="Animation" id=16]
 resource_name = "ToPage2"
+length = 2.5
 tracks/0/type = "value"
 tracks/0/path = NodePath("Info:text")
 tracks/0/interp = 1
@@ -155,7 +347,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0, 0.5 ),
 "transitions": PoolRealArray( 1, 1 ),
 "update": 1,
-"values": [ "Let's start with some basic settings.", "Are you an end-user or admin?" ]
+"values": [ "Let's start with some basic settings.", "" ]
 }
 tracks/1/type = "value"
 tracks/1/path = NodePath("Info:modulate")
@@ -164,10 +356,10 @@ tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 0.5, 0.6, 1 ),
-"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
 }
 tracks/2/type = "value"
 tracks/2/path = NodePath("Info:rect_size")
@@ -188,10 +380,10 @@ tracks/3/loop_wrap = true
 tracks/3/imported = false
 tracks/3/enabled = true
 tracks/3/keys = {
-"times": PoolRealArray( 0, 0.5, 0.6, 1 ),
-"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ Vector2( 256, 283 ), Vector2( 128, 283 ), Vector2( 384, 283 ), Vector2( 256, 283 ) ]
+"values": [ Vector2( 256, 283 ), Vector2( 128, 283 ) ]
 }
 tracks/4/type = "value"
 tracks/4/path = NodePath("GetStarted:modulate")
@@ -200,34 +392,118 @@ tracks/4/loop_wrap = true
 tracks/4/imported = false
 tracks/4/enabled = true
 tracks/4/keys = {
-"times": PoolRealArray( 0, 0.3 ),
+"times": PoolRealArray( 0, 0.4 ),
 "transitions": PoolRealArray( 1, 1 ),
 "update": 0,
 "values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
 }
 tracks/5/type = "value"
-tracks/5/path = NodePath("Admin:modulate")
+tracks/5/path = NodePath("Logo:rect_position")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/imported = false
 tracks/5/enabled = true
 tracks/5/keys = {
-"times": PoolRealArray( 0, 0.6, 1 ),
+"times": PoolRealArray( 0, 0.3, 1 ),
 "transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
-"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+"values": [ Vector2( 408, 12 ), Vector2( 408, 12 ), Vector2( 467, -34 ) ]
 }
 tracks/6/type = "value"
-tracks/6/path = NodePath("EndUser:modulate")
+tracks/6/path = NodePath("Logo:rect_scale")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/imported = false
 tracks/6/enabled = true
 tracks/6/keys = {
-"times": PoolRealArray( 0, 0.6, 1 ),
+"times": PoolRealArray( 0, 0.3, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 0.2, 0.2 ), Vector2( 0.2, 0.2 ), Vector2( 0.09, 0.09 ) ]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Header:modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
+"times": PoolRealArray( 0, 0.7, 1, 1.1, 1.4 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/8/type = "value"
+tracks/8/path = NodePath("Header:text")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/keys = {
+"times": PoolRealArray( 0, 1, 1.1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ "Welcome to Caesar!", "Welcome to Caesar!", "Server settings" ]
+}
+tracks/9/type = "value"
+tracks/9/path = NodePath("Header:rect_position")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/keys = {
+"times": PoolRealArray( 0, 1, 1.1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 347, 222 ), Vector2( 347, 222 ), Vector2( 347, 91 ) ]
+}
+tracks/10/type = "value"
+tracks/10/path = NodePath("../Page2:modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/keys = {
+"times": PoolRealArray( 0, 1.8, 2 ),
 "transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
 "values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/11/type = "value"
+tracks/11/path = NodePath("../Page2:visible")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/keys = {
+"times": PoolRealArray( 0, 1.8 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/12/type = "value"
+tracks/12/path = NodePath(".:visible")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/keys = {
+"times": PoolRealArray( 0, 2, 2.5 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ true, true, false ]
+}
+tracks/13/type = "value"
+tracks/13/path = NodePath(".:modulate")
+tracks/13/interp = 1
+tracks/13/loop_wrap = true
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/keys = {
+"times": PoolRealArray( 0, 2, 2.3 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
 }
 
 [node name="Setup" type="Control"]
@@ -259,6 +535,7 @@ icon = ExtResource( 2 )
 [node name="Page1" type="Control" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_top = 44.0
 
 [node name="Logo" type="TextureRect" parent="Page1"]
 margin_left = 408.0
@@ -275,11 +552,12 @@ margin_right = 680.0
 margin_bottom = 271.0
 custom_fonts/font = SubResource( 13 )
 text = "Welcome to Caesar!"
+align = 1
 
 [node name="Info" type="Label" parent="Page1"]
-margin_left = 128.0
+margin_left = 256.0
 margin_top = 283.0
-margin_right = 640.0
+margin_right = 768.0
 margin_bottom = 332.0
 custom_fonts/font = SubResource( 14 )
 text = "Let's start with some basic settings."
@@ -292,22 +570,92 @@ margin_right = 557.0
 margin_bottom = 377.0
 text = "Get started"
 
-[node name="Admin" type="Button" parent="Page1"]
+[node name="Page2" type="Control" parent="."]
+visible = false
 modulate = Color( 1, 1, 1, 0 )
-margin_left = 555.0
-margin_top = 344.0
-margin_right = 641.0
-margin_bottom = 377.0
-text = "Admin"
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 44.0
 
-[node name="EndUser" type="Button" parent="Page1"]
+[node name="Logo" type="TextureRect" parent="Page2"]
+margin_left = 467.0
+margin_top = -34.0
+margin_right = 1491.0
+margin_bottom = 990.0
+rect_scale = Vector2( 0.09, 0.09 )
+texture = ExtResource( 5 )
+
+[node name="Header" type="Label" parent="Page2"]
+margin_left = 347.0
+margin_top = 91.0
+margin_right = 680.0
+margin_bottom = 140.0
+custom_fonts/font = SubResource( 13 )
+text = "Server settings"
+align = 1
+
+[node name="CheckConnection" type="Button" parent="Page2"]
+margin_left = 448.0
+margin_top = 213.0
+margin_right = 580.0
+margin_bottom = 246.0
+text = "Check connection"
+
+[node name="ServerAddress" type="LineEdit" parent="Page2"]
+margin_left = 369.0
+margin_top = 160.0
+margin_right = 657.0
+margin_bottom = 195.0
+placeholder_text = "Enter server address"
+
+[node name="CodeEnter" type="LineEdit" parent="Page2"]
+visible = false
+margin_left = 448.0
+margin_top = 299.0
+margin_right = 575.0
+margin_bottom = 334.0
+placeholder_text = "Enter Code"
+
+[node name="Finish" type="Control" parent="."]
+visible = false
 modulate = Color( 1, 1, 1, 0 )
-margin_left = 387.0
-margin_top = 344.0
-margin_right = 473.0
-margin_bottom = 377.0
-text = "End user"
+margin_right = 40.0
+margin_bottom = 40.0
 
-[node name="FX1" type="AnimationPlayer" parent="Page1"]
+[node name="Logo" type="TextureRect" parent="Finish"]
+margin_left = 467.0
+margin_top = 10.0
+margin_right = 1491.0
+margin_bottom = 1034.0
+rect_scale = Vector2( 0.09, 0.09 )
+texture = ExtResource( 5 )
+
+[node name="Header" type="Label" parent="Finish"]
+margin_left = 347.0
+margin_top = 135.0
+margin_right = 680.0
+margin_bottom = 184.0
+custom_fonts/font = SubResource( 13 )
+text = "Done!"
+align = 1
+
+[node name="Finshup" type="Button" parent="Finish"]
+margin_left = 484.0
+margin_top = 197.0
+margin_right = 537.0
+margin_bottom = 230.0
+text = "Great!"
+
+[node name="FX" type="AnimationPlayer" parent="."]
+root_node = NodePath("../Page1")
+anims/Finish = SubResource( 17 )
 anims/RESET = SubResource( 15 )
 anims/ToPage2 = SubResource( 16 )
+
+[node name="ConnectionChecker" type="HTTPRequest" parent="."]
+
+[connection signal="pressed" from="Page1/GetStarted" to="." method="_on_GetStarted_pressed"]
+[connection signal="pressed" from="Page2/CheckConnection" to="." method="_on_CheckConnection_pressed"]
+[connection signal="text_entered" from="Page2/CodeEnter" to="." method="_on_CodeEnter_text_entered"]
+[connection signal="pressed" from="Finish/Finshup" to="." method="_on_Finshup_pressed"]
+[connection signal="request_completed" from="ConnectionChecker" to="." method="_on_ConnectionChecker_request_completed"]

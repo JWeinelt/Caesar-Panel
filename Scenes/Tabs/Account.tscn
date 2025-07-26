@@ -39,7 +39,7 @@ theme = ExtResource( 1 )
 script = SubResource( 1 )
 __meta__ = {
 "_edit_horizontal_guides_": [ 60.0, 510.0 ],
-"_edit_vertical_guides_": [ 443.0, 885.0 ]
+"_edit_vertical_guides_": [ 464.0, 885.0 ]
 }
 
 [node name="Header" type="Label" parent="."]
@@ -50,8 +50,9 @@ text = "Your account"
 align = 1
 
 [node name="Security" type="Control" parent="."]
+margin_left = 18.0
 margin_top = 61.0
-margin_right = 444.0
+margin_right = 462.0
 margin_bottom = 293.0
 
 [node name="Bg" type="ColorRect" parent="Security"]
@@ -117,8 +118,9 @@ custom_colors/font_color = Color( 1, 0, 0, 1 )
 custom_fonts/font = SubResource( 5 )
 
 [node name="Notifications" type="Control" parent="."]
+margin_left = 18.0
 margin_top = 296.0
-margin_right = 444.0
+margin_right = 462.0
 margin_bottom = 510.0
 
 [node name="Bg" type="ColorRect" parent="Notifications"]
@@ -154,29 +156,25 @@ text = "a new ticket is created"
 flat = true
 
 [node name="NTNType" type="OptionButton" parent="Notifications/NewTicketNotify" groups=["type_selector"]]
-margin_left = 253.0
-margin_top = 4.0
-margin_right = 430.0
-margin_bottom = 37.0
-rect_scale = Vector2( 0.7, 0.7 )
+margin_left = 251.0
+margin_right = 428.0
+margin_bottom = 33.0
 text = "Select..."
 items = [ "Select...", null, true, 0, null, "E-Mail", null, false, 1, null, "Caesar", null, false, 2, null, "Discord", null, false, 3, null ]
 selected = 0
 
 [node name="AssignTicketNotify" type="CheckButton" parent="Notifications"]
 margin_left = 6.0
-margin_top = 103.0
+margin_top = 116.0
 margin_right = 245.0
-margin_bottom = 136.0
+margin_bottom = 149.0
 text = "a ticket got assigned to me"
 flat = true
 
 [node name="ATType" type="OptionButton" parent="Notifications/AssignTicketNotify" groups=["type_selector"]]
-margin_left = 253.0
-margin_top = 6.0
-margin_right = 430.0
-margin_bottom = 39.0
-rect_scale = Vector2( 0.7, 0.7 )
+margin_left = 251.0
+margin_right = 428.0
+margin_bottom = 33.0
 text = "Select..."
 items = [ "Select...", null, true, 0, null, "E-Mail", null, false, 1, null, "Caesar", null, false, 2, null, "Discord", null, false, 3, null ]
 selected = 0

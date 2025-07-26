@@ -16,10 +16,16 @@ signal server_config_loaded(data)
 signal server_config_load_fail
 signal config_server_change_ok
 
+signal permission_send_success
+signal user_action_success
+
 signal got_users(data)
+signal got_roles(data)
+signal got_permissions(data)
 
-signal loaded_weather
+signal loaded_weather(data)
 
+# warning-ignore:unused_signal
 signal background_image_use_toggle(use_image)
 
 signal got_mc_uuid(mc_name, mc_uuid)
@@ -37,12 +43,17 @@ var location = Vector2.ZERO
 
 var server_setup_mode = false
 
+var chat_server_port
+
 var config_changed_keys = []
+
+var user_permissions = []
 
 var cs_settings = {
 	"defaults": {
 		"username": "",
 		"caesar_host": "localhost",
+		#"caesar_host": "play.codeblocksmc.com",
 		"useSSL": false,
 	},
 	"client_version": "1.0.0",
@@ -59,9 +70,19 @@ var cs_settings = {
 	}
 }
 
+var features_enabled = []
+
 func _ready():
 	load_config()
 	apply_config()
+
+
+func feature_enabled(feature) -> bool:
+	return features_enabled.find(feature) != -1
+
+
+func has_permission(permission) -> bool:
+	return user_permissions.find(permission) != -1
 
 
 func apply_config():
@@ -88,14 +109,12 @@ func caesar():
 	if url.find(":") == -1: url = url + ":48000"
 	if not url.begins_with("http://"): url = "http://" + url
 	if not url.ends_with("/"): url = url + "/"
-	print(url)
 	return url
 
 
 func cloudnet():
 	if not cloud_address.begins_with("http://") and not cloud_address.begins_with("https://"):
 		cloud_address = "http://" + cloud_address
-	print(cloud_address)
 	return cloud_address
 
 
@@ -113,6 +132,14 @@ func get_groups():
 
 func get_clusters():
 	$CloudNET/Clusters.request(cloudnet() + "cluster", cloudnet_tk())
+
+
+func update_permissions(username, permissions):
+	var body = {
+		"username": username,
+		"permissions": permissions
+	}
+	$Management/SendPermissions.request(caesar() + "user/permissions", caesar_tk(), false, HTTPClient.METHOD_POST, JSON.print(body))
 
 
 func check_connection_caesar(address: String, ssl: bool, port: int):
@@ -140,6 +167,37 @@ func get_users():
 	$Management/GetUsers.request(caesar() + "user", caesar_tk())
 
 
+func get_roles():
+	$Management/GetRoles.request(caesar() + "role", caesar_tk())
+
+
+func get_permissions():
+	$Management/GetPermissions.request(caesar() + "permission", caesar_tk())
+
+
+func create_user(username, password):
+	var body = {
+		"username": username,
+		"password": password,
+		"discordID": ""
+	}
+	$Management/UserAction.request(caesar() + "user", caesar_tk(), false, HTTPClient.METHOD_POST, JSON.print(body))
+	Worker.send_tray_type("user actions", "Creating user...", "INFO")
+
+
+func create_role(role_name, color: Color):
+	var parsed_color = str(str(color.r) + ";" + str(color.g) + ";" + str(color.b) + ";" + str(color.a))
+	var body = {
+		"name": role_name,
+		"color": parsed_color
+	}
+	$Management/CreateRole.request(caesar() + "role", caesar_tk(), false, HTTPClient.METHOD_POST, JSON.print(body))
+
+
+func get_server_config():
+	$Management/GetConfig.request(caesar() + "config", caesar_tk())
+
+
 func login(username, password):
 	cs_settings.defaults.username = username
 	save_config()
@@ -159,8 +217,10 @@ func get_greeting_from_time(iso_time: String) -> String:
 	
 	if hour >= 5 and hour < 10:
 		return "Good morning"
-	elif hour >= 10 and hour < 17:
-		return "Hello"
+	elif hour >= 10 and hour < 12:
+		return "Good day"
+	elif hour >= 12 and hour < 17:
+		return "Good afternoon"
 	elif hour >= 17 and hour < 21:
 		return "Good evening"
 	else:
@@ -169,7 +229,8 @@ func get_greeting_from_time(iso_time: String) -> String:
 
 func save_config():
 	var file = File.new()
-	file.open_encrypted_with_pass("user://config.cac", File.WRITE, "caesar-panel")
+	#file.open_encrypted_with_pass("user://config.cac", File.WRITE, "caesar-panel")
+	file.open("user://config.cac", File.WRITE)
 	file.store_var(cs_settings, true)
 	file.close()
 
@@ -178,7 +239,8 @@ func load_config():
 	print("Loading config")
 	var file = File.new()
 	if not file.file_exists("user://config.cac"): save_config()
-	file.open_encrypted_with_pass("user://config.cac", File.READ, "caesar-panel")
+	#file.open_encrypted_with_pass("user://config.cac", File.READ, "caesar-panel")
+	file.open("user://config.cac", File.READ)
 	cs_settings = file.get_var(true)
 
 
@@ -191,6 +253,19 @@ func _on_Auth_request_completed(_result, response_code, _headers, body):
 		server_setup_mode = data.setupMode
 		caesar_auth = data.token
 		user_id = data.userID
+		# Features
+		if data.features.chat: features_enabled.append("Chat")
+		if data.features.mail: features_enabled.append("Mails")
+		if data.features.support: features_enabled.append("Support")
+		if data.features.files: features_enabled.append("Files")
+		
+		chat_server_port = data.chatServer
+		
+		
+		user_permissions = data.permissions
+		print("Got " + str(user_permissions.size()) + " permissions in total.")
+		
+		
 		if data.useCloudNET:
 			cloud_address = data.cloudnet.host
 			if cloud_address == "localhost" or cloud_address == "127.0.0.1":
@@ -204,6 +279,9 @@ func _on_Auth_request_completed(_result, response_code, _headers, body):
 # warning-ignore:return_value_discarded
 			get_tree().change_scene("res://Scenes/Main.tscn")
 	else:
+		if response_code == 500:
+			Worker.send_tray_type("Error", "Could not authenticate with Caesar (500)", "ERROR")
+			return
 		printerr("Unable to authenticate to Caesar endpoint")
 		printerr("Code: %s" % str(response_code))
 		printerr("Reason: %s" % str(data.reason))
@@ -220,13 +298,12 @@ func _on_LocationService_request_completed(_result, _response_code, _headers, bo
 	location = Vector2(long, lat)
 
 
-func get_server_config():
-	$Management/GetConfig.request(caesar() + "config", caesar_tk())
 
 
 func send_config_change(data):
 	for i in config_changed_keys:
 		var val = data.get(i)
+		if i == "configVersion" or i == "languageVersion": return # Read-only fields
 		var body = {
 			"key": i,
 			"value": val,
@@ -263,8 +340,7 @@ func request_mc_id(mc_name):
 
 func _on_WeatherGetter_request_completed(_result, _response_code, _headers, body):
 	var data = JSON.parse(body.get_string_from_utf8()).result
-	print(get_greeting_from_time(data.current.time))
-	emit_signal("loaded_weather")
+	emit_signal("loaded_weather", data)
 
 
 func _on_AuthCN_request_completed(_result, response_code, _headers, body):
@@ -341,16 +417,54 @@ func _on_GetConfig_request_completed(_result, response_code, _headers, body):
 
 
 func _on_SendConfigChange_request_completed(_result, response_code, _headers, _body):
-	if response_code == 200: 
-		print("changes saved")
+	if response_code == 200:
 		emit_signal("config_server_change_ok")
 
 
-func _on_GetUsers_request_completed(_result, _response_code, _headers, body):
+func _on_GetUsers_request_completed(_result, response_code, _headers, body):
 	var data = JSON.parse(body.get_string_from_utf8()).result
-	emit_signal("got_users", data)
+	if response_code == 200:
+		emit_signal("got_users", data)
+	if response_code == HTTPClient.RESPONSE_FORBIDDEN:
+		printerr("No permission to get user information")
 
 
-func _on_GetUUIDFromName_request_completed(result, response_code, headers, body):
+func _on_GetUUIDFromName_request_completed(_result, _response_code, _headers, body):
 	var data = JSON.parse(body.get_string_from_utf8()).result
 	emit_signal("got_mc_uuid", data.get("name"), data.get("id"))
+
+
+func _on_UserAction_request_completed(_result, response_code, _headers, _body):
+	if response_code != 200:
+		Worker.send_tray_type("User actions", "Action could not be executed", "ERROR")
+		emit_signal("user_action_success")
+	else:
+		get_users()
+		Worker.send_tray_type("User actions", "User has been created", "INFO")
+
+
+func _on_GetRoles_request_completed(_result, _response_code, _headers, body):
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	
+	emit_signal("got_roles", data)
+
+
+func _on_CreateRole_request_completed(_result, response_code, _headers, _body):
+	if response_code != 200:
+		Worker.send_tray_type("Role actions", "Action could not be executed", "ERROR")
+	else:
+		get_roles()
+		Worker.send_tray_type("Role actions", "User has been created", "INFO")
+
+
+func _on_GetPermissions_request_completed(_result, response_code, _headers, body):
+	if response_code != 200:
+		printerr("Could not load available permissions.")
+		return
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	emit_signal("got_permissions", data)
+
+
+func _on_SendPermissions_request_completed(_result, response_code, _headers, _body):
+	if response_code == 200:
+		emit_signal("permission_send_success")
