@@ -10,25 +10,35 @@ signal leave_chat(chat_name)
 signal message_received(message_data)
 signal chat_renamed(chat, new_name)
 
+signal disconnected(clean_close)
+
 
 var server: WebSocketClient
+var connected = true
 
 func start():
 	server = WebSocketClient.new()
 # warning-ignore:return_value_discarded
 	server.connect(\"data_received\", self, \"_on_data_received\")
 	server.connect(\"connection_established\", self, \"_on_connection_success\")
+	server.connect(\"connection_closed\", self, \"_on_connection_close\")
 	var err = server.connect_to_url(\"ws://\" + GE.cs_settings.defaults.caesar_host + \":\" + str(GE.chat_server_port))
 	if err == OK:
 		print(\"Connecting to chat server...\")
 
 
 func _process(delta):
-	if server != null: server.poll()
+	if server != null and connected: server.poll()
 
 
 func _on_connection_success(_protocol):
 	send_auth()
+
+
+func _on_connection_close(clean_close):
+	print(\"Disconnected from ChatServer\")
+	connected = false
+	emit_signal(\"disconnected\", clean_close)
 
 
 func _on_data_received():
@@ -48,6 +58,13 @@ func parse_action(data):
 		\"MESSAGE\":
 			print(\"Received new message\")
 			emit_signal(\"message_received\", data)
+
+
+func close_connection():
+	var body = {
+		\"type\": \"CLOSE_REQUEST\"
+	}
+	send_data(body)
 
 
 func rename_chat(chat, new_name):

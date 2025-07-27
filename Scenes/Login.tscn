@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=25 format=2]
 
 [ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/Shaders/Rounded_Corners.tres" type="Shader" id=2]
@@ -10,6 +10,7 @@
 [ext_resource path="res://Scenes/Objects/Loader.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Assets/icons/pw_hidden.png" type="Texture" id=9]
 [ext_resource path="res://Assets/icons/pw_vis.png" type="Texture" id=10]
+[ext_resource path="res://Scenes/WindowBar.tscn" type="PackedScene" id=11]
 
 [sub_resource type="ShaderMaterial" id=2]
 shader = ExtResource( 2 )
@@ -80,6 +81,8 @@ material = SubResource( 2 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_styles/panel = SubResource( 1 )
+
+[node name="WindowBar" parent="." instance=ExtResource( 11 )]
 
 [node name="Exit" type="Button" parent="."]
 margin_left = 966.0

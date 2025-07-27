@@ -7,7 +7,14 @@
 [sub_resource type="GDScript" id=3]
 script/source = "extends Control
 
+var next_scene = \"res://Scenes/Login.tscn\"
+
 func _ready():
+	var file = File.new()
+	if not file.file_exists(\"user://config.cac\"): 
+		next_scene = \"res://Scenes/Setup.tscn\"
+	
+# warning-ignore:return_value_discarded
 	GE.connect(\"loaded_weather\", self, \"_on_got_weather\")
 	GE.request_location()
 	get_tree().get_root().set_transparent_background(true)
@@ -15,7 +22,6 @@ func _ready():
 
 
 func _on_got_weather(data):
-	print(data)
 	var greet = GE.get_greeting_from_time(data.current.time)
 	$Bg/Greeting.text = greet
 	var to_load = \"res://Assets/Backgrounds/non_blur/bg2.png\"
@@ -34,8 +40,9 @@ func _on_got_weather(data):
 	$FX.play(\"auto\")
 
 
-func _on_FX_animation_finished(anim_name):
-	get_tree().change_scene(\"res://Scenes/Login.tscn\")
+func _on_FX_animation_finished(_anim_name):
+# warning-ignore:return_value_discarded
+	get_tree().change_scene(next_scene)
 "
 
 [sub_resource type="DynamicFont" id=4]

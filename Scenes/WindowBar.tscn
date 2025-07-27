@@ -1,0 +1,48 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=16]
+script/source = "extends Control
+
+var click_pos = Vector2.ZERO
+var can_drag = false
+var can_resize = false
+
+var resizing: bool = false
+var initial_mouse_y: int = 0
+var initial_height: int = 0
+
+
+func _ready():
+	connect(\"mouse_entered\", self, \"_on_mouse_entered\")
+	connect(\"mouse_exited\", self, \"_on_mouse_exited\")
+
+
+func _process(_delta):
+	if Input.is_action_just_pressed(\"click\") and can_drag:
+		click_pos = get_local_mouse_position()
+	if Input.is_action_pressed(\"click\") and can_drag:
+		OS.set_window_position(
+			OS.window_position +
+			get_global_mouse_position() - 
+			click_pos
+		)
+	
+	
+	if resizing:
+		var mouse_y = get_local_mouse_position().y
+		var new_height = initial_height + (mouse_y - initial_mouse_y)
+		
+		new_height = max(new_height, 50)
+	
+
+func _on_mouse_entered():
+	can_drag = true
+
+func _on_mouse_exited():
+	can_drag = false
+"
+
+[node name="WindowBar" type="Control"]
+margin_right = 1026.0
+margin_bottom = 37.0
+script = SubResource( 16 )

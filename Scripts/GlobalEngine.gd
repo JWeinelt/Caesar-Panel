@@ -74,7 +74,6 @@ var features_enabled = []
 
 func _ready():
 	load_config()
-	apply_config()
 
 
 func feature_enabled(feature) -> bool:
@@ -238,10 +237,10 @@ func save_config():
 func load_config():
 	print("Loading config")
 	var file = File.new()
-	if not file.file_exists("user://config.cac"): save_config()
 	#file.open_encrypted_with_pass("user://config.cac", File.READ, "caesar-panel")
 	file.open("user://config.cac", File.READ)
 	cs_settings = file.get_var(true)
+	apply_config()
 
 
 func _on_Auth_request_completed(_result, response_code, _headers, body):
