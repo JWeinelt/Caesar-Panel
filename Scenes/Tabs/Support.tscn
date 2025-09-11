@@ -1,15 +1,23 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Assets/Customizabletheme/theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://addons/SmoothScroll/SmoothScrollContainer.gd" type="Script" id=3]
+[ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://Assets/Misc/circle.png" type="Texture" id=5]
+[ext_resource path="res://Assets/Misc/Text_Nonshaded.tres" type="Material" id=6]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
 
 
 func _ready():
-	pass
+# warning-ignore:return_value_discarded
+	GE.connect(\"player_created\", self, \"_on_player_created\")
+# warning-ignore:return_value_discarded
+	GE.connect(\"player_got\", self, \"_on_player_data_got\")
+# warning-ignore:return_value_discarded
+	ClientLinkSocket.connect(\"dc_waiting_room_update\", self, \"_on_waiting_room_update\")
 
 
 func _on_AddMCAccount_pressed():
@@ -18,11 +26,92 @@ func _on_AddMCAccount_pressed():
 
 func _on_CreatePlayer_pressed():
 	$CreatePlayerDialogue.popup()
+	for i in $CreatePlayerDialogue/Layer/MinecraftAccounts/MCAccList.get_children():
+		i.queue_free()
+
+
+func _on_CreatePlayerDialogue_confirmed():
+	Worker.send_tray(\"Workflow started\", \"Creating new player...\")
+	GE.create_player($CreatePlayerDialogue/Layer/PlayerUUID.text, $CreatePlayerDialogue/Layer/PlayerNumber.text)
+
+
+func _on_player_created(id):
+	var data = []
+	for i in $CreatePlayerDialogue/Layer/MinecraftAccounts/MCAccList.get_children():
+		var mcid = i.data.mc_id
+		data.append({
+			\"playerID\": id,
+			\"mcID\": format_uuid(mcid)
+		})
+	GE.link_mc_accounts(data)
+
+
+func format_uuid(id: String) -> String:
+	if \"-\" in id:
+		return id
+	
+	return id.substr(0, 8) + \"-\" + \\
+		   id.substr(8, 4) + \"-\" + \\
+		   id.substr(12, 4) + \"-\" + \\
+		   id.substr(16, 4) + \"-\" + \\
+		   id.substr(20, 12)
+
+
+func _on_IDSearch_pressed():
+	var txt = $PlayerSearch/PlayerIDEnter.text
+	if is_valid_int(txt):
+		GE.get_player_num(txt)
+	elif is_valid_uuid(txt):
+		GE.get_player_uuid(txt)
+	else:
+		GE.get_player_name(txt)
+
+
+func _on_player_data_got(data):
+	print(data)
+	$PlayerResult/PlayerUUID.text = data.UUID
+	$PlayerResult/PlayerNumber.text = str(data.playerNumber)
+	for p in data.punishments:
+		var pun = load(\"res://Scenes/Objects/iObj/Punishment.tscn\").instance()
+		pun.setup(p)
+		$PlayerResult/Categories/Punishments/PunishList/VPunList.add_child(pun)
+	for a in data.mcAccounts:
+		var acc = load(\"res://Scenes/Objects/iObj/MinecraftAccount.tscn\").instance()
+		acc.setup_p(a)
+		$PlayerResult/Categories/Accounts/AccList/VAccList.add_child(acc)
+
+
+func _on_waiting_room_update(data):
+	for i in $WaitingRoom/WRoomList/VMembersWRoom.get_children(): i.queue_free()
+	for i in data:
+		var member = load(\"res://Scenes/Objects/iObj/WaitingRoomMember.tscn\").instance()
+		member.setup(i)
+		$WaitingRoom/WRoomList/VMembersWRoom.add_child(member)
+
+
+func is_valid_uuid(uuid: String) -> bool:
+	var regex = RegEx.new()
+	regex.compile(\"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$\")
+	
+	return regex.search(uuid) != null
+
+
+func is_valid_int(id: String) -> bool:
+	var regex = RegEx.new()
+	regex.compile(\"^-?[0-9]+$\")
+	return regex.search(id) != null
 "
 
 [sub_resource type="DynamicFont" id=2]
 size = 33
 font_data = ExtResource( 2 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0.12549, 0.12549, 0.12549, 1 )
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
 
 [sub_resource type="GDScript" id=4]
 script/source = "extends ConfirmationDialog
@@ -43,7 +132,7 @@ func _on_AddMCAccountDialogue_mc_account_added(mc_id, mc_name):
 
 
 func generate_uuid() -> String:
-	return \"%s-%s-4%s-%s%s-%s\" % [
+	return \"%s-%s-%s-%s%s-%s\" % [
 		random_hex(8),
 		random_hex(4),
 		random_hex(3),
@@ -63,6 +152,7 @@ func random_hex(length: int) -> String:
 
 func _on_CreatePlayerDialogue_about_to_show():
 	$Layer/PlayerUUID.text = generate_uuid()
+	rng.randomize()
 	$Layer/PlayerNumber.text = str(rng.randi_range(1000, 9999))
 "
 
@@ -93,6 +183,14 @@ func _on_fetched_mc_uuid(mc_name2, mc_id2):
 func _on_AddMCAccountDialogue_confirmed():
 	emit_signal(\"mc_account_added\", mc_id, mc_name)
 "
+
+[sub_resource type="DynamicFont" id=6]
+size = 26
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=7]
+size = 26
+font_data = ExtResource( 4 )
 
 [node name="Support" type="Control"]
 anchor_right = 0.862
@@ -164,22 +262,22 @@ margin_left = -101.0
 margin_top = 9.0
 margin_right = -16.0
 margin_bottom = 32.0
-text = "Player-UUID"
+text = "Player UUID"
 
-[node name="PlayerName" type="LineEdit" parent="PlayerResult"]
+[node name="PlayerNumber" type="LineEdit" parent="PlayerResult"]
 margin_left = 116.0
-margin_top = 74.0
+margin_top = 61.0
 margin_right = 225.0
-margin_bottom = 109.0
+margin_bottom = 96.0
 custom_colors/cursor_color = Color( 1, 1, 1, 1 )
 caret_blink = true
 
-[node name="Info" type="Label" parent="PlayerResult/PlayerName"]
+[node name="Info" type="Label" parent="PlayerResult/PlayerNumber"]
 margin_left = -101.0
 margin_top = 9.0
 margin_right = -16.0
 margin_bottom = 32.0
-text = "Player-Name"
+text = "Player Number"
 
 [node name="Categories" type="TabContainer" parent="PlayerResult"]
 margin_left = 237.0
@@ -191,11 +289,25 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 30.0
 
+[node name="PunishList" type="ScrollContainer" parent="PlayerResult/Categories/Punishments"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 3 )
+
+[node name="VPunList" type="VBoxContainer" parent="PlayerResult/Categories/Punishments/PunishList"]
+
 [node name="Accounts" type="Tabs" parent="PlayerResult/Categories"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 30.0
+
+[node name="AccList" type="ScrollContainer" parent="PlayerResult/Categories/Accounts"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 3 )
+
+[node name="VAccList" type="VBoxContainer" parent="PlayerResult/Categories/Accounts/AccList"]
 
 [node name="Processes" type="Tabs" parent="PlayerResult/Categories"]
 visible = false
@@ -208,6 +320,30 @@ visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 30.0
+
+[node name="WaitingRoom" type="Panel" parent="."]
+margin_left = 284.0
+margin_top = 232.0
+margin_right = 507.0
+margin_bottom = 590.0
+custom_styles/panel = SubResource( 5 )
+
+[node name="Header" type="Label" parent="WaitingRoom"]
+margin_left = 1.0
+margin_top = 8.0
+margin_right = 218.0
+margin_bottom = 30.0
+text = "Waiting Room"
+align = 1
+
+[node name="WRoomList" type="ScrollContainer" parent="WaitingRoom"]
+margin_left = 1.0
+margin_top = 43.0
+margin_right = 221.0
+margin_bottom = 348.0
+script = ExtResource( 3 )
+
+[node name="VMembersWRoom" type="VBoxContainer" parent="WaitingRoom/WRoomList"]
 
 [node name="CreatePlayerDialogue" type="ConfirmationDialog" parent="."]
 margin_left = 149.0
@@ -293,8 +429,168 @@ margin_right = 177.0
 margin_bottom = 39.0
 text = "Fetch"
 
+[node name="CreateSupportChannel" type="Button" parent="."]
+margin_left = 291.0
+margin_top = 207.0
+margin_right = 442.0
+margin_bottom = 223.0
+text = "Create Support Channel"
+
+[node name="Tutorial" type="Control" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Bg" type="ColorRect" parent="Tutorial"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 0.235294 )
+
+[node name="Bg2" type="CanvasModulate" parent="Tutorial"]
+color = Color( 0.333333, 0.333333, 0.333333, 1 )
+
+[node name="Step1" type="Control" parent="Tutorial"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Header" type="Label" parent="Tutorial/Step1"]
+margin_left = 234.0
+margin_top = 11.0
+margin_right = 626.0
+margin_bottom = 55.0
+custom_fonts/font = SubResource( 6 )
+text = "Welcome to the support screen!"
+
+[node name="Text" type="Label" parent="Tutorial/Step1"]
+margin_left = 148.0
+margin_top = 54.0
+margin_right = 754.0
+margin_bottom = 213.0
+custom_fonts/font = SubResource( 7 )
+text = "Here, you can easily assist players. You can see
+punishments created in the past and create processes
+as well as notes."
+align = 1
+
+[node name="Step2" type="Control" parent="Tutorial"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Text" type="Label" parent="Tutorial/Step2"]
+light_mask = 2
+material = ExtResource( 6 )
+margin_left = 269.0
+margin_top = 69.0
+margin_right = 875.0
+margin_bottom = 228.0
+custom_fonts/font = SubResource( 7 )
+text = "You can search for players by entering any of their
+ingame names or their numerical player ID."
+align = 1
+
+[node name="Light2D" type="Light2D" parent="Tutorial/Step2"]
+position = Vector2( 167, 114 )
+scale = Vector2( 1.40625, 1.20313 )
+texture = ExtResource( 5 )
+
+[node name="Step3" type="Control" parent="Tutorial"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Text" type="Label" parent="Tutorial/Step3"]
+light_mask = 2
+material = ExtResource( 6 )
+margin_left = 121.0
+margin_top = 171.0
+margin_right = 727.0
+margin_bottom = 330.0
+custom_fonts/font = SubResource( 7 )
+text = "Here you can see the basic data of the player.
+This includes their numerical ID and a unique ID
+which is system-internal."
+align = 1
+
+[node name="Light2D" type="Light2D" parent="Tutorial/Step3"]
+position = Vector2( 402, 133 )
+scale = Vector2( 1.5625, 0.898438 )
+texture = ExtResource( 5 )
+
+[node name="Step4" type="Control" parent="Tutorial"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Text" type="Label" parent="Tutorial/Step4"]
+light_mask = 2
+material = ExtResource( 6 )
+margin_left = 402.0
+margin_top = 109.0
+margin_right = 900.0
+margin_bottom = 270.0
+custom_fonts/font = SubResource( 7 )
+text = "Under these tabs you can find more
+ information about the player. That
+includes punishments, their accounts,
+processes in the past and notes."
+align = 1
+
+[node name="Light2D" type="Light2D" parent="Tutorial/Step4"]
+position = Vector2( 701.5, 89 )
+scale = Vector2( 2.58203, 0.898438 )
+texture = ExtResource( 5 )
+
+[node name="Step5" type="Control" parent="Tutorial"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Text" type="Label" parent="Tutorial/Step5"]
+light_mask = 2
+material = ExtResource( 6 )
+margin_left = 360.0
+margin_top = 322.0
+margin_right = 879.0
+margin_bottom = 483.0
+custom_fonts/font = SubResource( 7 )
+text = "The waiting room displays waiting players
+live. If there is a player who needs assistance,
+you can easily create a new support talk."
+align = 1
+
+[node name="Light2D" type="Light2D" parent="Tutorial/Step5"]
+position = Vector2( 392, 385 )
+scale = Vector2( 1.5293, 1.86719 )
+texture = ExtResource( 5 )
+
+[node name="Step6" type="Control" parent="Tutorial"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Text" type="Label" parent="Tutorial/Step6"]
+light_mask = 2
+material = ExtResource( 6 )
+margin_left = 203.0
+margin_top = 114.0
+margin_right = 722.0
+margin_bottom = 275.0
+custom_fonts/font = SubResource( 7 )
+text = "If a player doesn't exist yet, you can create
+them by adding their accounts.
+Internal IDs will be generated automatically!"
+align = 1
+
+[node name="Light2D" type="Light2D" parent="Tutorial/Step6"]
+position = Vector2( 108, 128 )
+scale = Vector2( 0.65625, 0.371094 )
+texture = ExtResource( 5 )
+
+[connection signal="pressed" from="PlayerSearch/IDSearch" to="." method="_on_IDSearch_pressed"]
 [connection signal="pressed" from="PlayerSearch/CreatePlayer" to="." method="_on_CreatePlayer_pressed"]
 [connection signal="about_to_show" from="CreatePlayerDialogue" to="CreatePlayerDialogue" method="_on_CreatePlayerDialogue_about_to_show"]
+[connection signal="confirmed" from="CreatePlayerDialogue" to="." method="_on_CreatePlayerDialogue_confirmed"]
 [connection signal="pressed" from="CreatePlayerDialogue/Layer/AddMCAccount" to="." method="_on_AddMCAccount_pressed"]
 [connection signal="confirmed" from="AddMCAccountDialogue" to="AddMCAccountDialogue" method="_on_AddMCAccountDialogue_confirmed"]
 [connection signal="mc_account_added" from="AddMCAccountDialogue" to="CreatePlayerDialogue" method="_on_AddMCAccountDialogue_mc_account_added"]

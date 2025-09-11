@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=2]
+[gd_scene load_steps=47 format=2]
 
 [ext_resource path="res://Assets/Theme-Icons/window_close_white.png" type="Texture" id=1]
 [ext_resource path="res://Assets/Backgrounds/non_blur/bg1.png" type="Texture" id=2]
@@ -22,6 +22,8 @@
 [ext_resource path="res://Assets/Backgrounds/non_blur/bg2.png" type="Texture" id=20]
 [ext_resource path="res://Assets/Shaders/Blur.tres" type="Shader" id=21]
 [ext_resource path="res://Scripts/SceneAppend/SettingsScreen.gd" type="Script" id=22]
+[ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=23]
+[ext_resource path="res://Scenes/Tabs/Tickets.tscn" type="PackedScene" id=24]
 
 [sub_resource type="GDScript" id=4]
 script/source = "extends Control
@@ -63,6 +65,8 @@ func _ready():
 		f.list_dir_end()
 	else:
 		print(\"Could not load background images\")
+	
+	$Version.text = \"v\" + GE.client_version
 
 
 func provide_pages():
@@ -83,7 +87,7 @@ func show_settings():
 
 
 func _on_Exit_pressed():
-	get_tree().quit()
+	Worker.send_message(\"stop-caesar\")
 
 
 func _on_sidebar_click(entry):
@@ -159,6 +163,10 @@ func change_bg_image(id: int):
 func update_bg_blur(blur: float):
 	var shader_material := $BgImage.material as ShaderMaterial
 	shader_material.set_shader_param(\"blur_size\", blur)
+
+
+func _on_CreateConn_pressed():
+	GE.create_connection(\"SomeServer-1\", \"127.0.0.1\", \"25565\", true)
 "
 
 [sub_resource type="StyleBoxFlat" id=9]
@@ -403,6 +411,16 @@ corner_radius_top_right = 25
 corner_radius_bottom_right = 25
 corner_radius_bottom_left = 25
 
+[sub_resource type="StyleBoxFlat" id=23]
+bg_color = Color( 0.964706, 0.337255, 0.337255, 1 )
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="DynamicFont" id=24]
+font_data = ExtResource( 23 )
+
 [node name="Main" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -467,7 +485,7 @@ margin_bottom = 104.0
 entry_name = "Servers"
 icon_path = "servers"
 needs_permission = true
-permission = "caesar.view.servers"
+permission = "caesar.view.server"
 to_load = ExtResource( 5 )
 
 [node name="Files" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
@@ -494,12 +512,24 @@ needs_permission = true
 permission = "caesar.view.support"
 to_load = ExtResource( 12 )
 
-[node name="Chat" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
+[node name="Ticket" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_top = 216.0
 margin_right = 141.0
 margin_bottom = 266.0
+entry_name = "Tickets"
+icon_path = "ticket"
+needs_permission = true
+permission = "caesar.view.support"
+to_load = ExtResource( 24 )
+
+[node name="Chat" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 270.0
+margin_right = 141.0
+margin_bottom = 320.0
 entry_name = "Chat"
 icon_path = "chat"
 needs_activation = true
@@ -508,9 +538,9 @@ to_load = ExtResource( 13 )
 [node name="Mail" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 270.0
+margin_top = 324.0
 margin_right = 141.0
-margin_bottom = 320.0
+margin_bottom = 374.0
 entry_name = "Mails"
 icon_path = "mail"
 needs_activation = true
@@ -519,9 +549,9 @@ to_load = ExtResource( 9 )
 [node name="Users" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 324.0
+margin_top = 378.0
 margin_right = 141.0
-margin_bottom = 374.0
+margin_bottom = 428.0
 entry_name = "Users"
 icon_path = "users"
 needs_permission = true
@@ -531,9 +561,9 @@ to_load = ExtResource( 14 )
 [node name="Account" parent="Sidebar/SidebarList" instance=ExtResource( 4 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 378.0
+margin_top = 432.0
 margin_right = 141.0
-margin_bottom = 428.0
+margin_bottom = 482.0
 entry_name = "Account"
 icon_path = "account"
 to_load = ExtResource( 10 )
@@ -573,6 +603,7 @@ custom_fonts/font = SubResource( 12 )
 text = "Welcome to Caesar!"
 
 [node name="SettingsScreen" type="Control" parent="."]
+visible = false
 anchor_left = 0.135
 anchor_top = 0.088
 anchor_right = 0.959
@@ -585,7 +616,6 @@ theme = ExtResource( 18 )
 script = ExtResource( 22 )
 
 [node name="ServerSettings" type="Control" parent="SettingsScreen"]
-visible = false
 anchor_left = 0.033
 anchor_top = 0.113
 anchor_right = 0.443
@@ -657,6 +687,7 @@ margin_right = 35.712
 margin_bottom = -38.768
 
 [node name="ClientSettings" type="Control" parent="SettingsScreen"]
+visible = false
 anchor_left = 0.034
 anchor_top = 0.138
 anchor_right = 0.472
@@ -840,6 +871,44 @@ custom_styles/focus = SubResource( 7 )
 custom_styles/normal = SubResource( 3 )
 icon = ExtResource( 1 )
 
+[node name="CreateConn" type="Button" parent="."]
+visible = false
+margin_right = 40.0
+margin_bottom = 16.0
+text = "Create new server"
+
+[node name="Version" type="Label" parent="."]
+margin_left = 949.0
+margin_top = 567.0
+margin_right = 1010.0
+margin_bottom = 589.0
+text = "vxx.xx.xx"
+
+[node name="InfoScreen" type="Panel" parent="."]
+visible = false
+margin_left = 167.0
+margin_top = 37.0
+margin_right = 934.0
+margin_bottom = 65.0
+custom_styles/panel = SubResource( 23 )
+
+[node name="Header" type="Label" parent="InfoScreen"]
+margin_left = 7.0
+margin_top = -3.0
+margin_right = 93.0
+margin_bottom = 28.0
+custom_fonts/font = SubResource( 24 )
+text = "Important!"
+align = 1
+valign = 1
+
+[node name="Text" type="Label" parent="InfoScreen"]
+margin_left = 101.0
+margin_top = 4.0
+margin_right = 595.0
+margin_bottom = 26.0
+text = "An update for Caesar is available. Download it now to use the latest features."
+
 [connection signal="pressed" from="SettingsScreen/ServerSettings/SaveSettings" to="." method="_on_SaveSettings_pressed"]
 [connection signal="toggled" from="SettingsScreen/ClientSettings/Performance/TransparentEffects" to="SettingsScreen" method="_on_TransparentEffects_toggled"]
 [connection signal="toggled" from="SettingsScreen/ClientSettings/Performance/BorderlessWindow" to="SettingsScreen" method="_on_BorderlessWindow_toggled"]
@@ -853,3 +922,4 @@ icon = ExtResource( 1 )
 [connection signal="pressed" from="SettingsScreen/ViewClientSett" to="SettingsScreen" method="_on_ViewClientSett_pressed"]
 [connection signal="pressed" from="Settings" to="." method="_on_Settings_pressed"]
 [connection signal="pressed" from="Exit" to="." method="_on_Exit_pressed"]
+[connection signal="pressed" from="CreateConn" to="." method="_on_CreateConn_pressed"]

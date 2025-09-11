@@ -8,6 +8,10 @@ var data = {}
 func setup(json):
 	data = json
 	$Name.text = json.get(\"mc_name\")
+
+func setup_p(json):
+	data = json
+	$Name.text = json.get(\"name\")
 "
 
 [node name="MinecraftAccount" type="Control"]

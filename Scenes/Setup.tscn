@@ -30,7 +30,7 @@ func _on_CheckConnection_pressed():
 func _on_ConnectionChecker_request_completed(result, response_code, headers, body):
 	var data = JSON.parse(body.get_string_from_utf8()).result
 	if data.success:
-		if first_conn:
+		if data.setup and first_conn:
 			first_conn = false
 			$Page2/CodeEnter.show()
 		else:
@@ -45,8 +45,13 @@ func _on_CodeEnter_text_entered(new_text):
 
 
 func _on_Finshup_pressed():
-	GE.cs_settings.default.caesar_host = $Page2/ServerAddress.text
+	GE.cs_settings.defaults.caesar_host = $Page2/ServerAddress.text
+	GE.save_config()
 	get_tree().change_scene(\"res://Scenes/Login.tscn\")
+
+
+func _on_Exit_pressed():
+	get_tree().quit()
 "
 
 [sub_resource type="ShaderMaterial" id=8]
@@ -653,7 +658,9 @@ anims/RESET = SubResource( 15 )
 anims/ToPage2 = SubResource( 16 )
 
 [node name="ConnectionChecker" type="HTTPRequest" parent="."]
+timeout = 2.0
 
+[connection signal="pressed" from="Exit" to="." method="_on_Exit_pressed"]
 [connection signal="pressed" from="Page1/GetStarted" to="." method="_on_GetStarted_pressed"]
 [connection signal="pressed" from="Page2/CheckConnection" to="." method="_on_CheckConnection_pressed"]
 [connection signal="text_entered" from="Page2/CodeEnter" to="." method="_on_CodeEnter_text_entered"]

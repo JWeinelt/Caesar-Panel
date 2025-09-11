@@ -1,4 +1,10 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Assets/icons/Discord-Symbol-Blurple.png" type="Texture" id=1]
+[ext_resource path="res://Assets/Misc/node_ready.png" type="Texture" id=2]
+[ext_resource path="res://Assets/icons/connect.png" type="Texture" id=3]
+[ext_resource path="res://Assets/fonts/CascadiaMonoPL.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://Assets/Misc/warning.png" type="Texture" id=5]
 
 [sub_resource type="GDScript" id=16]
 script/source = "extends Control
@@ -13,8 +19,17 @@ var initial_height: int = 0
 
 
 func _ready():
+# warning-ignore:return_value_discarded
 	connect(\"mouse_entered\", self, \"_on_mouse_entered\")
+# warning-ignore:return_value_discarded
 	connect(\"mouse_exited\", self, \"_on_mouse_exited\")
+	
+# warning-ignore:return_value_discarded
+	ClientLinkSocket.connect(\"dc_voice_update\", self, \"_on_voice_update\")
+# warning-ignore:return_value_discarded
+	ClientLinkSocket.connect(\"dc_code_got\", self, \"_on_code_got\")
+# warning-ignore:return_value_discarded
+	ClientLinkSocket.connect(\"dc_link_success\", self, \"_on_dc_link_success\")
 
 
 func _process(_delta):
@@ -40,9 +55,140 @@ func _on_mouse_entered():
 
 func _on_mouse_exited():
 	can_drag = false
+
+
+func _on_voice_update(data):
+	$Discord.show()
+	if data.linked: $Discord/Connect.hide()
+	if data.linked: $Discord/Status.texture = load(\"res://Assets/Misc/node_ready.png\")
+	else: $Discord/Status.texture = load(\"res://Assets/Misc/node_disconnected.png\")
+	if data.channel != \"\":
+		$Discord/Info.text = \"Connected - \" + data.channel
+	else:
+		$Discord/Info.text = \"Not Connected\"
+
+
+func _on_code_got(code):
+	$Discord/VerifyWindow.popup()
+	$Discord/VerifyWindow/Layout/Code.text = str(code)
+
+
+func _on_ConnectLayer_gui_input(event):
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == BUTTON_LEFT:
+			ClientLinkSocket.send_code_request()
+
+
+func _on_dc_link_success():
+	$Discord/VerifyWindow.hide()
+"
+
+[sub_resource type="DynamicFont" id=17]
+size = 22
+font_data = ExtResource( 4 )
+
+[sub_resource type="GDScript" id=18]
+script/source = "extends Control
+
+func _process(_delta):
+	visible = !Worker.worker_connected()
 "
 
 [node name="WindowBar" type="Control"]
 margin_right = 1026.0
 margin_bottom = 37.0
 script = SubResource( 16 )
+__meta__ = {
+"_edit_horizontal_guides_": [ 36.0 ],
+"_edit_vertical_guides_": [ 967.0, 612.0 ]
+}
+
+[node name="Discord" type="Control" parent="."]
+visible = false
+margin_left = 612.0
+margin_right = 967.0
+margin_bottom = 36.0
+
+[node name="Logo" type="TextureRect" parent="Discord"]
+margin_left = 11.0
+margin_top = 5.0
+margin_right = 539.0
+margin_bottom = 405.0
+rect_scale = Vector2( 0.06, 0.06 )
+texture = ExtResource( 1 )
+
+[node name="Status" type="TextureRect" parent="Discord"]
+margin_left = 50.0
+margin_top = 5.0
+margin_right = 170.0
+margin_bottom = 125.0
+rect_scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 2 )
+
+[node name="Info" type="Label" parent="Discord"]
+margin_left = 79.0
+margin_top = 10.0
+margin_right = 119.0
+margin_bottom = 24.0
+text = "Connected - Support Talk 1"
+
+[node name="Connect" type="TextureRect" parent="Discord"]
+margin_left = 330.0
+margin_top = 9.0
+margin_right = 842.0
+margin_bottom = 521.0
+rect_scale = Vector2( 0.04, 0.04 )
+texture = ExtResource( 3 )
+
+[node name="ConnectLayer" type="Control" parent="Discord/Connect"]
+margin_right = 500.0
+margin_bottom = 525.0
+
+[node name="VerifyWindow" type="WindowDialog" parent="Discord"]
+margin_left = -533.0
+margin_top = 145.0
+margin_right = 150.0
+margin_bottom = 537.0
+window_title = "Verify"
+
+[node name="Layout" type="Control" parent="Discord/VerifyWindow"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Info" type="Label" parent="Discord/VerifyWindow/Layout"]
+margin_left = 19.0
+margin_top = 11.0
+margin_right = 363.0
+margin_bottom = 25.0
+text = "Copy the following code and send it to the Caesar bot:"
+
+[node name="Code" type="Label" parent="Discord/VerifyWindow/Layout"]
+margin_left = 43.0
+margin_top = 37.0
+margin_right = 83.0
+margin_bottom = 51.0
+custom_fonts/font = SubResource( 17 )
+text = "1234"
+
+[node name="WorkerWarn" type="Control" parent="."]
+margin_left = 65.0
+margin_right = 177.0
+margin_bottom = 36.0
+script = SubResource( 18 )
+
+[node name="TextureRect" type="TextureRect" parent="WorkerWarn"]
+margin_left = 5.0
+margin_top = 7.0
+margin_right = 80.0
+margin_bottom = 82.0
+rect_scale = Vector2( 0.3, 0.3 )
+texture = ExtResource( 5 )
+
+[node name="Label" type="Label" parent="WorkerWarn"]
+margin_left = 34.0
+margin_top = 11.0
+margin_right = 74.0
+margin_bottom = 25.0
+text = "Worker not connected!"
+
+[connection signal="gui_input" from="Discord/Connect/ConnectLayer" to="." method="_on_ConnectLayer_gui_input"]

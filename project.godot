@@ -184,6 +184,9 @@ DataLoader="*res://Scripts/DataLoader.tscn"
 Worker="*res://Scripts/CaesarWorker.tscn"
 ChatClient="*res://Scripts/Chat/ChatClient.tscn"
 EmojiWrapper="*res://Scripts/EmojiWrapper.gd"
+ClientLinkSocket="*res://Scripts/ClientLinkSocket.tscn"
+MarketDataFetcher="*res://Scripts/MarketDataFetcher.tscn"
+McPluginApi="*res://Scripts/MCPluginAPI.tscn"
 
 [display]
 
@@ -194,6 +197,7 @@ window/energy_saving/keep_screen_on=false
 
 [editor]
 
+main_run_args="development"
 version_control_autoload_on_startup=true
 version_control_plugin_name="GitAPI"
 

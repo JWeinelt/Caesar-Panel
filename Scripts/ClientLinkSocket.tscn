@@ -3,20 +3,31 @@
 [sub_resource type="GDScript" id=1]
 script/source = "extends Node
 
+signal dc_waiting_room_update(data)
+signal dc_voice_update(data)
+signal dc_code_got(code)
+signal dc_link_success
+
 var ws: WebSocketClient = null
 
-func _ready():
+func connect_to_server():
 	ws = WebSocketClient.new()
+# warning-ignore:return_value_discarded
 	ws.connect(\"connection_established\", self, \"_on_conn_ok\")
+# warning-ignore:return_value_discarded
 	ws.connect(\"data_received\", self, \"_on_data_received\")
+# warning-ignore:return_value_discarded
+	ws.connect(\"connection_closed\", self, \"_on_connection_closed\")
+# warning-ignore:return_value_discarded
 	ws.connect_to_url(\"http://localhost:48003\")
 
 
-func _process(delta):
+func _process(_delta):
 	if ws != null: ws.poll()
 
 
-func _on_conn_ok(protocol):
+func _on_conn_ok(_protocol):
+	print(\"Connected to Caesar Websocket Server\")
 	var auth = {
 		\"type\": \"AUTHENTICATE\",
 		\"myID\": GE.user_id,
@@ -34,6 +45,28 @@ func _on_data_received():
 			\"HANDSHAKE\":
 				var updateAvailable = vm.get(\"updateAvailable\")
 				if updateAvailable: print(\"Update available\")
+				Worker.send_update_request(vm.get(\"newVersion\"))
+			\"DC_WAITING_ROOM_UPDATE\":
+				emit_signal(\"dc_waiting_room_update\", vm.data)
+			\"DC_VOICE_UPDATE\":
+				emit_signal(\"dc_voice_update\", {\"channel\": vm.channel, \"linked\": vm.linked})
+			\"DC_LINK_REQUEST_CODE\":
+				emit_signal(\"dc_code_got\", vm.code)
+			\"DC_LINK_SUCCESS\":
+				Worker.send_tray(\"Success!\", \"Your Discord account has been connected.\")
+				emit_signal(\"dc_link_success\")
+
+
+func _on_connection_closed(_clean):
+	print(\"Disconnected from server.\")
+	Worker.send_tray_type(\"Disconnected\", \"We've lost the connection to the server.\", \"ERROR\")
+
+
+func send_code_request():
+	var body = {
+		\"type\": \"DC_LINK_REQUEST\"
+	}
+	send_message(JSON.print(body))
 
 
 func send_message(message):

@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Assets/Customizabletheme/theme.tres" type="Theme" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+signal move_user(id)
+
+var user_data = {}
+
+func setup(data):
+	user_data = data
+	$UserName.text = data.effectiveName
+
+
+func _on_Actions_item_selected(index):
+	pass # Replace with function body.
+"
+
+[node name="WaitingRoomMember" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -804.0
+margin_bottom = -570.0
+rect_min_size = Vector2( 220, 30 )
+theme = ExtResource( 1 )
+script = SubResource( 1 )
+
+[node name="Bg" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.168627, 0.168627, 0.168627, 1 )
+
+[node name="Actions" type="OptionButton" parent="."]
+margin_left = 140.0
+margin_right = 217.0
+margin_bottom = 30.0
+flat = true
+items = [ "Actions", null, true, 0, null, "Move User", null, false, 1, null, "Ignore", null, true, 2, null, "Preview", null, true, 3, null ]
+selected = 0
+
+[node name="UserName" type="Label" parent="."]
+margin_left = 4.0
+margin_top = 3.0
+margin_right = 167.0
+margin_bottom = 25.0
+text = "Username"
+clip_text = true
+
+[connection signal="item_selected" from="Actions" to="." method="_on_Actions_item_selected"]

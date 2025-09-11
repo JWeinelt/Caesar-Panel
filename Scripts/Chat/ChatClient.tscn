@@ -4,10 +4,14 @@
 script/source = "extends Node
 
 signal got_chat_list(data)
+# warning-ignore:unused_signal
 signal loaded_chat_content(data)
+# warning-ignore:unused_signal
 signal join_chat(chat_name)
+# warning-ignore:unused_signal
 signal leave_chat(chat_name)
 signal message_received(message_data)
+# warning-ignore:unused_signal
 signal chat_renamed(chat, new_name)
 
 signal disconnected(clean_close)
@@ -20,14 +24,16 @@ func start():
 	server = WebSocketClient.new()
 # warning-ignore:return_value_discarded
 	server.connect(\"data_received\", self, \"_on_data_received\")
+# warning-ignore:return_value_discarded
 	server.connect(\"connection_established\", self, \"_on_connection_success\")
+# warning-ignore:return_value_discarded
 	server.connect(\"connection_closed\", self, \"_on_connection_close\")
 	var err = server.connect_to_url(\"ws://\" + GE.cs_settings.defaults.caesar_host + \":\" + str(GE.chat_server_port))
 	if err == OK:
 		print(\"Connecting to chat server...\")
 
 
-func _process(delta):
+func _process(_delta):
 	if server != null and connected: server.poll()
 
 

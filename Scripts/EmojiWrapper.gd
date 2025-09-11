@@ -39,7 +39,7 @@ func scale_images_in_folder(folder_path: String) -> void:
 	print("Alle Bilder wurden verarbeitet.")
 
 
-func get_emoji_name(sprite_id, frame_id):
+func get_emoji_name(_sprite_id, _frame_id):
 	pass
 
 

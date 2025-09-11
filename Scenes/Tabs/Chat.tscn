@@ -13,8 +13,11 @@ var current_chat_open = \"\"
 
 func _ready():
 	ChatClient.start()
+# warning-ignore:return_value_discarded
 	ChatClient.connect(\"got_chat_list\", self, \"_on_get_chat_list\")
+# warning-ignore:return_value_discarded
 	ChatClient.connect(\"message_received\", self, \"_on_message_received\")
+# warning-ignore:return_value_discarded
 	ChatClient.connect(\"chat_renamed\", self, \"_on_chat_renamed\")
 
 

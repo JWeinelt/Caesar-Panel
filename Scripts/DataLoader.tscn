@@ -6,7 +6,7 @@ script/source = "extends Node
 
 func load_image(url: String, target: Object, callback_method: String):
 	var cache = File.new()
-	var cacheFile = \"user://.cache/\" + hash_string(url) + \".png\"
+	var cacheFile = \".cache/\" + hash_string(url) + \".png\"
 	if cache.file_exists(cacheFile):
 		target.call(callback_method, load_texture_from_file(cacheFile))
 		print(\"loading cache\")
@@ -46,7 +46,7 @@ func _on_request_completed(_result, response_code, _headers, body, http_request:
 	# Callback aufrufen
 	if target.has_method(callback_method):
 		target.call(callback_method, texture)
-		var path = \"user://.cache/\" + hash_string(url) + \".png\"
+		var path = \".cache/\" + hash_string(url) + \".png\"
 		save_texture_as_png(texture, path)
 		
 	else:

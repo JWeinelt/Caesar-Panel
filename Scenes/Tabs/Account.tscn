@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
@@ -26,6 +26,10 @@ font_data = ExtResource( 2 )
 font_data = ExtResource( 4 )
 
 [sub_resource type="DynamicFont" id=5]
+font_data = ExtResource( 5 )
+
+[sub_resource type="DynamicFont" id=7]
+size = 12
 font_data = ExtResource( 5 )
 
 [sub_resource type="DynamicFont" id=6]
@@ -116,6 +120,89 @@ margin_right = 40.0
 margin_bottom = 56.0
 custom_colors/font_color = Color( 1, 0, 0, 1 )
 custom_fonts/font = SubResource( 5 )
+
+[node name="Admin" type="Control" parent="."]
+margin_left = 464.0
+margin_top = 61.0
+margin_right = 885.0
+margin_bottom = 510.0
+
+[node name="Bg" type="ColorRect" parent="Admin"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.120117, 0.139369, 0.1875, 1 )
+script = ExtResource( 3 )
+
+[node name="Header" type="Label" parent="Admin"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -220.0
+margin_right = 220.0
+margin_bottom = 29.0
+custom_fonts/font = SubResource( 3 )
+text = "Administration"
+align = 1
+
+[node name="UpdateChannel" type="OptionButton" parent="Admin"]
+margin_left = 146.0
+margin_top = 43.0
+margin_right = 256.0
+margin_bottom = 76.0
+text = "Release"
+items = [ "Release", null, false, 0, null, "Beta", null, false, 1, null, "Development", null, false, 2, null, "Nightly", null, false, 3, null ]
+selected = 0
+
+[node name="Label" type="Label" parent="Admin/UpdateChannel"]
+margin_left = -127.0
+margin_top = 5.0
+margin_right = -16.0
+margin_bottom = 28.0
+text = "Update Channel"
+
+[node name="Label2" type="Label" parent="Admin/UpdateChannel"]
+margin_left = -45.0
+margin_top = 46.0
+margin_right = 158.0
+margin_bottom = 121.0
+custom_colors/font_color = Color( 0.427451, 0.427451, 0.427451, 1 )
+text = "Please keep in mind that only
+\"Release\" is recommended 
+for production use!"
+
+[node name="Updates" type="Control" parent="Admin"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Header" type="Label" parent="Admin/Updates"]
+margin_left = 19.0
+margin_top = 183.0
+margin_right = 76.0
+margin_bottom = 206.0
+text = "Updates"
+
+[node name="Server" type="Label" parent="Admin/Updates"]
+margin_left = 19.0
+margin_top = 215.0
+margin_right = 180.0
+margin_bottom = 232.0
+custom_fonts/font = SubResource( 7 )
+text = "Server: "
+
+[node name="Client" type="Label" parent="Admin/Updates"]
+margin_left = 19.0
+margin_top = 231.0
+margin_right = 180.0
+margin_bottom = 248.0
+custom_fonts/font = SubResource( 7 )
+text = "Clients: "
+
+[node name="Connector" type="Label" parent="Admin/Updates"]
+margin_left = 19.0
+margin_top = 247.0
+margin_right = 180.0
+margin_bottom = 264.0
+custom_fonts/font = SubResource( 7 )
+text = "Connector: "
 
 [node name="Notifications" type="Control" parent="."]
 margin_left = 18.0

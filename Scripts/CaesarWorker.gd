@@ -16,17 +16,28 @@ func _process(_delta):
 	if ws != null: ws.poll()
 
 
+func worker_connected():
+	return ws != null
 
 
 func _on_data_received():
 	var message := ws.get_peer(1).get_packet().get_string_from_utf8()
 	var _vm = JSON.parse(message).result
+	if message == "stop-ok":
+		get_tree().quit()
 
 
 func send_message(message):
+	if ws == null or !ws.get_peer(1).is_connected_to_host():
+		print("Could not send data to worker: No worker application running")
+		return
 	var err = ws.get_peer(1).put_packet(message.to_utf8())
 	if err != OK:
-		printerr("Problem while sending message via WebSocket (Console): " + str(err))
+		print("Problem while sending message via WebSocket (Console): " + str(err))
+
+
+func send_update_request(version):
+	send_message("update;" + version)
 
 
 func send_tray(title, message):

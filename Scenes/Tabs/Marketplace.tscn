@@ -1,0 +1,120 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Scenes/Objects/Loader.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://Scripts/ScriptPartsUI/Background.gd" type="Script" id=3]
+
+[sub_resource type="GDScript" id=18]
+script/source = "extends Tabs
+
+var opened = false
+
+func _ready():
+	MarketDataFetcher.connect(\"plugins_got\", self, \"_on_plugins_fetched\")
+
+
+func _on_Marketplace_tab_clicked(tab):
+	if tab == 2:
+		opened = true
+		MarketDataFetcher.fetch_plugins()
+
+
+func _on_plugins_fetched(data):
+	for i in data:
+		pass
+"
+
+[sub_resource type="StyleBoxFlat" id=19]
+bg_color = Color( 0, 0.0313726, 0.2, 1 )
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+
+[sub_resource type="StyleBoxFlat" id=20]
+bg_color = Color( 0, 0.0235294, 0.141176, 1 )
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="DynamicFont" id=17]
+font_data = ExtResource( 2 )
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Control
+
+export var initial_visibility = false
+
+func _ready():
+	if not initial_visibility:
+		$Img.hide()
+
+
+func show_loading(time: int):
+	$Img.show()
+	$EndTimer.wait_time = time
+	$EndTimer.start()
+
+
+func end_loading():
+	$Img.hide()
+
+
+func _on_EndTimer_timeout():
+	$Img.hide()
+"
+
+[node name="Marketplace" type="Tabs"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 30.0
+margin_right = -230.0
+margin_bottom = -102.0
+rect_min_size = Vector2( 794, 468 )
+script = SubResource( 18 )
+__meta__ = {
+"_edit_horizontal_guides_": [ 30.0, 498.0 ],
+"_edit_vertical_guides_": [ 794.0 ]
+}
+
+[node name="Navigation" type="Panel" parent="."]
+margin_right = 795.0
+margin_bottom = 40.0
+custom_styles/panel = SubResource( 19 )
+script = ExtResource( 3 )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Navigation"]
+margin_left = 18.0
+margin_right = 779.0
+margin_bottom = 40.0
+
+[node name="Body" type="Panel" parent="."]
+margin_top = 40.0
+margin_right = 795.0
+margin_bottom = 468.0
+custom_styles/panel = SubResource( 20 )
+
+[node name="Header" type="Label" parent="."]
+margin_right = 793.0
+margin_bottom = 31.0
+custom_fonts/font = SubResource( 17 )
+text = "Caesar Marketplace"
+align = 1
+
+[node name="Loader" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Loader" parent="Loader" instance=ExtResource( 1 )]
+margin_left = 380.0
+margin_top = 103.0
+margin_right = 380.0
+margin_bottom = 103.0
+script = SubResource( 2 )
+
+[node name="Info" type="Label" parent="Loader"]
+margin_left = 293.0
+margin_top = 153.0
+margin_right = 507.0
+margin_bottom = 175.0
+text = "Connecting to marketplace..."
+align = 1
+
+[connection signal="tab_clicked" from="." to="." method="_on_Marketplace_tab_clicked"]

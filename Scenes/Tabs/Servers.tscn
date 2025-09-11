@@ -1,5 +1,6 @@
-[gd_scene load_steps=25 format=2]
+[gd_scene load_steps=28 format=2]
 
+[ext_resource path="res://Scenes/Tabs/Marketplace.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=3]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold Italic.ttf" type="DynamicFontData" id=4]
@@ -8,6 +9,7 @@
 [ext_resource path="res://Assets/Theme-Icons/down_arrow.png" type="Texture" id=7]
 [ext_resource path="res://Assets/fonts/segoe_11.tres" type="DynamicFont" id=8]
 [ext_resource path="res://Scripts/ScriptPartsUI/Background.gd" type="Script" id=9]
+[ext_resource path="res://Scenes/Tabs/MCPlugins.tscn" type="PackedScene" id=10]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
@@ -128,6 +130,16 @@ font_data = ExtResource( 3 )
 [sub_resource type="DynamicFont" id=7]
 size = 24
 font_data = ExtResource( 4 )
+
+[sub_resource type="GDScript" id=17]
+script/source = "extends TabContainer
+
+func _ready():
+	set_tab_title(0, \"CloudNet\")
+	set_tab_title(1, \"Single Servers\")
+	set_tab_title(2, \"Market\")
+	set_tab_title(3, \"Plugins\")
+"
 
 [sub_resource type="GDScript" id=14]
 script/source = "extends Tabs
@@ -439,7 +451,7 @@ func setup(json):
 		inst.setup(group)
 "
 
-[node name="CloudNET" type="Control"]
+[node name="Servers" type="Control"]
 anchor_right = 0.862
 anchor_bottom = 1.0
 margin_right = 0.311951
@@ -557,6 +569,7 @@ margin_top = 74.0
 margin_right = 840.0
 margin_bottom = 572.0
 tab_align = 0
+script = SubResource( 17 )
 
 [node name="CloudNET" type="Tabs" parent="Parts"]
 anchor_right = 1.0
@@ -1035,11 +1048,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 30.0
 
-[node name="Marketplace" type="Tabs" parent="Parts"]
+[node name="Marketplace" parent="Parts" instance=ExtResource( 1 )]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_top = 30.0
+margin_right = 0.0
+margin_bottom = 0.0
+
+[node name="MCPlugins" parent="Parts" instance=ExtResource( 10 )]
+visible = false
 
 [connection signal="pressed" from="Parts/CloudNET/Tabs/Services/ServiceDetails/DropDown" to="Parts/CloudNET/Tabs/Services/ServiceDetails/DropDown" method="_on_DropDown_pressed"]
 [connection signal="value_changed" from="Parts/CloudNET/Tabs/Tasks/TaskDetail/MainTaskConfig/Memory" to="Parts/CloudNET/Tabs/Tasks/TaskDetail" method="_on_Memory_value_changed"]

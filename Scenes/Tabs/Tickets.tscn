@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Assets/Customizabletheme/theme.tres" type="Theme" id=1]
+[ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+
+func _ready():
+	pass
+"
+
+[sub_resource type="DynamicFont" id=2]
+size = 33
+font_data = ExtResource( 2 )
+
+[node name="Tickets" type="Control"]
+anchor_right = 0.862
+anchor_bottom = 1.0
+margin_right = 0.311951
+theme = ExtResource( 1 )
+script = SubResource( 1 )
+__meta__ = {
+"_edit_vertical_guides_": [ 888.0 ]
+}
+
+[node name="Header" type="Label" parent="."]
+margin_right = 881.0
+margin_bottom = 45.0
+custom_fonts/font = SubResource( 2 )
+text = "Ticket system"
+align = 1

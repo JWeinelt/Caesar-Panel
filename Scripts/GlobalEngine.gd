@@ -30,7 +30,10 @@ signal background_image_use_toggle(use_image)
 
 signal got_mc_uuid(mc_name, mc_uuid)
 
-var client_version = "1.0.0"
+signal player_created(uuid)
+signal player_got(data)
+
+var client_version = "2.5.1"
 var user_id = ""
 
 var caesar_auth = ""
@@ -74,6 +77,19 @@ var features_enabled = []
 
 func _ready():
 	load_config()
+
+
+func config_exists() -> bool:
+	var exe_dir = OS.get_executable_path().get_base_dir()
+	var dir = Directory.new()
+	var err = dir.open(exe_dir)
+	if err != OK:
+		print("Error opening ", exe_dir)
+		return false
+	print("Opened " + dir.get_current_dir())
+	print("Checking for config.cac")
+	return dir.file_exists("config.cac")
+
 
 
 func feature_enabled(feature) -> bool:
@@ -131,6 +147,43 @@ func get_groups():
 
 func get_clusters():
 	$CloudNET/Clusters.request(cloudnet() + "cluster", cloudnet_tk())
+
+
+func get_player_name(input):
+	$Players/GetPlayer.request(caesar() + "player/mc/name/" + input, caesar_tk())
+
+
+func get_player_num(input):
+	$Players/GetPlayer.request(caesar() + "player/id/" + input, caesar_tk())
+
+
+func get_player_uuid(input):
+	$Players/GetPlayer.request(caesar() + "player/uuid/" + input, caesar_tk())
+
+
+func create_player(id, number):
+	var body = {
+		"playerID": id,
+		"playerNumber": int(number)
+	}
+	$Minecraft/CreatePlayer.request(caesar() + "player", caesar_tk(), false, HTTPClient.METHOD_POST, JSON.print(body))
+
+
+func link_mc_account(playerID, mcID):
+	var body = {
+		"playerID": playerID,
+		"mcID": mcID
+	}
+	$Minecraft/LinkMCAcc.request(caesar() + "player/mc", caesar_tk(), false, HTTPClient.METHOD_POST, JSON.print(body))
+	
+
+func link_mc_accounts(data):
+	for i in data:
+		print("Sending mc acc data...")
+		var r = $Minecraft/LinkMCAcc.duplicate()
+		add_child(r)
+		r.request(caesar() + "player/mc", caesar_tk(), false, HTTPClient.METHOD_POST, JSON.print(i))
+	
 
 
 func update_permissions(username, permissions):
@@ -229,7 +282,7 @@ func get_greeting_from_time(iso_time: String) -> String:
 func save_config():
 	var file = File.new()
 	#file.open_encrypted_with_pass("user://config.cac", File.WRITE, "caesar-panel")
-	file.open("user://config.cac", File.WRITE)
+	file.open("config.cac", File.WRITE)
 	file.store_var(cs_settings, true)
 	file.close()
 
@@ -237,8 +290,9 @@ func save_config():
 func load_config():
 	print("Loading config")
 	var file = File.new()
+	if not config_exists(): return
 	#file.open_encrypted_with_pass("user://config.cac", File.READ, "caesar-panel")
-	file.open("user://config.cac", File.READ)
+	file.open("config.cac", File.READ)
 	cs_settings = file.get_var(true)
 	apply_config()
 
@@ -260,6 +314,8 @@ func _on_Auth_request_completed(_result, response_code, _headers, body):
 		
 		chat_server_port = data.chatServer
 		
+		ClientLinkSocket.connect_to_server()
+		
 		
 		user_permissions = data.permissions
 		print("Got " + str(user_permissions.size()) + " permissions in total.")
@@ -270,8 +326,8 @@ func _on_Auth_request_completed(_result, response_code, _headers, body):
 			if cloud_address == "localhost" or cloud_address == "127.0.0.1":
 				cloud_address = cs_settings.defaults.caesar_host
 			var header = ["Authorization: Basic " + data.cloudnet.credentials]
-			$Auth/AuthCN.request("http://" + cloud_address + "/api/v3/auth", header, false, HTTPClient.METHOD_POST)
-			cloud_address = "http://" + cloud_address + "/api/v3/"
+			$Auth/AuthCN.request("https://" + cloud_address + "/api/v3/auth", header, false, HTTPClient.METHOD_POST)
+			cloud_address = "https://" + cloud_address + "/api/v3/"
 			enable_cloud = true
 		else:
 			enable_cloud = false
@@ -335,6 +391,17 @@ func get_value_type(val):
 
 func request_mc_id(mc_name):
 	$Minecraft/GetUUIDFromName.request("https://api.mojang.com/users/profiles/minecraft/" + mc_name)
+
+
+func create_connection(cname, address, port, encrypted):
+	var body = {
+		"name": cname,
+		"address": address,
+		"port": port,
+		"encrypted": encrypted,
+		"uuid": "2165a008-faa4-4060-bd5c-c209756ee858"
+	}
+	$Minecraft/CreateConnection.request(caesar() + "connection", caesar_tk(), false, HTTPClient.METHOD_POST, JSON.print(body))
 
 
 func _on_WeatherGetter_request_completed(_result, _response_code, _headers, body):
@@ -467,3 +534,23 @@ func _on_GetPermissions_request_completed(_result, response_code, _headers, body
 func _on_SendPermissions_request_completed(_result, response_code, _headers, _body):
 	if response_code == 200:
 		emit_signal("permission_send_success")
+
+
+func _on_CreateConnection_request_completed(_result, _response_code, _headers, body):
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	
+	print("Created connection:")
+	print(data)
+
+
+func _on_CreatePlayer_request_completed(_result, response_code, _headers, body):
+	print("Answer from server (player creation): " + str(response_code))
+	if response_code == 201:
+		var data = JSON.parse(body.get_string_from_utf8()).result
+		var playerID = data.get("playerID")
+		emit_signal("player_created", playerID)
+
+
+func _on_GetPlayer_request_completed(_result, _response_code, _headers, body):
+		var data = JSON.parse(body.get_string_from_utf8()).result
+		emit_signal("player_got", data)

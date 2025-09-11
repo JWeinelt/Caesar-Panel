@@ -39,6 +39,7 @@ func _on_tasks_received(data):
 
 func _on_service_clicked(service):
 	pass
+
 "
 
 [sub_resource type="DynamicFont" id=2]

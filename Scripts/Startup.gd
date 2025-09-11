@@ -1,6 +1,11 @@
 extends Control
 
 func _ready():
+	print(OS.get_cmdline_args())
+	if not GE.config_exists() and OS.get_cmdline_args().find("development") == -1:
+# warning-ignore:return_value_discarded
+		get_tree().change_scene("res://Scenes/Setup.tscn")
+		return
 	$Error.hide()
 	get_tree().get_root().set_transparent_background(true)
 	OS.window_borderless = true
@@ -9,6 +14,7 @@ func _ready():
 	
 	if not $Username/UEnter.text.empty():
 		$Password/PEnter.grab_focus()
+	else: $Username/UEnter.grab_focus()
 	
 # warning-ignore:return_value_discarded
 	GE.connect("caesar_auth_failed", self, "_on_caesar_auth_fail")
