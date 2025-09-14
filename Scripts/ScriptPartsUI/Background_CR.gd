@@ -5,6 +5,9 @@ extends ColorRect
 func _ready():
 # warning-ignore:return_value_discarded
 	GE.connect("background_image_use_toggle", self, "_on_background_update")
+	
+	if GE.cs_settings.clientSettings.useBackgroundImage:
+		_on_background_update(true)
 
 
 func _on_background_update(use_image):

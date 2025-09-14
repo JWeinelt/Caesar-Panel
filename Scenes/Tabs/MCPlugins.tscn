@@ -9,7 +9,9 @@
 script/source = "extends Tabs
 
 func _ready():
+# warning-ignore:return_value_discarded
 	McPluginApi.connect(\"resource_fetched\", self, \"_on_resource_fetched\")
+# warning-ignore:return_value_discarded
 	McPluginApi.connect(\"resources_fetched\", self, \"_on_resources_fetched\")
 	
 	McPluginApi.get_resources(10, 1)

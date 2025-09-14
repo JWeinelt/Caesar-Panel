@@ -1,0 +1,82 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Scripts/ScriptPartsUI/Background.gd" type="Script" id=1]
+[ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Control
+
+func _ready():
+	GE.get_dashboard_data_caesar(\"discord\")
+	GE.connect(\"dashboard_data_got\", self, \"_on_dashboard_data_got\")
+
+
+func _on_dashboard_data_got(data):
+	if data.route == \"discord\":
+		var total = data.members
+		var unit = 273.0 / total
+		var offline = data.members - (data.online + data.bots)
+		
+		$Graph/Members.rect_size.x = unit * data.online
+		$Graph/Members.rect_position.x = 0
+		$Graph/Bots.rect_size.x = unit * data.bots
+		$Graph/Bots.rect_position.x = $Graph/Members.rect_size.x
+		$Graph/Offline.rect_size.x = unit * offline
+		$Graph/Offline.rect_position.x = $Graph/Members.rect_size.x + $Graph/Bots.rect_size.x
+		
+"
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.11002, 0.120717, 0.147461, 1 )
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
+
+[sub_resource type="DynamicFont" id=3]
+size = 20
+font_data = ExtResource( 2 )
+
+[node name="DashboardCard" type="Control"]
+anchor_right = 0.636
+anchor_bottom = 0.696
+margin_right = -306.264
+margin_bottom = -207.6
+rect_min_size = Vector2( 345, 210 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = SubResource( 2 )
+
+[node name="Bg" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 1 )
+
+[node name="Header" type="Label" parent="."]
+anchor_right = 1.0
+margin_bottom = 14.0
+custom_fonts/font = SubResource( 3 )
+text = "Discord"
+align = 1
+
+[node name="Graph" type="Control" parent="."]
+margin_left = 31.0
+margin_top = 47.0
+margin_right = 304.0
+margin_bottom = 81.0
+
+[node name="Members" type="ColorRect" parent="Graph"]
+margin_right = 54.0
+margin_bottom = 34.0
+color = Color( 0.85098, 0.407843, 0.407843, 1 )
+
+[node name="Bots" type="ColorRect" parent="Graph"]
+margin_right = 54.0
+margin_bottom = 34.0
+color = Color( 0.407843, 0.643137, 0.85098, 1 )
+
+[node name="Offline" type="ColorRect" parent="Graph"]
+margin_right = 54.0
+margin_bottom = 34.0
+color = Color( 0.298039, 0.298039, 0.298039, 1 )

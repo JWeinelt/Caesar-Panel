@@ -7,6 +7,7 @@ func _ready():
 	ws = WebSocketClient.new()
 # warning-ignore:return_value_discarded
 	ws.connect("data_received", self, "_on_data_received")
+	ws.connect("connection_established", self, "_on_conn_ok")
 	var err = ws.connect_to_url("http://localhost:41539")
 	if err == OK:
 		print("Connected to worker")
@@ -20,11 +21,18 @@ func worker_connected():
 	return ws != null
 
 
+func _on_conn_ok(protocol):
+	send_message("get-version")
+
+
 func _on_data_received():
 	var message := ws.get_peer(1).get_packet().get_string_from_utf8()
-	var _vm = JSON.parse(message).result
+	#var _vm = JSON.parse(message).result
 	if message == "stop-ok":
 		get_tree().quit()
+	if message.begins_with("version"):
+		GE.worker_version = message.split(";")[1]
+		print("Registered worker version: " + GE.worker_version)
 
 
 func send_message(message):
@@ -38,6 +46,11 @@ func send_message(message):
 
 func send_update_request(version):
 	send_message("update;" + version)
+
+
+func send_update_request_worker(version):
+	print("Requesting update from worker...")
+	send_message("worker-update;" + version)
 
 
 func send_tray(title, message):

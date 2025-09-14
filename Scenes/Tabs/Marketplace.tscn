@@ -10,6 +10,7 @@ script/source = "extends Tabs
 var opened = false
 
 func _ready():
+# warning-ignore:return_value_discarded
 	MarketDataFetcher.connect(\"plugins_got\", self, \"_on_plugins_fetched\")
 
 

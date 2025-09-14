@@ -16,9 +16,13 @@ signal chat_renamed(chat, new_name)
 
 signal disconnected(clean_close)
 
+signal got_req_user_data(data)
+
 
 var server: WebSocketClient
 var connected = true
+
+var requested_user_data = []
 
 func start():
 	server = WebSocketClient.new()
@@ -47,6 +51,20 @@ func _on_connection_close(clean_close):
 	emit_signal(\"disconnected\", clean_close)
 
 
+func request_user_info(userid):
+	var dat = {
+		\"userid\": userid,
+		\"data\": {}
+	}
+	requested_user_data.append(dat)
+	
+	var body = {
+		\"type\": \"REQUEST_USER_DATA\",
+		\"userid\": userid
+	}
+	send_data(body)
+
+
 func _on_data_received():
 	var message := server.get_peer(1).get_packet().get_string_from_utf8()
 	print_debug(\"Received data\")
@@ -60,10 +78,15 @@ func parse_action(data):
 		\"SEND_CHAT_LIST\":
 			emit_signal(\"got_chat_list\", data.get(\"chats\"))
 		\"HANDSHAKE\":
-			print(\"Received handshake from server\")
+			print(\"Received handshake from server (chats)\")
 		\"MESSAGE\":
 			print(\"Received new message\")
 			emit_signal(\"message_received\", data)
+		\"REQUEST_USER_DATA\":
+			for i in requested_user_data:
+				if i.userid == data.userid:
+					i.data = data
+					emit_signal(\"got_req_user_data\", data.userData)
 
 
 func close_connection():

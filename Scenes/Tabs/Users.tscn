@@ -314,10 +314,10 @@ placeholder_text = "Enter name"
 
 [node name="RoleColorPicker" type="ColorPicker" parent="Roles/RoleCreation"]
 visible = false
-margin_left = 267.0
-margin_top = -54.0
-margin_right = 557.0
-margin_bottom = 467.0
+margin_left = 271.0
+margin_top = -50.0
+margin_right = 561.0
+margin_bottom = 471.0
 rect_scale = Vector2( 0.8, 0.8 )
 edit_alpha = false
 presets_enabled = false

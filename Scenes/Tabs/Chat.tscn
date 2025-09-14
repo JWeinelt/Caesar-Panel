@@ -1,15 +1,18 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://addons/SmoothScroll/SmoothScrollContainer.gd" type="Script" id=3]
 [ext_resource path="res://Scripts/ScriptPartsUI/Background.gd" type="Script" id=4]
 [ext_resource path="res://Assets/Emoji/tile000.png" type="Texture" id=5]
+[ext_resource path="res://themes/chat_bg_style.tres" type="StyleBox" id=6]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
 
 var current_chat_open = \"\"
+
+var username_requested_chats = []
 
 func _ready():
 	ChatClient.start()
@@ -19,16 +22,37 @@ func _ready():
 	ChatClient.connect(\"message_received\", self, \"_on_message_received\")
 # warning-ignore:return_value_discarded
 	ChatClient.connect(\"chat_renamed\", self, \"_on_chat_renamed\")
+# warning-ignore:return_value_discarded
+	ChatClient.connect(\"got_req_user_data\", self, \"_on_user_data_got\")
+
+
+func request_username(id, node):
+	var dat = {
+		\"userid\": id,
+		\"chat\": node
+	}
+	username_requested_chats.append(dat)
+	ChatClient.request_user_info(id)
 
 
 func _on_get_chat_list(chats):
-	for i in $Screen/Chats/ChatList.get_children(): i.queue_free()
+	var prev_chats = []
+	for i in $Screen/Chats/ChatList.get_children():
+		prev_chats.append(i.data.uniqueID)
 	
 	for i in chats:
+		if prev_chats.find(i.uniqueID) != -1:
+			print(\"Found chat previously created\")
+			continue
 		var chat_entry = load(\"res://Scenes/Objects/iObj/Chat/ChatListEntry.tscn\").instance()
 		$Screen/Chats/ChatList.add_child(chat_entry)
 		chat_entry.setup(i)
 		chat_entry.connect(\"open_chat\", self, \"_on_open_chat\")
+		prev_chats.append(i.uniqueID)
+	
+	print(prev_chats)
+	for i in $Screen/Chats/ChatList.get_children():
+		if prev_chats.find(i.data.uniqueID) == -1: i.queue_free()
 
 
 func _on_open_chat(data):
@@ -46,6 +70,13 @@ func _on_open_chat(data):
 			var message = load(\"res://Scenes/Objects/iObj/Chat/ChatMessageSystem.tscn\").instance()
 			$Screen/Chat/List/ChatMessages.add_child(message)
 			message.setup(msg.message, msg.date)
+
+
+func _on_user_data_got(data):
+	for i in username_requested_chats:
+		if i.userid == data.uuid:
+			i.chat.rename(data.username)
+			print(\"Renaming chat to \" + data.username)
 
 
 func _on_message_received(data):
@@ -114,6 +145,7 @@ margin_bottom = 602.0
 margin_right = 150.0
 margin_bottom = 546.0
 rect_min_size = Vector2( 150, 0 )
+custom_styles/panel = ExtResource( 6 )
 script = ExtResource( 4 )
 
 [node name="Header" type="Label" parent="Screen/Chats"]
@@ -141,6 +173,7 @@ margin_left = 154.0
 margin_right = 724.0
 margin_bottom = 546.0
 rect_min_size = Vector2( 570, 0 )
+custom_styles/panel = ExtResource( 6 )
 script = ExtResource( 4 )
 
 [node name="List" type="ScrollContainer" parent="Screen/Chat"]
@@ -178,6 +211,7 @@ margin_left = 728.0
 margin_right = 878.0
 margin_bottom = 546.0
 rect_min_size = Vector2( 150, 0 )
+custom_styles/panel = ExtResource( 6 )
 script = ExtResource( 4 )
 
 [node name="Header" type="Label" parent="Screen/Members"]

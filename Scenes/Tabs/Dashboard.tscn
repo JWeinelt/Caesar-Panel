@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
 [ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://Scenes/Objects/Dashboard/DashboardInfo.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Scenes/Objects/Dashboard/NotAvailable.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Scenes/Objects/Dashboard/Discord.tscn" type="PackedScene" id=5]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
@@ -61,7 +62,7 @@ anchor_bottom = 0.45
 margin_left = -0.235016
 margin_right = 0.394958
 
-[node name="DashboardCard" parent="Dash2" instance=ExtResource( 3 )]
+[node name="DashboardCard" parent="Dash2" instance=ExtResource( 5 )]
 
 [node name="Dash3" type="Control" parent="."]
 anchor_left = 0.545

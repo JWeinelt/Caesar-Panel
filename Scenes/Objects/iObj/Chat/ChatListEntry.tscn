@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Assets/fonts/segoe-ui.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Assets/icons/stopped.png" type="Texture" id=2]
+[ext_resource path="res://Scripts/ScriptPartsUI/Background.gd" type="Script" id=3]
 
 [sub_resource type="GDScript" id=3]
 script/source = "extends Control
@@ -16,8 +17,17 @@ func _ready():
 func setup(chat_data):
 	$Name.text = chat_data.customName
 	data = chat_data
+	
+	if data.publicChat: return
+	
+	for i in chat_data.users:
+		if i != GE.user_id:
+			print(\"Requesting \" + i)
+			get_parent().get_parent().get_parent().get_parent().request_username(i, self)
+			break
 
 func rename(new_name):
+	if $Name.text != \"New Chat\" and $Name.text != \"<DM>\": return
 	$Name.text = new_name
 
 
@@ -65,10 +75,12 @@ script = SubResource( 3 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_styles/panel = SubResource( 1 )
+script = ExtResource( 3 )
 
 [node name="Name" type="Label" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_left = 6.0
 custom_fonts/font = SubResource( 2 )
 text = "Chatname"
 valign = 1

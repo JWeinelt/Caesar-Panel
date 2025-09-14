@@ -22,7 +22,7 @@ func get_children_json(node: Node = null) -> Dictionary:
 		if (not child.has_method("value")):
 			continue
 
-		var key = child.key
+		var keys = child.key
 		var val = child.value()
 
 		if child.get_child_count() > 0:
@@ -37,7 +37,7 @@ func get_children_json(node: Node = null) -> Dictionary:
 					"children": nested
 				}
 		
-		result[key] = val
+		result[keys] = val
 	
 	return result
 

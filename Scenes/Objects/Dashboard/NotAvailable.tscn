@@ -26,10 +26,10 @@ size = 19
 font_data = ExtResource( 3 )
 
 [node name="DashboardCard" type="Control"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_right = -679.0
-margin_bottom = -390.0
+anchor_right = 0.337
+anchor_bottom = 0.35
+margin_right = -0.0880127
+margin_bottom = -1.52588e-05
 rect_min_size = Vector2( 345, 210 )
 script = SubResource( 2 )
 __meta__ = {

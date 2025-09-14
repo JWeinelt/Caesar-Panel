@@ -33,7 +33,11 @@ signal got_mc_uuid(mc_name, mc_uuid)
 signal player_created(uuid)
 signal player_got(data)
 
-var client_version = "2.5.1"
+signal dashboard_data_got(data)
+signal dashboard_data_got_cloudnet(data)
+
+var client_version = "2.5.2"
+var worker_version = ""
 var user_id = ""
 
 var caesar_auth = ""
@@ -80,16 +84,27 @@ func _ready():
 
 
 func config_exists() -> bool:
+	
+	var exe_dir = OS.get_executable_path().get_base_dir()
+	var dir = Directory.new()
+	if OS.get_cmdline_args().find("development") != -1: return dir.file_exists("user://config.cac")
+	var err = dir.open(exe_dir)
+	if err != OK:
+		print(err)
+		return false
+	var found = dir.file_exists("config.cac")
+	
+	if found: print("Config found")
+	return found
+
+
+func config_file_path():
 	var exe_dir = OS.get_executable_path().get_base_dir()
 	var dir = Directory.new()
 	var err = dir.open(exe_dir)
 	if err != OK:
-		print("Error opening ", exe_dir)
 		return false
-	print("Opened " + dir.get_current_dir())
-	print("Checking for config.cac")
 	return dir.file_exists("config.cac")
-
 
 
 func feature_enabled(feature) -> bool:
@@ -279,22 +294,54 @@ func get_greeting_from_time(iso_time: String) -> String:
 		return "Good night"
 
 
+# Dashboard
+func get_dashboard_data_caesar(route):
+	var http = HTTPRequest.new()
+	http.connect("request_completed", self, "_on_dashboard_http_request_complete_caesar")
+	$DashBoardGetters.add_child(http)
+	http.request(caesar() + "dashboard/" + route, caesar_tk())
+
+
+func get_dashboard_data_cloudnet(route):
+	var http = HTTPRequest.new()
+	http.connect("request_completed", self, "_on_dashboard_http_request_complete_cloudnet")
+	$DashBoardGetters.add_child(http)
+	http.request(cloudnet() + route, cloudnet_tk())
+
+
+
 func save_config():
+	print("Got command to save config:")
+	print(cs_settings)
+	var pref = ""
+	if OS.get_cmdline_args().find("development") != -1: pref = "user://"
 	var file = File.new()
 	#file.open_encrypted_with_pass("user://config.cac", File.WRITE, "caesar-panel")
-	file.open("config.cac", File.WRITE)
+	file.open(pref + "config.cac", File.WRITE)
 	file.store_var(cs_settings, true)
 	file.close()
 
 
 func load_config():
+	var pref = ""
+	if OS.get_cmdline_args().find("development") != -1: pref = "user://"
 	print("Loading config")
 	var file = File.new()
 	if not config_exists(): return
 	#file.open_encrypted_with_pass("user://config.cac", File.READ, "caesar-panel")
-	file.open("config.cac", File.READ)
+	file.open(pref + "config.cac", File.READ)
 	cs_settings = file.get_var(true)
+	print(cs_settings)
 	apply_config()
+
+
+func _on_dashboard_http_request_complete_caesar(_result, _response_code, _headers, body):
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	emit_signal("dashboard_data_got", data)
+
+func _on_dashboard_http_request_complete_cloudnet(_result, _response_code, _headers, body):
+	var data = JSON.parse(body.get_string_from_utf8()).result
+	emit_signal("dashboard_data_got_cloudnet", data)
 
 
 func _on_Auth_request_completed(_result, response_code, _headers, body):

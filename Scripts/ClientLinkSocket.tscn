@@ -19,7 +19,8 @@ func connect_to_server():
 # warning-ignore:return_value_discarded
 	ws.connect(\"connection_closed\", self, \"_on_connection_closed\")
 # warning-ignore:return_value_discarded
-	ws.connect_to_url(\"http://localhost:48003\")
+	var err = ws.connect_to_url(\"http://\" + GE.cs_settings.defaults.caesar_host + \":48003\")
+	print(\"Websocket connection try (link) has been finished with error \" + str(err))
 
 
 func _process(_delta):
@@ -31,7 +32,8 @@ func _on_conn_ok(_protocol):
 	var auth = {
 		\"type\": \"AUTHENTICATE\",
 		\"myID\": GE.user_id,
-		\"myVersion\": GE.client_version
+		\"myVersion\": GE.client_version,
+		\"workerVersion\": GE.worker_version
 	}
 	send_message(JSON.print(auth))
 
@@ -43,9 +45,15 @@ func _on_data_received():
 		var type = vm.get(\"type\")
 		match type:
 			\"HANDSHAKE\":
-				var updateAvailable = vm.get(\"updateAvailable\")
-				if updateAvailable: print(\"Update available\")
-				Worker.send_update_request(vm.get(\"newVersion\"))
+				var updateAvailable = vm.get(\"client\").get(\"updateAvailable\")
+				if updateAvailable: 
+					print(\"Update for panel available\")
+					Worker.send_update_request(vm.get(\"client\").get(\"newVersion\"))
+				
+				var workerUpdate = vm.get(\"worker\").get(\"updateAvailable\")
+				if workerUpdate:
+					print(\"Update for Worker available\")
+					Worker.send_update_request_worker(vm.get(\"worker\").get(\"newVersion\"))
 			\"DC_WAITING_ROOM_UPDATE\":
 				emit_signal(\"dc_waiting_room_update\", vm.data)
 			\"DC_VOICE_UPDATE\":
