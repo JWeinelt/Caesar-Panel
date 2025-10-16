@@ -19,6 +19,9 @@ signal config_server_change_ok
 signal permission_send_success
 signal user_action_success
 
+signal discord_channels_got(data)
+signal discord_embeds_got(data)
+
 signal got_users(data)
 signal got_roles(data)
 signal got_permissions(data)
@@ -136,6 +139,7 @@ func cloudnet_tk():
 
 func caesar():
 	var url = cs_settings.defaults.caesar_host
+	url = "localhost" # debug
 	if url.find(":") == -1: url = url + ":48000"
 	if not url.begins_with("http://"): url = "http://" + url
 	if not url.ends_with("/"): url = url + "/"
@@ -174,6 +178,14 @@ func get_player_num(input):
 
 func get_player_uuid(input):
 	$Players/GetPlayer.request(caesar() + "player/uuid/" + input, caesar_tk())
+
+
+func get_discord_channels():
+	$DiscordChannelGetter.request(caesar() + "discord/channels", caesar_tk())
+
+
+func get_discord_embeds():
+	$DiscordChannelGetter.request(caesar() + "discord/embed", caesar_tk())
 
 
 func create_player(id, number):
@@ -601,3 +613,13 @@ func _on_CreatePlayer_request_completed(_result, response_code, _headers, body):
 func _on_GetPlayer_request_completed(_result, _response_code, _headers, body):
 		var data = JSON.parse(body.get_string_from_utf8()).result
 		emit_signal("player_got", data)
+
+
+func _on_DiscordChannelGetter_request_completed(result, response_code, headers, body):
+		var data = JSON.parse(body.get_string_from_utf8()).result
+		emit_signal("discord_channels_got", data)
+
+
+func _on_EmbedGet_request_completed(result, response_code, headers, body):
+		var data = JSON.parse(body.get_string_from_utf8()).result
+		emit_signal("discord_embeds_got", data)

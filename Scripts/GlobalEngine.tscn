@@ -67,6 +67,18 @@ script = ExtResource( 1 )
 
 [node name="DashBoardGetters" type="Node" parent="."]
 
+[node name="DiscordChannelGetter" type="HTTPRequest" parent="."]
+
+[node name="Discord" type="Node" parent="."]
+
+[node name="Embed" type="HTTPRequest" parent="Discord"]
+
+[node name="TicketStatus" type="HTTPRequest" parent="Discord"]
+
+[node name="TicketType" type="HTTPRequest" parent="Discord"]
+
+[node name="EmbedGet" type="HTTPRequest" parent="Discord"]
+
 [connection signal="request_completed" from="Auth/Auth" to="." method="_on_Auth_request_completed"]
 [connection signal="request_completed" from="Auth/AuthCN" to="." method="_on_AuthCN_request_completed"]
 [connection signal="request_completed" from="Weather/LocationService" to="." method="_on_LocationService_request_completed"]
@@ -89,3 +101,5 @@ script = ExtResource( 1 )
 [connection signal="request_completed" from="Minecraft/CreateConnection" to="." method="_on_CreateConnection_request_completed"]
 [connection signal="request_completed" from="Minecraft/CreatePlayer" to="." method="_on_CreatePlayer_request_completed"]
 [connection signal="request_completed" from="Players/GetPlayer" to="." method="_on_GetPlayer_request_completed"]
+[connection signal="request_completed" from="DiscordChannelGetter" to="." method="_on_DiscordChannelGetter_request_completed"]
+[connection signal="request_completed" from="Discord/EmbedGet" to="." method="_on_EmbedGet_request_completed"]

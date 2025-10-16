@@ -1,0 +1,350 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Assets/Theme.tres" type="Theme" id=1]
+[ext_resource path="res://Assets/fonts/Segoe UI Bold.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://addons/SmoothScroll/SmoothScrollContainer.gd" type="Script" id=3]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+var channels = []
+
+
+func _ready():
+	GE.connect(\"discord_channels_got\", self, \"_on_discord_channels_got\")
+	GE.connect(\"discord_embeds_got\", self, \"_on_discord_embeds_got\")
+	GE.get_discord_channels()
+
+
+func _on_discord_channels_got(data):
+	for i in data:
+		if i.type != \"TEXT\": continue
+		$Screen/ChannelSel.add_item(i.get(\"name\"))
+
+
+func _on_discord_embeds_got(data):
+	for i in data:
+		var entry = load(\"res://Scenes/Objects/iObj/DiscordEmbedEntry.tscn\").instance()
+		entry.setup(i)
+		$Screen/EmbedList.add_child(entry)
+
+
+func _on_SaveEmbed_pressed():
+	var d = JSON.parse($EmbedScreen/Paster.text).result
+	var e = {
+		\"embedID\": \"\",
+		\"title\": \"\",
+		\"description\": \"\",
+		\"url\": \"\",
+		\"color\": \"\",
+		\"footer\": \"\",
+		\"image\": \"\",
+		\"thumbnail\": \"\",
+		\"timestamp\": \"\",
+		\"author\": \"\",
+		\"fields\": []
+	}
+	e.embedID = $EmbedScreen/EmbedID.text
+	e.title = d.title
+	e.description = d.description
+	# TODO: Add other fields
+"
+
+[sub_resource type="DynamicFont" id=2]
+size = 33
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 20
+font_data = ExtResource( 2 )
+
+[node name="Mail" type="Control"]
+anchor_right = 0.862
+anchor_bottom = 1.0
+margin_right = 0.311951
+theme = ExtResource( 1 )
+script = SubResource( 1 )
+__meta__ = {
+"_edit_vertical_guides_": [ 883.0 ]
+}
+
+[node name="Header" type="Label" parent="."]
+margin_right = 881.0
+margin_bottom = 45.0
+custom_fonts/font = SubResource( 2 )
+text = "Admin"
+align = 1
+
+[node name="Screen" type="Control" parent="."]
+margin_top = 63.0
+margin_right = 883.0
+margin_bottom = 600.0
+
+[node name="Tickets" type="Label" parent="Screen"]
+margin_left = 12.0
+margin_top = 6.0
+margin_right = 126.0
+margin_bottom = 29.0
+text = "Discord - Tickets"
+
+[node name="ChannelSel" type="OptionButton" parent="Screen"]
+margin_left = 32.0
+margin_top = 42.0
+margin_right = 262.0
+margin_bottom = 75.0
+
+[node name="EmbedList" type="VBoxContainer" parent="Screen"]
+margin_left = 408.0
+margin_top = 17.0
+margin_right = 647.0
+margin_bottom = 421.0
+
+[node name="EmbedScreen" type="Control" parent="."]
+margin_top = 63.0
+margin_right = 883.0
+margin_bottom = 600.0
+
+[node name="Bg" type="ColorRect" parent="EmbedScreen"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 0.74902 )
+
+[node name="EmbedPreview" type="ColorRect" parent="EmbedScreen"]
+visible = false
+margin_left = 120.0
+margin_top = 39.0
+margin_right = 422.0
+margin_bottom = 518.0
+color = Color( 0.2, 0.2, 0.2, 1 )
+
+[node name="Color" type="ColorRect" parent="EmbedScreen/EmbedPreview"]
+margin_right = 4.0
+margin_bottom = 479.0
+color = Color( 0, 0.815686, 0.94902, 1 )
+
+[node name="EmbedEnter" type="ColorRect" parent="EmbedScreen"]
+visible = false
+margin_left = 536.0
+margin_top = 39.0
+margin_right = 838.0
+margin_bottom = 518.0
+color = Color( 0.2, 0.2, 0.2, 1 )
+
+[node name="SmoothScroll" type="ScrollContainer" parent="EmbedScreen/EmbedEnter"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 3 )
+
+[node name="Container" type="VBoxContainer" parent="EmbedScreen/EmbedEnter/SmoothScroll"]
+margin_right = 302.0
+margin_bottom = 1262.0
+rect_min_size = Vector2( 302, 0 )
+
+[node name="Author" type="ColorRect" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container"]
+margin_right = 302.0
+margin_bottom = 250.0
+rect_min_size = Vector2( 0, 250 )
+color = Color( 0.164706, 0.164706, 0.164706, 1 )
+
+[node name="Header" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Author"]
+margin_left = 8.0
+margin_top = 4.0
+margin_right = 69.0
+margin_bottom = 32.0
+custom_fonts/font = SubResource( 3 )
+text = "Author"
+
+[node name="AuthorName" type="LineEdit" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Author"]
+margin_left = 16.0
+margin_top = 59.0
+margin_right = 195.0
+margin_bottom = 94.0
+
+[node name="Info" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Author/AuthorName"]
+margin_top = -25.0
+margin_right = 94.0
+margin_bottom = -2.0
+text = "Author Name"
+
+[node name="AuthorURL" type="LineEdit" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Author"]
+margin_left = 16.0
+margin_top = 123.0
+margin_right = 195.0
+margin_bottom = 158.0
+
+[node name="Info" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Author/AuthorURL"]
+margin_top = -25.0
+margin_right = 94.0
+margin_bottom = -2.0
+text = "Author URL"
+
+[node name="AuthorIconURL" type="LineEdit" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Author"]
+margin_left = 16.0
+margin_top = 187.0
+margin_right = 195.0
+margin_bottom = 222.0
+
+[node name="Info" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Author/AuthorIconURL"]
+margin_top = -25.0
+margin_right = 94.0
+margin_bottom = -2.0
+text = "Author Icon URL"
+
+[node name="Body" type="ColorRect" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container"]
+margin_top = 254.0
+margin_right = 302.0
+margin_bottom = 854.0
+rect_min_size = Vector2( 0, 600 )
+color = Color( 0.164706, 0.164706, 0.164706, 1 )
+
+[node name="Header" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Body"]
+margin_left = 8.0
+margin_top = 4.0
+margin_right = 69.0
+margin_bottom = 32.0
+custom_fonts/font = SubResource( 3 )
+text = "Body"
+
+[node name="Title" type="LineEdit" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Body"]
+margin_left = 16.0
+margin_top = 59.0
+margin_right = 195.0
+margin_bottom = 94.0
+
+[node name="Info" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Body/Title"]
+margin_top = -25.0
+margin_right = 94.0
+margin_bottom = -2.0
+text = "Title"
+
+[node name="TitleURL" type="LineEdit" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Body"]
+margin_left = 16.0
+margin_top = 123.0
+margin_right = 195.0
+margin_bottom = 158.0
+
+[node name="Info" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Body/TitleURL"]
+margin_top = -25.0
+margin_right = 94.0
+margin_bottom = -2.0
+text = "Title URL"
+
+[node name="Description" type="TextEdit" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Body"]
+margin_left = 16.0
+margin_top = 187.0
+margin_right = 289.0
+margin_bottom = 536.0
+
+[node name="Info" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Body/Description"]
+margin_top = -25.0
+margin_right = 94.0
+margin_bottom = -2.0
+text = "Description"
+
+[node name="Images" type="ColorRect" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container"]
+margin_top = 858.0
+margin_right = 302.0
+margin_bottom = 1058.0
+rect_min_size = Vector2( 0, 200 )
+color = Color( 0.164706, 0.164706, 0.164706, 1 )
+
+[node name="Header" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Images"]
+margin_left = 8.0
+margin_top = 4.0
+margin_right = 69.0
+margin_bottom = 32.0
+custom_fonts/font = SubResource( 3 )
+text = "Images"
+
+[node name="ImageURL" type="LineEdit" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Images"]
+margin_left = 16.0
+margin_top = 59.0
+margin_right = 195.0
+margin_bottom = 94.0
+
+[node name="Info" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Images/ImageURL"]
+margin_top = -25.0
+margin_right = 94.0
+margin_bottom = -2.0
+text = "Image URL"
+
+[node name="ThumbnailURL" type="LineEdit" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Images"]
+margin_left = 16.0
+margin_top = 123.0
+margin_right = 195.0
+margin_bottom = 158.0
+
+[node name="Info" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Images/ThumbnailURL"]
+margin_top = -25.0
+margin_right = 94.0
+margin_bottom = -2.0
+text = "Thumbnail URL"
+
+[node name="Footer" type="ColorRect" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container"]
+margin_top = 1062.0
+margin_right = 302.0
+margin_bottom = 1262.0
+rect_min_size = Vector2( 0, 200 )
+color = Color( 0.164706, 0.164706, 0.164706, 1 )
+
+[node name="Header" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Footer"]
+margin_left = 8.0
+margin_top = 4.0
+margin_right = 69.0
+margin_bottom = 32.0
+custom_fonts/font = SubResource( 3 )
+text = "Images"
+
+[node name="FooterText" type="LineEdit" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Footer"]
+margin_left = 16.0
+margin_top = 59.0
+margin_right = 195.0
+margin_bottom = 94.0
+
+[node name="Info" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Footer/FooterText"]
+margin_top = -25.0
+margin_right = 94.0
+margin_bottom = -2.0
+text = "Footer Text"
+
+[node name="FooterIconURL" type="LineEdit" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Footer"]
+margin_left = 16.0
+margin_top = 123.0
+margin_right = 195.0
+margin_bottom = 158.0
+
+[node name="Info" type="Label" parent="EmbedScreen/EmbedEnter/SmoothScroll/Container/Footer/FooterIconURL"]
+margin_top = -25.0
+margin_right = 94.0
+margin_bottom = -2.0
+text = "Footer Icon URL"
+
+[node name="Paster" type="TextEdit" parent="EmbedScreen"]
+margin_left = 69.0
+margin_top = 130.0
+margin_right = 802.0
+margin_bottom = 451.0
+
+[node name="Info" type="Label" parent="EmbedScreen"]
+margin_left = 69.0
+margin_top = 50.0
+margin_right = 592.0
+margin_bottom = 73.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+text = "Paste the JSON generated at https://embed.dan.onl/ here to use it in Caesar."
+
+[node name="EmbedID" type="LineEdit" parent="EmbedScreen"]
+margin_left = 75.0
+margin_top = 85.0
+margin_right = 470.0
+margin_bottom = 120.0
+placeholder_text = "Enter unique Embed ID"
+
+[node name="SaveEmbed" type="Button" parent="EmbedScreen"]
+margin_left = 747.0
+margin_top = 79.0
+margin_right = 790.0
+margin_bottom = 112.0
+text = "Save"
+
+[connection signal="pressed" from="EmbedScreen/SaveEmbed" to="." method="_on_SaveEmbed_pressed"]
