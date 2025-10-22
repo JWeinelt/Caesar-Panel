@@ -1,5 +1,5 @@
 # 🏛️Caesar Frontend
-![Version](https://img.shields.io/badge/Version-v0.0.238-green)![Update](https://img.shields.io/badge/Update-23.4.2025-blue)
+![Version](https://img.shields.io/badge/Version-v0.0.238-green)![Update](https://img.shields.io/badge/Last--Update-22.10.2025-blue)
 
 This repo contains the frontend panel of **Caesar.**
 
