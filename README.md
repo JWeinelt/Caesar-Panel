@@ -1,6 +1,10 @@
 # 🏛️Caesar Frontend
 ![Version](https://img.shields.io/badge/Version-v0.0.238-green)![Update](https://img.shields.io/badge/Last--Update-22.10.2025-blue)
 
+> [!WARNING]
+> This project is not actively maintained as I don't have enough time for it.
+> Maybe I will continue it later.
+
 This repo contains the frontend panel of **Caesar.**
 
 ## ⚙️ Requirements
